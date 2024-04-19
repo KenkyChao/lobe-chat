@@ -1,9 +1,10 @@
-import { ActionIcon, DiscordIcon, Icon } from '@lobehub/ui';
+// import { ActionIcon, DiscordIcon, Icon } from '@lobehub/ui';
+import { ActionIcon, Icon } from '@lobehub/ui';
 import { Badge, ConfigProvider, Dropdown, MenuProps } from 'antd';
 import {
-  Book,
-  Feather,
-  FileClock,
+  // Book,
+  // Feather,
+  // FileClock,
   Github,
   HardDriveDownload,
   HardDriveUpload,
@@ -17,7 +18,8 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { ABOUT, CHANGELOG, DISCORD, DOCUMENTS, FEEDBACK, GITHUB } from '@/const/url';
+// import { ABOUT, CHANGELOG, DISCORD, DOCUMENTS, FEEDBACK, GITHUB } from '@/const/url';
+import { ABOUT, GITHUB } from '@/const/url';
 import DataImporter from '@/features/DataImporter';
 import { configService } from '@/services/config';
 import { GlobalStore, useGlobalStore } from '@/store/global';
@@ -77,24 +79,24 @@ const BottomActions = memo<BottomActionProps>(({ tab }) => {
     {
       type: 'divider',
     },
-    {
-      icon: <Icon icon={Feather} />,
-      key: 'feedback',
-      label: t('feedback'),
-      onClick: () => window.open(FEEDBACK, '__blank'),
-    },
-    {
-      icon: <Icon icon={FileClock} />,
-      key: 'changelog',
-      label: t('changelog'),
-      onClick: () => window.open(CHANGELOG, '__blank'),
-    },
-    {
-      icon: <Icon icon={DiscordIcon} />,
-      key: 'wiki',
-      label: 'Discord',
-      onClick: () => window.open(DISCORD, '__blank'),
-    },
+    // {
+    //   icon: <Icon icon={Feather} />,
+    //   key: 'feedback',
+    //   label: t('feedback'),
+    //   onClick: () => window.open(FEEDBACK, '__blank'),
+    // },
+    // {
+    //   icon: <Icon icon={FileClock} />,
+    //   key: 'changelog',
+    //   label: t('changelog'),
+    //   onClick: () => window.open(CHANGELOG, '__blank'),
+    // },
+    // {
+    //   icon: <Icon icon={DiscordIcon} />,
+    //   key: 'wiki',
+    //   label: 'Discord',
+    //   onClick: () => window.open(DISCORD, '__blank'),
+    // },
     {
       icon: <Icon icon={Heart} />,
       key: 'about',
@@ -123,9 +125,9 @@ const BottomActions = memo<BottomActionProps>(({ tab }) => {
       <Link aria-label={'GitHub'} href={GITHUB} target={'_blank'}>
         <ActionIcon icon={Github} placement={'right'} title={'GitHub'} />
       </Link>
-      <Link aria-label={t('document')} href={DOCUMENTS} target={'_blank'}>
-        <ActionIcon icon={Book} placement={'right'} title={t('document')} />
-      </Link>
+      {/*<Link aria-label={t('document')} href={DOCUMENTS} target={'_blank'}>*/}
+      {/*  <ActionIcon icon={Book} placement={'right'} title={t('document')} />*/}
+      {/*</Link>*/}
       <Dropdown arrow={false} menu={{ items }} trigger={['click']}>
         {hasNewVersion ? (
           <Flexbox>

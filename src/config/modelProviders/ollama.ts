@@ -4,7 +4,7 @@ const Ollama: ModelProviderCard = {
   chatModels: [
     {
       displayName: 'Gemma 7B',
-      enabled: true,
+      enabled: false,
       functionCall: false,
       id: 'gemma',
       tokens: 4000,
@@ -12,7 +12,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Gemma 2B',
-      enabled: true,
+      enabled: false,
       functionCall: false,
       id: 'gemma:2b',
       tokens: 4000,
@@ -20,6 +20,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Llama2 Chat 13B',
+      enabled: true,
       functionCall: false,
       id: 'llama2:13b',
       tokens: 4000,
@@ -27,7 +28,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Llama2 Chat 7B',
-      enabled: true,
+      enabled: false,
       functionCall: false,
       id: 'llama2',
       tokens: 4000,
@@ -56,6 +57,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Code Llama 7B',
+      enabled: true,
       functionCall: false,
       id: 'codellama',
       tokens: 16_000,
@@ -84,7 +86,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Mistral',
-      enabled: true,
+      enabled: false,
       functionCall: false,
       id: 'mistral',
       tokens: 4800,
@@ -92,7 +94,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Mixtral 8x7B',
-      enabled: true,
+      enabled: false,
       functionCall: false,
       id: 'mixtral',
       tokens: 32_000,
@@ -107,7 +109,7 @@ const Ollama: ModelProviderCard = {
     },
     {
       displayName: 'Qwen Chat 7B',
-      enabled: true,
+      enabled: false,
       functionCall: false,
       id: 'qwen:7b',
       tokens: 32_768,

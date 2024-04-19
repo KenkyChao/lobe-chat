@@ -14,13 +14,13 @@
     "tts",
     "stt"
   ],
-  "homepage": "https://github.com/lobehub/lobe-chat",
+  "homepage": "http://192.168.1.155:3000/DevOps/naiyun-chat",
   "bugs": {
-    "url": "https://github.com/lobehub/lobe-chat/issues/new/choose"
+    "url": "https://docs.qq.com/sheet/DR1JGYXZZdVd6SXVt?tab=ss_8rwrcx"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lobehub/lobe-chat.git"
+    "url": "http://192.168.1.155:3000/DevOps/naiyun-chat.git"
   },
   "license": "MIT",
   "author": "LobeHub <i@lobehub.com>",
