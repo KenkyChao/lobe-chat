@@ -39,7 +39,7 @@ export const chatPlugin: StateCreator<
   [['zustand/devtools', never]],
   [],
   ChatPluginAction
-> = (set, get) => ({
+  > = (set, get) => ({
   createAssistantMessageByPlugin: async (content, parentId) => {
     const newMessage: CreateMessageParams = {
       content,
@@ -84,9 +84,9 @@ export const chatPlugin: StateCreator<
 
     let content;
 
-    try {
-      content = JSON.parse(data);
-    } catch {}
+    // try {
+    content = JSON.parse(data);
+    // } catch {}
 
     if (!content) return;
 
