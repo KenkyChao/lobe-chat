@@ -21,6 +21,7 @@ ChatGPT/LLMs 聊天应用与开发框架<br/>
 ```fish
 docker run -d -p 10084:3210 \
   -e ACCESS_CODE=xxx \
+  -e GROQ_API_KEY=xxx \
   --name lobe-chat \
   naiyun-chat:latest
 ```

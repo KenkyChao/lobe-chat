@@ -1,4 +1,4 @@
-FROM node:20-slim AS base
+FROM node:18-alpine AS base
 
 ## Sharp dependencies, copy all the files for production
 FROM base AS sharp
@@ -89,6 +89,9 @@ ENV PERPLEXITY_API_KEY ""
 
 # Anthropic
 ENV ANTHROPIC_API_KEY ""
+
+# Groq Service
+ENV GROQ_API_KEY "xxx"
 
 # Mistral
 ENV MISTRAL_API_KEY ""

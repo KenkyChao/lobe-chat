@@ -8,7 +8,7 @@ import * as debugStreamModule from '../utils/debugStream';
 import { LobeGroq } from './index';
 
 const provider = 'groq';
-const defaultBaseURL = 'https://api.groq.com/openai/v1';
+const defaultBaseURL = 'http://18.119.99.46:58880/openai/v1';
 const bizErrorType = 'GroqBizError';
 const invalidErrorType = 'InvalidGroqAPIKey';
 
