@@ -1,10 +1,5 @@
 {
   "anthropic": {
-    "endpoint": {
-      "desc": "Varsayılan adres dışında, http(s):// içermelidir",
-      "placeholder": "https://api.anthropic.com",
-      "title": "API Proxy Adresi"
-    },
     "title": "Anthropic",
     "token": {
       "desc": "Anthropic'ten gelen API Key'i girin",
@@ -66,12 +61,19 @@
       "title": "Özel Bedrock Kimlik Bilgilerini Kullan"
     }
   },
-  "google": {
-    "endpoint": {
-      "desc": "除默认地址外，必须包含 http(s)://",
-      "placeholder": "https://generativelanguage.googleapis.com",
-      "title": "API 代理地址"
+  "deepseek": {
+    "title": "DeepSeek",
+    "token": {
+      "desc": "DeepSeek 的 API Anahtarını girin",
+      "placeholder": "DeepSeek API Anahtarı",
+      "title": "API Anahtarı"
     },
+    "unlock": {
+      "description": "Oturumu başlatmak için DeepSeek API Anahtarınızı girin. Uygulama API Anahtarınızı kaydetmez",
+      "title": "Özel DeepSeek API Anahtarını Kullan"
+    }
+  },
+  "google": {
     "title": "Google",
     "token": {
       "desc": "Google'dan gelen API Key'i girin",
@@ -93,6 +95,18 @@
     "unlock": {
       "description": "Groq API Anahtarınızı girerek oturumu başlatabilirsiniz. Uygulama API Anahtarınızı kaydetmez.",
       "title": "Özel Groq API Anahtarı Kullan"
+    }
+  },
+  "minimax": {
+    "title": "Minimax",
+    "token": {
+      "desc": "Minimax'den API Anahtarınızı girin",
+      "placeholder": "Minimax API Anahtarı",
+      "title": "API Anahtarı"
+    },
+    "unlock": {
+      "description": "Minimax API Anahtarınızı girerek oturumu başlatabilirsiniz. Uygulama API Anahtarınızı kaydetmez",
+      "title": "Özel Minimax API Anahtarını Kullan"
     }
   },
   "mistral": {
@@ -121,7 +135,8 @@
   },
   "ollama": {
     "checker": {
-      "desc": "Proxy adresinin doğru girilip girilmediğini test edin"
+      "desc": "Proxy adresinin doğru girilip girilmediğini test edin",
+      "title": "Bağlantı Kontrolü"
     },
     "customModelName": {
       "desc": "Özel modeller ekleyin, birden fazla model için virgül (,) kullanın",
@@ -130,17 +145,35 @@
     },
     "endpoint": {
       "desc": "Ollama arayüz proxy adresini girin, yerel olarak belirtilmemişse boş bırakılabilir",
-      "placeholder": "http://127.0.0.1:11434/v1",
       "title": "Arayüz Proxy Adresi"
+    },
+    "setup": {
+      "cors": {
+        "description": "Ollama'nın normal şekilde çalışabilmesi için, tarayıcı güvenlik kısıtlamaları nedeniyle Ollama'nın çapraz kaynak isteklerine izin verilmesi gerekmektedir.",
+        "linux": {
+          "env": "[Service] bölümüne `Environment` ekleyerek OLLAMA_ORIGINS ortam değişkenini ekleyin:",
+          "reboot": "systemd'yi yeniden yükleyin ve Ollama'yı yeniden başlatın",
+          "systemd": "systemd'yi çağırarak ollama servisini düzenleyin:"
+        },
+        "macos": "Lütfen 'Terminal' uygulamasını açın ve aşağıdaki komutu yapıştırıp Enter tuşuna basın",
+        "reboot": "Komut tamamlandıktan sonra Ollama servisini yeniden başlatın",
+        "title": "Ollama'nın çapraz kaynak erişimine izin vermek için yapılandırma",
+        "windows": "Windows'ta, 'Control Panel'ı tıklayarak sistem ortam değişkenlerini düzenleyin. Kullanıcı hesabınıza * değerinde 'OLLAMA_ORIGINS' adında bir ortam değişkeni oluşturun ve 'OK/Apply' düğmesine tıklayarak kaydedin"
+      },
+      "install": {
+        "description": "Ollama'nın açık olduğundan emin olun. Ollama'yı indirmediyseniz, lütfen resmi web sitesine giderek <1>indirin</1>.",
+        "docker": "Docker kullanmayı tercih ediyorsanız, Ollama resmi Docker görüntüsünü aşağıdaki komutla çekebilirsiniz:",
+        "linux": {
+          "command": "Aşağıdaki komutları kullanarak yükleyin:",
+          "manual": "Ya da, <1>Linux için el ile kurulum kılavuzuna</1> bakarak kendiniz kurabilirsiniz"
+        },
+        "title": "Yerel olarak Ollama uygulamasını kurun ve başlatın",
+        "windowsTab": "Windows (Önizleme)"
+      }
     },
     "title": "Ollama"
   },
   "openai": {
-    "endpoint": {
-      "desc": "Varsayılan adres dışında, http(s):// içermelidir",
-      "placeholder": "https://api.openai.com/v1",
-      "title": "Arayüz Proxy Adresi"
-    },
     "title": "OpenAI",
     "token": {
       "desc": "Kendi OpenAI Key'inizi kullanın",

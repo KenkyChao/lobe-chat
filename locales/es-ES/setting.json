@@ -22,19 +22,22 @@
       "confirm": "¿Confirmar el restablecimiento de todas las configuraciones?",
       "currentVersion": "Versión actual",
       "desc": "Restablecer todas las opciones de configuración a sus valores predeterminados",
+      "success": "Se han restablecido todas las configuraciones",
       "title": "Restablecer todas las configuraciones"
     }
   },
   "header": {
+    "desc": "Preferencias y configuración del modelo.",
     "global": "Configuración global",
     "session": "Configuración de la sesión",
-    "sessionWithName": "Configuración de la sesión · {{name}}"
+    "sessionDesc": "Configuración de roles y preferencias de sesión.",
+    "sessionWithName": "Configuración de la sesión · {{name}}",
+    "title": "Configuración"
   },
   "llm": {
     "checker": {
       "button": "Comprobar",
       "desc": "Comprueba si la clave API y la dirección del proxy están escritas correctamente",
-      "ollamaDesc": "Verifica si la dirección del proxy está correctamente completada",
       "pass": "Comprobación exitosa",
       "title": "Comprobación de conectividad"
     },
@@ -67,13 +70,18 @@
         },
         "modalTitle": "Configuración del modelo personalizado",
         "tokens": {
-          "title": "Número máximo de tokens"
+          "title": "Número máximo de tokens",
+          "unlimited": "ilimitado"
         },
         "vision": {
           "extra": "Esta configuración solo habilitará la configuración de carga de imágenes en LobeChat. La capacidad de reconocimiento depende completamente del modelo en sí. Por favor, realiza pruebas para verificar la disponibilidad de esta capacidad en el modelo.",
           "title": "Soporte de reconocimiento visual"
         }
       }
+    },
+    "fetchOnClient": {
+      "desc": "El modo de solicitud en el cliente iniciará directamente la solicitud de sesión desde el navegador, lo que puede mejorar la velocidad de respuesta",
+      "title": "Usar el modo de solicitud en el cliente"
     },
     "fetcher": {
       "fetch": "Obtener lista de modelos",
@@ -86,6 +94,10 @@
       "placeholder": "Selecciona un modelo de la lista",
       "title": "Lista de modelos",
       "total": "Total de {{count}} modelos disponibles"
+    },
+    "proxyUrl": {
+      "desc": "Además de la dirección predeterminada, debe incluir http(s)://",
+      "title": "Dirección del proxy de la API"
     },
     "waitingForMore": "Más modelos están en <1>planificación para su incorporación</1>, ¡estén atentos! ✨"
   },

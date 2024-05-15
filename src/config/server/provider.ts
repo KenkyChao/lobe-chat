@@ -19,6 +19,10 @@ declare global {
       AZURE_ENDPOINT?: string;
       AZURE_API_VERSION?: string;
 
+      // DeepSeek Provider
+      ENABLED_DEEPSEEK?: string;
+      DEEPSEEK_API_KEY?: string;
+      
       // ZhiPu Provider
       ENABLED_ZHIPU?: string;
       ZHIPU_API_KEY?: string;
@@ -37,11 +41,16 @@ declare global {
       // Perplexity Provider
       ENABLED_PERPLEXITY?: string;
       PERPLEXITY_API_KEY?: string;
+      PERPLEXITY_PROXY_URL?: string;
 
       // Anthropic Provider
       ENABLED_ANTHROPIC?: string;
       ANTHROPIC_API_KEY?: string;
       ANTHROPIC_PROXY_URL?: string;
+
+      // Minimax Provider
+      ENABLED_MINIMAX?: string;
+      MINIMAX_API_KEY?: string;
 
       // Mistral Provider
       ENABLED_MISTRAL?: string;
@@ -50,6 +59,7 @@ declare global {
       // Groq Provider
       ENABLED_GROQ?: string;
       GROQ_API_KEY?: string;
+      GROQ_PROXY_URL?: string;
 
       // OpenRouter Provider
       ENABLED_OPENROUTER?: string;
@@ -71,8 +81,8 @@ declare global {
       AWS_SECRET_ACCESS_KEY?: string;
 
       // Ollama Provider;
+      ENABLE_OLLAMA?: string;
       OLLAMA_PROXY_URL?: string;
-
       OLLAMA_MODEL_LIST?: string;
 
       /**
@@ -99,8 +109,11 @@ export const getProviderConfig = () => {
   const AZURE_API_KEY = process.env.AZURE_API_KEY || '';
 
   const ZHIPU_API_KEY = process.env.ZHIPU_API_KEY || '';
+
   const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
 
+  const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
+  
   const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || '';
 
   const MOONSHOT_API_KEY = process.env.MOONSHOT_API_KEY || '';
@@ -108,6 +121,8 @@ export const getProviderConfig = () => {
   const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY || '';
 
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
+
+  const MINIMAX_API_KEY = process.env.MINIMAX_API_KEY || '';
 
   const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || '';
 
@@ -118,8 +133,6 @@ export const getProviderConfig = () => {
   const ZEROONE_API_KEY = process.env.ZEROONE_API_KEY || '';
 
   const TOGETHERAI_API_KEY = process.env.TOGETHERAI_API_KEY || '';
-
-  const OLLAMA_PROXY_URL = process.env.OLLAMA_PROXY_URL || '';
 
   // region format: iad1,sfo1
   let regions: string[] = [];
@@ -162,16 +175,23 @@ export const getProviderConfig = () => {
     ENABLED_ZHIPU: !!ZHIPU_API_KEY,
     ZHIPU_API_KEY,
 
+    ENABLED_DEEPSEEK: !!DEEPSEEK_API_KEY,
+    DEEPSEEK_API_KEY,
+
     ENABLED_GOOGLE: !!GOOGLE_API_KEY,
     GOOGLE_API_KEY,
     GOOGLE_PROXY_URL: process.env.GOOGLE_PROXY_URL,
 
     ENABLED_PERPLEXITY: !!PERPLEXITY_API_KEY,
     PERPLEXITY_API_KEY,
+    PERPLEXITY_PROXY_URL: process.env.PERPLEXITY_PROXY_URL,
 
     ENABLED_ANTHROPIC: !!ANTHROPIC_API_KEY,
     ANTHROPIC_API_KEY,
     ANTHROPIC_PROXY_URL: process.env.ANTHROPIC_PROXY_URL,
+
+    ENABLED_MINIMAX: !!MINIMAX_API_KEY,
+    MINIMAX_API_KEY,
 
     ENABLED_MISTRAL: !!MISTRAL_API_KEY,
     MISTRAL_API_KEY,
@@ -190,6 +210,7 @@ export const getProviderConfig = () => {
     MOONSHOT_PROXY_URL: process.env.MOONSHOT_PROXY_URL,
 
     ENABLED_GROQ: !!GROQ_API_KEY,
+    GROQ_PROXY_URL: process.env.GROQ_PROXY_URL,
     GROQ_API_KEY,
 
     ENABLED_ZEROONE: !!ZEROONE_API_KEY,
@@ -200,8 +221,8 @@ export const getProviderConfig = () => {
     AWS_ACCESS_KEY_ID: AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
 
-    ENABLE_OLLAMA: !!OLLAMA_PROXY_URL,
-    OLLAMA_PROXY_URL: OLLAMA_PROXY_URL,
+    ENABLE_OLLAMA: Boolean(process.env.ENABLE_OLLAMA),
+    OLLAMA_PROXY_URL: process.env.OLLAMA_PROXY_URL || '',
     OLLAMA_MODEL_LIST: process.env.OLLAMA_MODEL_LIST || process.env.OLLAMA_CUSTOM_MODELS,
   };
 };

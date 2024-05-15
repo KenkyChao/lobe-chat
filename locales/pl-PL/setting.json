@@ -22,19 +22,22 @@
       "confirm": "Potwierdź zresetowanie wszystkich ustawień?",
       "currentVersion": "Aktualna wersja",
       "desc": "Zresetuj wszystkie ustawienia do wartości domyślnych",
+      "success": "Wszystkie ustawienia zostały zresetowane",
       "title": "Zresetuj wszystkie ustawienia"
     }
   },
   "header": {
+    "desc": "Preferencje i ustawienia modelu.",
     "global": "Ustawienia globalne",
     "session": "Ustawienia sesji",
-    "sessionWithName": "Ustawienia sesji · {{name}}"
+    "sessionDesc": "Ustawienia postaci i preferencje sesji.",
+    "sessionWithName": "Ustawienia sesji · {{name}}",
+    "title": "Ustawienia"
   },
   "llm": {
     "checker": {
       "button": "Sprawdź",
       "desc": "Sprawdź poprawność wypełnienia klucza API i adresu proxy",
-      "ollamaDesc": "Sprawdź, czy adres proxy został poprawnie wprowadzony",
       "pass": "Połączenie udane",
       "title": "Test połączenia"
     },
@@ -67,13 +70,18 @@
         },
         "modalTitle": "Konfiguracja niestandardowego modelu",
         "tokens": {
-          "title": "Maksymalna liczba tokenów"
+          "title": "Maksymalna liczba tokenów",
+          "unlimited": "Nieograniczony"
         },
         "vision": {
           "extra": "Ta konfiguracja aktywuje tylko możliwość przesyłania obrazów w LobeChat. Możliwość rozpoznawania zależy wyłącznie od modelu. Proszę przetestować dostępność rozpoznawania wizyjnego tego modelu",
           "title": "Obsługa rozpoznawania wizyjnego"
         }
       }
+    },
+    "fetchOnClient": {
+      "desc": "使用客户端请求模式，浏览器将直接发起会话请求，以提升响应速度",
+      "title": "使用客户端请求模式"
     },
     "fetcher": {
       "fetch": "Pobierz listę modeli",
@@ -86,6 +94,10 @@
       "placeholder": "Wybierz model z listy",
       "title": "Lista modeli",
       "total": "Razem dostępne są {{count}} modele"
+    },
+    "proxyUrl": {
+      "desc": "Oprócz domyślnego adresu, musi zawierać http(s)://",
+      "title": "Adres proxy API"
     },
     "waitingForMore": "Więcej modeli jest obecnie w <1>planach dołączenia</1>, prosimy o cierpliwość ✨"
   },

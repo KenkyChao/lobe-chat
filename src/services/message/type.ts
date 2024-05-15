@@ -20,6 +20,7 @@ export interface IMessageService {
   getAllMessages(): Promise<ChatMessage[]>;
   getAllMessagesInSession(sessionId: string): Promise<ChatMessage[]>;
   countMessages(): Promise<number>;
+  countTodayMessages(): Promise<number>;
 
   updateMessageError(id: string, error: ChatMessageError): Promise<any>;
   updateMessage(id: string, message: Partial<DB_Message>): Promise<any>;
@@ -30,4 +31,7 @@ export interface IMessageService {
   removeMessage(id: string): Promise<any>;
   removeMessages(assistantId: string, topicId?: string): Promise<any>;
   removeAllMessages(): Promise<any>;
+
+  hasMessages(): Promise<boolean>;
+  messageCountToCheckTrace(): Promise<boolean>;
 }

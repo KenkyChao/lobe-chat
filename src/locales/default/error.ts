@@ -1,4 +1,22 @@
 export default {
+  clerkAuth: {
+    loginSuccess: {
+      action: '继续会话',
+      desc: '{{greeting}}，很高兴能够继续为你服务。让我们接着刚刚的话题聊下去吧',
+      title: '欢迎回来， {{nickName}}',
+    },
+  },
+  error: {
+    backHome: '返回首页',
+    desc: '待会来试试，或者回到已知的世界',
+    retry: '重新加载',
+    title: '页面遇到一点问题..',
+  },
+  notFound: {
+    backHome: '返回首页',
+    desc: '我们找不到你正在寻找的页面，请检查链接是否正确',
+    title: '进入了未知领域？',
+  },
   pluginSettings: {
     desc: '完成以下配置，即可开始使用该插件',
     title: '{{name}} 插件配置',
@@ -52,8 +70,9 @@ export default {
     PluginOpenApiInitError: '很抱歉，OpenAPI 客户端初始化失败，请检查 OpenAPI 的配置信息是否正确',
 
     InvalidAccessCode: '密码不正确或为空，请输入正确的访问密码，或者添加自定义 API Key',
+    InvalidClerkUser: '很抱歉，你当前尚未登录，请先登录或注册账号后继续操作',
     LocationNotSupportError:
-      '很抱歉，你的所在位置不支持此模型服务，可能是由于地区限制或服务未开通。请确认当前位置是否支持使用此服务，或尝试使用其他位置信息。',
+      '很抱歉，你的所在地区不支持此模型服务，可能是由于区域限制或服务未开通。请确认当前地区是否支持使用此服务，或尝试使用切换到其他地区后重试。',
 
     OpenAIBizError: '请求 OpenAI 服务出错，请根据以下信息排查或重试',
     NoOpenAIAPIKey: 'OpenAI API Key 为空，请添加自定义 OpenAI API Key',
@@ -73,6 +92,9 @@ export default {
     InvalidBedrockCredentials: 'Bedrock 鉴权未通过，请检查 AccessKeyId/SecretAccessKey 后重试',
     BedrockBizError: '请求 Bedrock 服务出错，请根据以下信息排查或重试',
 
+    InvalidDeepSeekAPIKey: 'DeepSeek API Key 不正确或为空，请检查 DeepSeek API Key 后重试',
+    DeepSeekBizError: '请求 DeepSeek 服务出错，请根据以下信息排查或重试',
+    
     InvalidAzureAPIKey: 'Azure API Key 不正确或为空，请检查 Azure API Key 后重试',
     AzureBizError: '请求 Azure AI 服务出错，请根据以下信息排查或重试',
 
@@ -96,7 +118,11 @@ export default {
 
     InvalidOllamaArgs: 'Ollama 配置不正确，请检查 Ollama 配置后重试',
     OllamaBizError: '请求 Ollama 服务出错，请根据以下信息排查或重试',
-    OllamaServiceUnavailable: '未检测到 Ollama 服务，请检查是否正常启动',
+    OllamaServiceUnavailable:
+      'Ollama 服务连接失败，请检查 Ollama 是否运行正常，或是否正确设置 Ollama 的跨域配置',
+
+    MinimaxBizError: '请求 Minimax 服务出错，请根据以下信息排查或重试',
+    InvalidMinimaxAPIKey: 'Minimax API Key 不正确或为空，请检查 Minimax API Key 后重试',
 
     AgentRuntimeError: 'Lobe AI Runtime 执行出错，请根据以下信息排查或重试',
     /* eslint-enable */
@@ -111,18 +137,20 @@ export default {
     addProxyUrl: '添加 OpenAI 代理地址（可选）',
     closeMessage: '关闭提示',
     confirm: '确认并重试',
-    model: {
-      Ollama: {
-        confirm: '下载',
-        description: '输入你的 Ollama 模型标签，完成即可继续会话',
-        title: '下载指定的 Ollama 模型',
-      },
-    },
+
     oauth: {
       description: '管理员已开启统一登录认证，点击下方按钮登录，即可解锁应用',
       success: '登录成功',
       title: '登录账号',
       welcome: '欢迎你！',
+    },
+    ollama: {
+      cancel: '取消下载',
+      confirm: '下载',
+      description: '输入你的 Ollama 模型标签，完成即可继续会话',
+      downloaded: '{{completed}} / {{total}}',
+      starting: '开始下载...',
+      title: '下载指定的 Ollama 模型',
     },
     password: {
       description: '管理员已开启应用加密，输入应用密码后即可解锁应用。密码只需填写一次',

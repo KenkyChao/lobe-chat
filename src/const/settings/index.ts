@@ -1,8 +1,10 @@
 import {
   AnthropicProviderCard,
   BedrockProviderCard,
+  DeepSeekProviderCard,
   GoogleProviderCard,
   GroqProviderCard,
+  MinimaxProviderCard,
   MistralProviderCard,
   MoonshotProviderCard,
   OllamaProviderCard,
@@ -80,6 +82,11 @@ export const DEFAULT_LLM_CONFIG: GlobalLLMConfig = {
     region: 'us-east-1',
     secretAccessKey: '',
   },
+  deepseek: {
+    apiKey: '',
+    enabled: false,
+    enabledModels: filterEnabledModels(DeepSeekProviderCard),
+  },
   google: {
     apiKey: '',
     enabled: false,
@@ -89,6 +96,11 @@ export const DEFAULT_LLM_CONFIG: GlobalLLMConfig = {
     apiKey: '',
     enabled: false,
     enabledModels: filterEnabledModels(GroqProviderCard),
+  },
+  minimax: {
+    apiKey: '',
+    enabled: false,
+    enabledModels: filterEnabledModels(MinimaxProviderCard),
   },
   mistral: {
     apiKey: '',
@@ -101,9 +113,10 @@ export const DEFAULT_LLM_CONFIG: GlobalLLMConfig = {
     enabledModels: filterEnabledModels(MoonshotProviderCard),
   },
   ollama: {
-    enabled: false,
+    enabled: true,
     enabledModels: filterEnabledModels(OllamaProviderCard),
     endpoint: '',
+    fetchOnClient: true,
   },
   openai: {
     apiKey: '',

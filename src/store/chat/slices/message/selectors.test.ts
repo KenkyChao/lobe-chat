@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_INBOX_AVATAR } from '@/const/meta';
 import { INBOX_SESSION_ID } from '@/const/session';
+import { useAgentStore } from '@/store/agent';
 import { ChatStore } from '@/store/chat';
 import { initialState } from '@/store/chat/initialState';
-import { useGlobalStore } from '@/store/global';
 import { useSessionStore } from '@/store/session';
+import { useUserStore } from '@/store/user';
+import { LobeAgentConfig } from '@/types/agent';
 import { ChatMessage } from '@/types/message';
 import { MetaData } from '@/types/meta';
 import { merge } from '@/utils/merge';
@@ -33,12 +35,16 @@ const mockMessages = [
   {
     id: 'msg3',
     content: 'Function Message',
-    role: 'function',
-    plugin: {
-      arguments: ['arg1', 'arg2'],
-      identifier: 'func1',
-      type: 'pluginType',
-    },
+    role: 'tool',
+    tools: [
+      {
+        arguments: ['arg1', 'arg2'],
+        identifier: 'func1',
+        apiName: 'ttt',
+        type: 'pluginType',
+        id: 'abc',
+      },
+    ],
   },
 ] as ChatMessage[];
 
@@ -62,16 +68,22 @@ const mockedChats = [
   {
     id: 'msg3',
     content: 'Function Message',
-    role: 'function',
+    role: 'tool',
     meta: {
-      avatar: '🧩',
-      title: 'plugin-unknown',
+      avatar: '🤯',
+      backgroundColor: 'rgba(0,0,0,0)',
+      description: 'inbox.desc',
+      title: 'inbox.title',
     },
-    plugin: {
-      arguments: ['arg1', 'arg2'],
-      identifier: 'func1',
-      type: 'pluginType',
-    },
+    tools: [
+      {
+        arguments: ['arg1', 'arg2'],
+        identifier: 'func1',
+        apiName: 'ttt',
+        type: 'pluginType',
+        id: 'abc',
+      },
+    ],
   },
 ] as ChatMessage[];
 
@@ -101,52 +113,6 @@ describe('chatSelectors', () => {
     });
   });
 
-  describe('getFunctionMessageProps', () => {
-    it('should return the properties of a function message', () => {
-      const state = merge(initialStore, {
-        messages: mockMessages,
-        chatLoadingId: 'msg3', // Assuming this id represents a loading state
-      });
-      const props = chatSelectors.getFunctionMessageProps(mockMessages[2])(state);
-      expect(props).toEqual({
-        arguments: ['arg1', 'arg2'],
-        command: mockMessages[2].plugin,
-        content: 'Function Message',
-        id: 'func1',
-        loading: true,
-        type: 'pluginType',
-      });
-    });
-
-    it('should return loading as false if the message id is not the current loading id', () => {
-      const state = merge(initialStore, { messages: mockMessages, chatLoadingId: 'msg1' });
-      const props = chatSelectors.getFunctionMessageProps(mockMessages[2])(state);
-      expect(props.loading).toBe(false);
-    });
-
-    it('should return correct properties when no plugin is present', () => {
-      const messageWithoutPlugin = {
-        id: 'msg4',
-        content: 'No Plugin Message',
-        role: 'function',
-        // No plugin property
-      };
-      const state = merge(initialStore, {
-        messages: [...mockMessages, messageWithoutPlugin],
-        chatLoadingId: 'msg1',
-      });
-      const props = chatSelectors.getFunctionMessageProps(messageWithoutPlugin)(state);
-      expect(props).toEqual({
-        arguments: undefined,
-        command: undefined,
-        content: 'No Plugin Message',
-        id: undefined,
-        loading: false,
-        type: undefined,
-      });
-    });
-  });
-
   describe('currentChatsWithHistoryConfig', () => {
     it('should slice the messages according to the current agent config', () => {
       const state = merge(initialStore, { messages: mockMessages });
@@ -158,8 +124,13 @@ describe('chatSelectors', () => {
     it('should slice the messages according to config, assuming historyCount is mocked to 2', async () => {
       const state = merge(initialStore, { messages: mockMessages });
       act(() => {
-        useGlobalStore.setState({
-          settings: { defaultAgent: { config: { historyCount: 2, enableHistoryCount: true } } },
+        useAgentStore.setState({
+          activeId: 'inbox',
+          agentConfig: {
+            historyCount: 2,
+            enableHistoryCount: true,
+            model: 'abc',
+          } as LobeAgentConfig,
         });
       });
 
@@ -178,16 +149,22 @@ describe('chatSelectors', () => {
         {
           id: 'msg3',
           content: 'Function Message',
-          role: 'function',
+          role: 'tool',
           meta: {
-            avatar: '🧩',
-            title: 'plugin-unknown',
+            avatar: '🤯',
+            backgroundColor: 'rgba(0,0,0,0)',
+            description: 'inbox.desc',
+            title: 'inbox.title',
           },
-          plugin: {
-            arguments: ['arg1', 'arg2'],
-            identifier: 'func1',
-            type: 'pluginType',
-          },
+          tools: [
+            {
+              apiName: 'ttt',
+              arguments: ['arg1', 'arg2'],
+              identifier: 'func1',
+              id: 'abc',
+              type: 'pluginType',
+            },
+          ],
         },
       ]);
     });
@@ -218,7 +195,7 @@ describe('chatSelectors', () => {
 
       const chats = chatSelectors.currentChatsWithGuideMessage(metaData)(state);
 
-      expect(chats[0].content).toEqual('inbox.defaultMessage'); // Assuming translation returns a string containing this
+      expect(chats[0].content).toEqual(''); // Assuming translation returns a string containing this
     });
 
     it('should use agent default message for non-inbox sessions', () => {
@@ -251,6 +228,32 @@ describe('chatSelectors', () => {
 
       // Restore the mocks after the test
       vi.restoreAllMocks();
+    });
+  });
+
+  describe('showInboxWelcome', () => {
+    it('should return false if the active session is not the inbox session', () => {
+      const state = merge(initialStore, { activeId: 'someActiveId' });
+      const result = chatSelectors.showInboxWelcome(state);
+      expect(result).toBe(false);
+    });
+
+    it('should return false if there are existing messages in the inbox session', () => {
+      const state = merge(initialStore, {
+        activeId: INBOX_SESSION_ID,
+        messages: mockMessages,
+      });
+      const result = chatSelectors.showInboxWelcome(state);
+      expect(result).toBe(false);
+    });
+
+    it('should return true if the active session is the inbox session and there are no existing messages', () => {
+      const state = merge(initialStore, {
+        activeId: INBOX_SESSION_ID,
+        messages: [],
+      });
+      const result = chatSelectors.showInboxWelcome(state);
+      expect(result).toBe(true);
     });
   });
 });

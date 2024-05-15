@@ -1,6 +1,6 @@
 import { Icon, Tooltip } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
-import { LucideEye, LucidePaperclip, ToyBrick } from 'lucide-react';
+import { Infinity, LucideEye, LucidePaperclip, ToyBrick } from 'lucide-react';
 import numeral from 'numeral';
 import { rgba } from 'polished';
 import { memo } from 'react';
@@ -56,11 +56,21 @@ const useStyles = createStyles(({ css, token }) => ({
     border-radius: 4px;
   `,
 }));
+const formatTokenNumber = (num: number): string => {
+  if (num > 0 && num < 1024) return '1K';
+
+  let kiloToken = Math.floor(num / 1024);
+  if (num >= 128_000 && num < 1_024_000) {
+    kiloToken = Math.floor(num / 1000);
+  }
+  return kiloToken < 1000 ? `${kiloToken}K` : `${Math.floor(kiloToken / 1000)}M`;
+};
 
 interface ModelInfoTagsProps extends ChatModelCard {
   directionReverse?: boolean;
   placement?: 'top' | 'right';
 }
+
 export const ModelInfoTags = memo<ModelInfoTagsProps>(
   ({ directionReverse, placement = 'right', ...model }) => {
     const { t } = useTranslation('components');
@@ -77,7 +87,7 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
         )}
         {model.vision && (
           <Tooltip placement={placement} title={t('ModelSelect.featureTag.vision')}>
-            <div className={cx(styles.tag, styles.tagGreen)}>
+            <div className={cx(styles.tag, styles.tagGreen)} style={{ cursor: 'pointer' }} title="">
               <Icon icon={LucideEye} />
             </div>
           </Tooltip>
@@ -88,20 +98,26 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
             placement={placement}
             title={t('ModelSelect.featureTag.functionCall')}
           >
-            <div className={cx(styles.tag, styles.tagBlue)}>
+            <div className={cx(styles.tag, styles.tagBlue)} style={{ cursor: 'pointer' }} title="">
               <Icon icon={ToyBrick} />
             </div>
           </Tooltip>
         )}
-        {model.tokens && (
+        {model.tokens !== undefined && (
           <Tooltip
             overlayStyle={{ maxWidth: 'unset' }}
             placement={placement}
             title={t('ModelSelect.featureTag.tokens', {
-              tokens: numeral(model.tokens).format('0,0'),
+              tokens: model.tokens === 0 ? '∞' : numeral(model.tokens).format('0,0'),
             })}
           >
-            <Center className={styles.token}>{Math.floor(model.tokens / 1000)}K</Center>
+            <Center className={styles.token} title="">
+              {model.tokens === 0 ? (
+                <Infinity size={17} strokeWidth={1.6} />
+              ) : (
+                formatTokenNumber(model.tokens)
+              )}
+            </Center>
           </Tooltip>
         )}
         {/*{model.isCustom && (*/}
@@ -121,6 +137,7 @@ export const ModelInfoTags = memo<ModelInfoTagsProps>(
 interface ModelItemRenderProps extends ChatModelCard {
   showInfoTag?: boolean;
 }
+
 export const ModelItemRender = memo<ModelItemRenderProps>(({ showInfoTag = true, ...model }) => {
   return (
     <Flexbox align={'center'} gap={32} horizontal justify={'space-between'}>

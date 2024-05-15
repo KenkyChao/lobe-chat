@@ -1,7 +1,9 @@
 import {
   Anthropic,
+  DeepSeek,
   Google,
   Groq,
+  Minimax,
   Mistral,
   Moonshot,
   OpenAI,
@@ -32,6 +34,10 @@ const ProviderAvatar = memo<ProviderAvatarProps>(({ provider }) => {
       return <Zhipu.Color size={64} />;
     }
 
+    case ModelProvider.Minimax: {
+      return <Minimax.Color size={56} />;
+    }
+
     case ModelProvider.Mistral: {
       return <Mistral.Color size={56} />;
     }
@@ -46,6 +52,10 @@ const ProviderAvatar = memo<ProviderAvatarProps>(({ provider }) => {
 
     case ModelProvider.Anthropic: {
       return <Anthropic color={Anthropic.colorPrimary} size={52} />;
+    }
+
+    case ModelProvider.DeepSeek: {
+      return <DeepSeek color={DeepSeek.colorPrimary} size={56} />;
     }
 
     case ModelProvider.Groq: {

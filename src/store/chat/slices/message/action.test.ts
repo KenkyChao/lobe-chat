@@ -7,8 +7,9 @@ import { DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { chatService } from '@/services/chat';
 import { messageService } from '@/services/message';
 import { topicService } from '@/services/topic';
+import { agentSelectors } from '@/store/agent/selectors';
 import { chatSelectors } from '@/store/chat/selectors';
-import { agentSelectors } from '@/store/session/selectors';
+import { sessionMetaSelectors } from '@/store/session/selectors';
 import { ChatMessage } from '@/types/message';
 
 import { useChatStore } from '../../store';
@@ -18,6 +19,7 @@ vi.stubGlobal(
   vi.fn(() => Promise.resolve(new Response('mock'))),
 );
 
+vi.mock('zustand/traditional');
 // Mock service
 vi.mock('@/services/message', () => ({
   messageService: {
@@ -46,13 +48,7 @@ vi.mock('@/services/chat', async (importOriginal) => {
   };
 });
 
-vi.mock('@/store/chat/selectors', () => ({
-  chatSelectors: {
-    currentChats: vi.fn(),
-  },
-}));
-
-const realCoreProcessMessage = useChatStore.getState().coreProcessMessage;
+const realCoreProcessMessage = useChatStore.getState().internal_coreProcessMessage;
 const realRefreshMessages = useChatStore.getState().refreshMessages;
 // Mock state
 const mockState = {
@@ -61,7 +57,7 @@ const mockState = {
   messages: [],
   refreshMessages: vi.fn(),
   refreshTopic: vi.fn(),
-  coreProcessMessage: vi.fn(),
+  internal_coreProcessMessage: vi.fn(),
   saveToTopic: vi.fn(),
 };
 
@@ -69,7 +65,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   useChatStore.setState(mockState, false);
   vi.spyOn(agentSelectors, 'currentAgentConfig').mockImplementation(() => DEFAULT_AGENT_CONFIG);
-  vi.spyOn(agentSelectors, 'currentAgentMeta').mockImplementation(() => ({ tags: [] }));
+  vi.spyOn(sessionMetaSelectors, 'currentAgentMeta').mockImplementation(() => ({ tags: [] }));
 });
 
 afterEach(() => {
@@ -85,6 +81,9 @@ describe('chatMessage actions', () => {
       const messageId = 'message-id';
       const deleteSpy = vi.spyOn(result.current, 'deleteMessage');
 
+      act(() => {
+        useChatStore.setState({ messages: [{ id: messageId } as ChatMessage] });
+      });
       await act(async () => {
         await result.current.deleteMessage(messageId);
       });
@@ -190,7 +189,7 @@ describe('chatMessage actions', () => {
 
       expect(messageService.createMessage).not.toHaveBeenCalled();
       expect(result.current.refreshMessages).not.toHaveBeenCalled();
-      expect(result.current.coreProcessMessage).not.toHaveBeenCalled();
+      expect(result.current.internal_coreProcessMessage).not.toHaveBeenCalled();
     });
 
     it('should not send message if message is empty and there are no files', async () => {
@@ -203,7 +202,7 @@ describe('chatMessage actions', () => {
 
       expect(messageService.createMessage).not.toHaveBeenCalled();
       expect(result.current.refreshMessages).not.toHaveBeenCalled();
-      expect(result.current.coreProcessMessage).not.toHaveBeenCalled();
+      expect(result.current.internal_coreProcessMessage).not.toHaveBeenCalled();
     });
 
     it('should not send message if message is empty and there are empty files', async () => {
@@ -216,10 +215,10 @@ describe('chatMessage actions', () => {
 
       expect(messageService.createMessage).not.toHaveBeenCalled();
       expect(result.current.refreshMessages).not.toHaveBeenCalled();
-      expect(result.current.coreProcessMessage).not.toHaveBeenCalled();
+      expect(result.current.internal_coreProcessMessage).not.toHaveBeenCalled();
     });
 
-    it('should create message and call coreProcessMessage if message or files are provided', async () => {
+    it('should create message and call internal_coreProcessMessage if message or files are provided', async () => {
       const { result } = renderHook(() => useChatStore());
       const message = 'Test message';
       const files = [{ id: 'file-id', url: 'file-url' }];
@@ -239,7 +238,7 @@ describe('chatMessage actions', () => {
         topicId: mockState.activeTopicId,
       });
       expect(result.current.refreshMessages).toHaveBeenCalled();
-      expect(result.current.coreProcessMessage).toHaveBeenCalled();
+      expect(result.current.internal_coreProcessMessage).toHaveBeenCalled();
     });
 
     describe('auto-create topic', () => {
@@ -258,11 +257,6 @@ describe('chatMessage actions', () => {
           enableAutoCreateTopic,
         }));
 
-        // Mock the currentChats selector to return a list that does not reach the threshold
-        (chatSelectors.currentChats as Mock).mockReturnValue(
-          Array.from({ length: autoCreateTopicThreshold + 1 }, (_, i) => ({ id: `msg-${i}` })),
-        );
-
         // Mock saveToTopic and switchTopic to simulate not being called
         const saveToTopicMock = vi.fn();
         const switchTopicMock = vi.fn();
@@ -270,6 +264,10 @@ describe('chatMessage actions', () => {
         await act(async () => {
           useChatStore.setState({
             ...mockState,
+            // Mock the currentChats selector to return a list that does not reach the threshold
+            messages: Array.from({ length: autoCreateTopicThreshold + 1 }, (_, i) => ({
+              id: `msg-${i}`,
+            })) as any,
             activeTopicId: undefined,
             saveToTopic: saveToTopicMock,
             switchTopic: switchTopicMock,
@@ -297,11 +295,6 @@ describe('chatMessage actions', () => {
         // Mock messageService.create to resolve with a message id
         (messageService.createMessage as Mock).mockResolvedValue('new-message-id');
 
-        // Mock the currentChats selector to return a list that reaches the threshold
-        (chatSelectors.currentChats as Mock).mockReturnValue(
-          Array.from({ length: autoCreateTopicThreshold }, (_, i) => ({ id: `msg-${i}` })),
-        );
-
         // Mock saveToTopic to resolve with a topic id and switchTopic to switch to the new topic
         const saveToTopicMock = vi.fn(() => Promise.resolve('new-topic-id'));
         const switchTopicMock = vi.fn();
@@ -309,6 +302,9 @@ describe('chatMessage actions', () => {
         act(() => {
           useChatStore.setState({
             ...mockState,
+            messages: Array.from({ length: autoCreateTopicThreshold }, (_, i) => ({
+              id: `msg-${i}`,
+            })) as any,
             activeTopicId: undefined,
             saveToTopic: saveToTopicMock,
             switchTopic: switchTopicMock,
@@ -338,11 +334,6 @@ describe('chatMessage actions', () => {
           enableAutoCreateTopic,
         }));
 
-        // Mock the currentChats selector to return a list that does not reach the threshold
-        (chatSelectors.currentChats as Mock).mockReturnValue(
-          Array.from({ length: autoCreateTopicThreshold - 1 }, (_, i) => ({ id: `msg-${i}` })),
-        );
-
         // Mock saveToTopic and switchTopic to simulate not being called
         const saveToTopicMock = vi.fn();
         const switchTopicMock = vi.fn();
@@ -350,6 +341,10 @@ describe('chatMessage actions', () => {
         await act(async () => {
           useChatStore.setState({
             ...mockState,
+            // Mock the currentChats selector to return a list that does not reach the threshold
+            messages: Array.from({ length: autoCreateTopicThreshold - 2 }, (_, i) => ({
+              id: `msg-${i}`,
+            })) as any,
             activeTopicId: undefined,
             saveToTopic: saveToTopicMock,
             switchTopic: switchTopicMock,
@@ -364,30 +359,57 @@ describe('chatMessage actions', () => {
     });
   });
 
-  describe('internalResendMessage action', () => {
+  describe('toggleMessageEditing action', () => {
+    it('should add message id to messageEditingIds when editing is true', () => {
+      const { result } = renderHook(() => useChatStore());
+      const messageId = 'message-id';
+
+      act(() => {
+        result.current.toggleMessageEditing(messageId, true);
+      });
+
+      expect(result.current.messageEditingIds).toContain(messageId);
+    });
+
+    it('should remove message id from messageEditingIds when editing is false', () => {
+      const { result } = renderHook(() => useChatStore());
+      const messageId = 'abc';
+
+      act(() => {
+        result.current.toggleMessageEditing(messageId, true);
+        result.current.toggleMessageEditing(messageId, false);
+      });
+
+      expect(result.current.messageEditingIds).not.toContain(messageId);
+    });
+  });
+
+  describe('internal_resendMessage action', () => {
     it('should resend a message by id and refresh messages', async () => {
       const { result } = renderHook(() => useChatStore());
       const messageId = 'message-id';
 
-      // Mock the currentChats selector to return a list that includes the message to be resent
-      (chatSelectors.currentChats as Mock).mockReturnValue([
-        // ... other messages
-        { id: messageId, role: 'user', content: 'Resend this message' },
-        // ... other messages
-      ]);
+      act(() => {
+        useChatStore.setState({
+          // Mock the currentChats selector to return a list that includes the message to be resent
+          messages: [
+            { id: messageId, role: 'user', content: 'Resend this message' } as ChatMessage,
+          ],
+        });
+      });
 
-      // Mock the coreProcessMessage function to resolve immediately
-      mockState.coreProcessMessage.mockResolvedValue(undefined);
+      // Mock the internal_coreProcessMessage function to resolve immediately
+      mockState.internal_coreProcessMessage.mockResolvedValue(undefined);
 
       await act(async () => {
-        await result.current.internalResendMessage(messageId);
+        await result.current.internal_resendMessage(messageId);
       });
 
       expect(messageService.removeMessage).not.toHaveBeenCalledWith(messageId);
-      expect(mockState.coreProcessMessage).toHaveBeenCalledWith(
+      expect(mockState.internal_coreProcessMessage).toHaveBeenCalledWith(
         expect.any(Array),
         messageId,
-        undefined,
+        {},
       );
     });
 
@@ -395,29 +417,31 @@ describe('chatMessage actions', () => {
       const { result } = renderHook(() => useChatStore());
       const messageId = 'non-existing-message-id';
 
-      // Mock the currentChats selector to return a list that does not include the message to be resent
-      (chatSelectors.currentChats as Mock).mockReturnValue([
-        // ... other messages
-      ]);
+      act(() => {
+        useChatStore.setState({
+          // Mock the currentChats selector to return a list that does not include the message to be resent
+          messages: [],
+        });
+      });
 
       await act(async () => {
-        await result.current.internalResendMessage(messageId);
+        await result.current.internal_resendMessage(messageId);
       });
 
       expect(messageService.removeMessage).not.toHaveBeenCalledWith(messageId);
-      expect(mockState.coreProcessMessage).not.toHaveBeenCalled();
+      expect(mockState.internal_coreProcessMessage).not.toHaveBeenCalled();
       expect(mockState.refreshMessages).not.toHaveBeenCalled();
     });
   });
 
-  describe('internalUpdateMessageContent action', () => {
-    it('should call messageService.internalUpdateMessageContent with correct parameters', async () => {
+  describe('internal_updateMessageContent action', () => {
+    it('should call messageService.internal_updateMessageContent with correct parameters', async () => {
       const { result } = renderHook(() => useChatStore());
       const messageId = 'message-id';
       const newContent = 'Updated content';
 
       await act(async () => {
-        await result.current.internalUpdateMessageContent(messageId, newContent);
+        await result.current.internal_updateMessageContent(messageId, newContent);
       });
 
       expect(messageService.updateMessage).toHaveBeenCalledWith(messageId, { content: newContent });
@@ -427,17 +451,16 @@ describe('chatMessage actions', () => {
       const { result } = renderHook(() => useChatStore());
       const messageId = 'message-id';
       const newContent = 'Updated content';
-      const dispatchMessageSpy = vi.spyOn(result.current, 'dispatchMessage');
+      const internal_dispatchMessageSpy = vi.spyOn(result.current, 'internal_dispatchMessage');
 
       await act(async () => {
-        await result.current.internalUpdateMessageContent(messageId, newContent);
+        await result.current.internal_updateMessageContent(messageId, newContent);
       });
 
-      expect(dispatchMessageSpy).toHaveBeenCalledWith({
+      expect(internal_dispatchMessageSpy).toHaveBeenCalledWith({
         id: messageId,
-        key: 'content',
-        type: 'updateMessage',
-        value: newContent,
+        type: 'updateMessages',
+        value: { content: newContent },
       });
     });
 
@@ -447,16 +470,16 @@ describe('chatMessage actions', () => {
       const newContent = 'Updated content';
 
       await act(async () => {
-        await result.current.internalUpdateMessageContent(messageId, newContent);
+        await result.current.internal_updateMessageContent(messageId, newContent);
       });
 
       expect(result.current.refreshMessages).toHaveBeenCalled();
     });
   });
 
-  describe('coreProcessMessage action', () => {
+  describe('internal_coreProcessMessage action', () => {
     it('should handle the core AI message processing', async () => {
-      useChatStore.setState({ coreProcessMessage: realCoreProcessMessage });
+      useChatStore.setState({ internal_coreProcessMessage: realCoreProcessMessage });
 
       const { result } = renderHook(() => useChatStore());
       const userMessage = {
@@ -476,7 +499,7 @@ describe('chatMessage actions', () => {
       (messageService.createMessage as Mock).mockResolvedValue('assistant-message-id');
 
       await act(async () => {
-        await result.current.coreProcessMessage(messages, userMessage.id);
+        await result.current.internal_coreProcessMessage(messages, userMessage.id);
       });
 
       // 验证是否创建了代表 AI 响应的消息
@@ -502,7 +525,7 @@ describe('chatMessage actions', () => {
   describe('stopGenerateMessage action', () => {
     it('should stop generating message and set loading states correctly', async () => {
       const { result } = renderHook(() => useChatStore());
-      const toggleChatLoadingSpy = vi.spyOn(result.current, 'toggleChatLoading');
+      const internal_toggleChatLoadingSpy = vi.spyOn(result.current, 'internal_toggleChatLoading');
       const abortController = new AbortController();
 
       act(() => {
@@ -514,7 +537,11 @@ describe('chatMessage actions', () => {
       });
 
       expect(abortController.signal.aborted).toBe(true);
-      expect(toggleChatLoadingSpy).toHaveBeenCalledWith(false, undefined, expect.any(String));
+      expect(internal_toggleChatLoadingSpy).toHaveBeenCalledWith(
+        false,
+        undefined,
+        expect.any(String),
+      );
     });
 
     it('should not do anything if there is no abortController', async () => {
@@ -601,7 +628,7 @@ describe('chatMessage actions', () => {
     });
   });
 
-  describe('fetchAIChatMessage', () => {
+  describe('internal_fetchAIChatMessage', () => {
     it('should fetch AI chat message and return content', async () => {
       const { result } = renderHook(() => useChatStore());
       const messages = [{ id: 'message-id', content: 'Hello', role: 'user' }] as ChatMessage[];
@@ -611,51 +638,11 @@ describe('chatMessage actions', () => {
       (fetch as Mock).mockResolvedValueOnce(new Response(aiResponse));
 
       await act(async () => {
-        const response = await result.current.fetchAIChatMessage(messages, assistantMessageId);
-        expect(response.content).toEqual(aiResponse);
-        expect(response.isFunctionCall).toEqual(false);
-        expect(response.functionCallAtEnd).toEqual(false);
-        expect(response.functionCallContent).toEqual('');
-      });
-    });
-
-    it('should handle function call message at start of AI response', async () => {
-      const { result } = renderHook(() => useChatStore());
-      const messages = [{ id: 'message-id', content: 'Hello', role: 'user' }] as ChatMessage[];
-      const assistantMessageId = 'assistant-message-id';
-      const aiResponse =
-        '{"tool_calls":[{"id":"call_sbca","type":"function","function":{"name":"pluginName____apiName","arguments":{"key":"value"}}}]}';
-
-      // Mock fetch to resolve with AI response containing function call
-      vi.mocked(fetch).mockResolvedValueOnce(new Response(aiResponse));
-
-      await act(async () => {
-        const response = await result.current.fetchAIChatMessage(messages, assistantMessageId);
-        expect(response.content).toEqual(aiResponse);
-        expect(response.isFunctionCall).toEqual(true);
-        expect(response.functionCallAtEnd).toEqual(false);
-        expect(response.functionCallContent).toEqual('');
-      });
-    });
-
-    it('should handle function message at end of AI response', async () => {
-      const { result } = renderHook(() => useChatStore());
-      const messages = [{ id: 'message-id', content: 'Hello', role: 'user' }] as ChatMessage[];
-      const assistantMessageId = 'assistant-message-id';
-      const aiResponse =
-        'Hello, human! {"tool_calls":[{"id":"call_sbca","type":"function","function":{"name":"pluginName____apiName","arguments":{"key":"value"}}}]}';
-
-      // Mock fetch to resolve with AI response containing function call at end
-      vi.mocked(fetch).mockResolvedValue(new Response(aiResponse));
-
-      await act(async () => {
-        const response = await result.current.fetchAIChatMessage(messages, assistantMessageId);
-        expect(response.content).toEqual(aiResponse);
-        expect(response.isFunctionCall).toEqual(true);
-        expect(response.functionCallAtEnd).toEqual(true);
-        expect(response.functionCallContent).toEqual(
-          '{"tool_calls":[{"id":"call_sbca","type":"function","function":{"name":"pluginName____apiName","arguments":{"key":"value"}}}]}',
+        const response = await result.current.internal_fetchAIChatMessage(
+          messages,
+          assistantMessageId,
         );
+        expect(response.isFunctionCall).toEqual(false);
       });
     });
 
@@ -669,25 +656,27 @@ describe('chatMessage actions', () => {
       vi.mocked(fetch).mockRejectedValue(new Error(errorMessage));
 
       await act(async () => {
-        await expect(
-          result.current.fetchAIChatMessage(messages, assistantMessageId),
-        ).rejects.toThrow(errorMessage);
+        expect(
+          await result.current.internal_fetchAIChatMessage(messages, assistantMessageId),
+        ).toEqual({
+          isFunctionCall: false,
+        });
       });
     });
   });
 
-  describe('toggleChatLoading', () => {
+  describe('internal_toggleChatLoading', () => {
     it('should set loading state and create an AbortController when loading is true', () => {
       const { result } = renderHook(() => useChatStore());
       const action = 'loading-action';
 
       act(() => {
-        result.current.toggleChatLoading(true, 'message-id', action);
+        result.current.internal_toggleChatLoading(true, 'message-id', action);
       });
 
       const state = useChatStore.getState();
       expect(state.abortController).toBeInstanceOf(AbortController);
-      expect(state.chatLoadingId).toEqual('message-id');
+      expect(state.chatLoadingIds).toEqual(['message-id']);
     });
 
     it('should clear loading state and abort controller when loading is false', () => {
@@ -696,17 +685,17 @@ describe('chatMessage actions', () => {
 
       // Set initial loading state
       act(() => {
-        result.current.toggleChatLoading(true, 'message-id', 'start-loading-action');
+        result.current.internal_toggleChatLoading(true, 'message-id', 'start-loading-action');
       });
 
       // Stop loading
       act(() => {
-        result.current.toggleChatLoading(false, undefined, action);
+        result.current.internal_toggleChatLoading(false, undefined, action);
       });
 
       const state = useChatStore.getState();
       expect(state.abortController).toBeUndefined();
-      expect(state.chatLoadingId).toBeUndefined();
+      expect(state.chatLoadingIds).toEqual([]);
     });
 
     it('should attach beforeunload event listener when loading starts', () => {
@@ -714,7 +703,7 @@ describe('chatMessage actions', () => {
       const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
 
       act(() => {
-        result.current.toggleChatLoading(true, 'message-id', 'loading-action');
+        result.current.internal_toggleChatLoading(true, 'message-id', 'loading-action');
       });
 
       expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
@@ -726,8 +715,8 @@ describe('chatMessage actions', () => {
 
       // Start and then stop loading to trigger the removal of the event listener
       act(() => {
-        result.current.toggleChatLoading(true, 'message-id', 'start-loading-action');
-        result.current.toggleChatLoading(false, undefined, 'stop-loading-action');
+        result.current.internal_toggleChatLoading(true, 'message-id', 'start-loading-action');
+        result.current.internal_toggleChatLoading(false, undefined, 'stop-loading-action');
       });
 
       expect(removeEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
@@ -739,11 +728,36 @@ describe('chatMessage actions', () => {
 
       act(() => {
         useChatStore.setState({ abortController });
-        result.current.toggleChatLoading(true, 'message-id', 'loading-action');
+        result.current.internal_toggleChatLoading(true, 'message-id', 'loading-action');
       });
 
       const state = useChatStore.getState();
       expect(state.abortController).toEqual(abortController);
+    });
+  });
+
+  describe('internal_toggleMessageLoading action', () => {
+    it('should add message id to messageLoadingIds when loading is true', () => {
+      const { result } = renderHook(() => useChatStore());
+      const messageId = 'message-id';
+
+      act(() => {
+        result.current.internal_toggleMessageLoading(true, messageId);
+      });
+
+      expect(result.current.messageLoadingIds).toContain(messageId);
+    });
+
+    it('should remove message id from messageLoadingIds when loading is false', () => {
+      const { result } = renderHook(() => useChatStore());
+      const messageId = 'ddd-id';
+
+      act(() => {
+        result.current.internal_toggleMessageLoading(true, messageId);
+        result.current.internal_toggleMessageLoading(false, messageId);
+      });
+
+      expect(result.current.messageLoadingIds).not.toContain(messageId);
     });
   });
 });

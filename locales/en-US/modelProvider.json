@@ -1,10 +1,5 @@
 {
   "anthropic": {
-    "endpoint": {
-      "desc": "Must include http(s):// in addition to the default address",
-      "placeholder": "https://api.anthropic.com",
-      "title": "API Proxy Address"
-    },
     "title": "Anthropic",
     "token": {
       "desc": "Enter the API Key from Anthropic",
@@ -66,12 +61,19 @@
       "title": "Use Custom Bedrock Authentication Information"
     }
   },
-  "google": {
-    "endpoint": {
-      "desc": "Must include http(s):// besides the default address",
-      "placeholder": "https://generativelanguage.googleapis.com",
-      "title": "API Proxy Address"
+  "deepseek": {
+    "title": "DeepSeek",
+    "token": {
+      "desc": "Enter your API Key from DeepSeek",
+      "placeholder": "DeepSeek API Key",
+      "title": "API Key"
     },
+    "unlock": {
+      "description": "Enter your DeepSeek API Key to start the session. The app will not store your API Key.",
+      "title": "Use Custom DeepSeek API Key"
+    }
+  },
+  "google": {
     "title": "Google",
     "token": {
       "desc": "Enter the API Key from Google",
@@ -93,6 +95,18 @@
     "unlock": {
       "description": "Enter your Groq API Key to start the session. The app will not store your API Key",
       "title": "Use Custom Groq API Key"
+    }
+  },
+  "minimax": {
+    "title": "Minimax",
+    "token": {
+      "desc": "Enter your API Key from Minimax",
+      "placeholder": "Minimax API Key",
+      "title": "API Key"
+    },
+    "unlock": {
+      "description": "Enter your Minimax API Key to start the session. The app will not store your API Key.",
+      "title": "Use Custom Minimax API Key"
     }
   },
   "mistral": {
@@ -121,7 +135,8 @@
   },
   "ollama": {
     "checker": {
-      "desc": "Test if the proxy address is correctly filled in"
+      "desc": "Test if the proxy address is correctly filled in",
+      "title": "Connectivity Check"
     },
     "customModelName": {
       "desc": "Add custom models, separate multiple models with commas",
@@ -130,17 +145,35 @@
     },
     "endpoint": {
       "desc": "Enter the Ollama interface proxy address, leave blank if not specified locally",
-      "placeholder": "http://127.0.0.1:11434/v1",
       "title": "Interface proxy address"
+    },
+    "setup": {
+      "cors": {
+        "description": "Due to browser security restrictions, you need to configure cross-origin settings for Ollama to function properly.",
+        "linux": {
+          "env": "Add `Environment` under [Service] section, and set the OLLAMA_ORIGINS environment variable:",
+          "reboot": "Reload systemd and restart Ollama.",
+          "systemd": "Invoke systemd to edit the ollama service:"
+        },
+        "macos": "Open the 'Terminal' application, paste the following command, and press Enter to run it.",
+        "reboot": "Please restart the Ollama service after completion.",
+        "title": "Configure Ollama for Cross-Origin Access",
+        "windows": "On Windows, go to 'Control Panel' and edit system environment variables. Create a new environment variable named 'OLLAMA_ORIGINS' for your user account, set the value to '*', and click 'OK/Apply' to save."
+      },
+      "install": {
+        "description": "Please make sure you have enabled Ollama. If you haven't downloaded Ollama yet, please visit the official website <1>to download</1>.",
+        "docker": "If you prefer using Docker, Ollama also provides an official Docker image. You can pull it using the following command:",
+        "linux": {
+          "command": "Install using the following command:",
+          "manual": "Alternatively, you can refer to the <1>Linux Manual Installation Guide</1> for manual installation."
+        },
+        "title": "Install and Start Ollama Locally",
+        "windowsTab": "Windows (Preview)"
+      }
     },
     "title": "Ollama"
   },
   "openai": {
-    "endpoint": {
-      "desc": "Must include http(s):// besides the default address",
-      "placeholder": "https://api.openai.com/v1",
-      "title": "Interface proxy address"
-    },
     "title": "OpenAI",
     "token": {
       "desc": "Use your own OpenAI Key",

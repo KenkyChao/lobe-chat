@@ -19,7 +19,7 @@ interface APIKeyFormProps {
 const APIKeyForm = memo<APIKeyFormProps>(({ id, provider }) => {
   const { t } = useTranslation('error');
 
-  const [resend, deleteMessage] = useChatStore((s) => [s.internalResendMessage, s.deleteMessage]);
+  const [resend, deleteMessage] = useChatStore((s) => [s.regenerateMessage, s.deleteMessage]);
 
   const apiKeyPlaceholder = useMemo(() => {
     switch (provider) {
@@ -41,6 +41,10 @@ const APIKeyForm = memo<APIKeyFormProps>(({ id, provider }) => {
 
       case ModelProvider.Groq: {
         return 'gsk_*****************************';
+      }
+
+      case ModelProvider.DeepSeek: {
+        return 'sk_******************************';
       }
 
       default: {

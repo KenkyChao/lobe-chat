@@ -1,10 +1,5 @@
 {
   "anthropic": {
-    "endpoint": {
-      "desc": "يجب أن يتضمن العنوان، بخلاف الافتراضي، http(s)://",
-      "placeholder": "https://api.anthropic.com",
-      "title": "عنوان وكيل API"
-    },
     "title": "Anthropic",
     "token": {
       "desc": "أدخل مفتاح API الخاص بـ Anthropic",
@@ -66,12 +61,19 @@
       "title": "استخدام معلومات المصادقة الخاصة بـ Bedrock المخصصة"
     }
   },
-  "google": {
-    "endpoint": {
-      "desc": "بالإضافة إلى العنوان الافتراضي، يجب أن يتضمن http(s)://",
-      "placeholder": "https://generativelanguage.googleapis.com",
-      "title": "عنوان وكيل API"
+  "deepseek": {
+    "title": "DeepSeek",
+    "token": {
+      "desc": "أدخل مفتاح API الخاص بـ DeepSeek",
+      "placeholder": "مفتاح API DeepSeek",
+      "title": "مفتاح API"
     },
+    "unlock": {
+      "description": "قم بإدخال مفتاح API DeepSeek الخاص بك لبدء الجلسة. لن يتم تسجيل مفتاح الـ API الخاص بك",
+      "title": "استخدام مفتاح API خاص بـ DeepSeek"
+    }
+  },
+  "google": {
     "title": "Google",
     "token": {
       "desc": "أدخل مفتاح API الخاص بـ Google",
@@ -93,6 +95,18 @@
     "unlock": {
       "description": "أدخل مفتاح API الخاص بك في Groq لبدء الجلسة. لن يتم تسجيل مفتاح الخاص بك من قبل التطبيق",
       "title": "استخدام مفتاح API الخاص بـ Groq المخصص"
+    }
+  },
+  "minimax": {
+    "title": "Minimax",
+    "token": {
+      "desc": "أدخل مفتاح API الخاص بـ Minimax",
+      "placeholder": "مفتاح API Minimax",
+      "title": "مفتاح API"
+    },
+    "unlock": {
+      "description": "قم بإدخال مفتاح API Minimax الخاص بك لبدء الجلسة. لن يتم تسجيل مفتاح الـ API الخاص بك من قبل التطبيق",
+      "title": "استخدام مفتاح API Minimax المخصص"
     }
   },
   "mistral": {
@@ -121,7 +135,8 @@
   },
   "ollama": {
     "checker": {
-      "desc": "اختبر ما إذا تم إدخال عنوان الوكيل بشكل صحيح"
+      "desc": "اختبر ما إذا تم إدخال عنوان الوكيل بشكل صحيح",
+      "title": "فحص الاتصال"
     },
     "customModelName": {
       "desc": "أضف نماذج مخصصة، استخدم الفاصلة (،) لفصل عدة نماذج",
@@ -130,17 +145,35 @@
     },
     "endpoint": {
       "desc": "أدخل عنوان واجهة برمجة التطبيقات الخاص بـ Ollama، إذا لم يتم تحديده محليًا، يمكن تركه فارغًا",
-      "placeholder": "http://127.0.0.1:11434/v1",
       "title": "عنوان وكيل الواجهة"
+    },
+    "setup": {
+      "cors": {
+        "description": "بسبب قيود الأمان في المتصفح، يجب تكوين الوصول عبر المواقع المختلفة لـ Ollama لاستخدامه بشكل صحيح.",
+        "linux": {
+          "env": "في القسم [Service]، أضف `Environment` وأضف متغير البيئة OLLAMA_ORIGINS:",
+          "reboot": "أعد تحميل systemd وأعد تشغيل Ollama",
+          "systemd": "استدعاء تحرير خدمة ollama في systemd:"
+        },
+        "macos": "افتح تطبيق \"Terminal\" والصق الأمر التالي، ثم اضغط على Enter للتشغيل.",
+        "reboot": "يرجى إعادة تشغيل خدمة Ollama بعد الانتهاء من التنفيذ",
+        "title": "تكوين Ollama للسماح بالوصول عبر المواقع المختلفة",
+        "windows": "على نظام Windows، انقر فوق \"لوحة التحكم\"، ثم ادخل إلى تحرير متغيرات البيئة النظامية. قم بإنشاء متغير بيئي بعنوان \"OLLAMA_ORIGINS\" لحساب المستخدم الخاص بك، واجعل قيمته * ثم انقر على \"موافق/تطبيق\" للحفظ."
+      },
+      "install": {
+        "description": "يرجى التأكد من أنك قد قمت بتشغيل Ollama ، إذا لم تقم بتنزيل Ollama ، يرجى زيارة الموقع الرسمي <1>للتنزيل</1>",
+        "docker": "إذا كنت تفضل استخدام Docker، يوفر Ollama أيضًا صور Docker الرسمية، يمكنك سحبها باستخدام الأمر التالي:",
+        "linux": {
+          "command": "قم بتثبيته باستخدام الأمر التالي:",
+          "manual": "أو يمكنك الرجوع إلى <1>دليل تثبيت Linux يدويًا</1> للقيام بالتثبيت بنفسك."
+        },
+        "title": "تثبيت وتشغيل تطبيق Ollama محليًا",
+        "windowsTab": "Windows (نسخة معاينة)"
+      }
     },
     "title": "Ollama"
   },
   "openai": {
-    "endpoint": {
-      "desc": "يجب أن يتضمن العنوان، بخلاف الافتراضي، http(s)://",
-      "placeholder": "https://api.openai.com/v1",
-      "title": "عنوان وكيل الواجهة"
-    },
     "title": "OpenAI",
     "token": {
       "desc": "استخدم مفتاح OpenAI الخاص بك",

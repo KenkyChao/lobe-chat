@@ -17,6 +17,10 @@ export interface GeneralModelProviderConfig {
   enabledModels?: string[] | null;
   endpoint?: string;
   /**
+   * whether fetch on client
+   */
+  fetchOnClient?: boolean;
+  /**
    * the latest fetch model list time
    */
   latestFetchTime?: number;
@@ -40,8 +44,10 @@ export interface GlobalLLMConfig {
   anthropic: GeneralModelProviderConfig;
   azure: AzureOpenAIConfig;
   bedrock: AWSBedrockConfig;
+  deepseek: GeneralModelProviderConfig;
   google: GeneralModelProviderConfig;
   groq: GeneralModelProviderConfig;
+  minimax: GeneralModelProviderConfig;
   mistral: GeneralModelProviderConfig;
   moonshot: GeneralModelProviderConfig;
   ollama: GeneralModelProviderConfig;

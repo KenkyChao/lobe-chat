@@ -1,14 +1,12 @@
 import NextAuth from 'next-auth';
 
-import { getServerConfig } from '@/config/server';
+import { authEnv } from '@/config/auth';
 
 import { ssoProviders } from './sso-providers';
 
-const { NEXTAUTH_SECRET, ENABLE_OAUTH_SSO, SSO_PROVIDERS } = getServerConfig();
-
 export const initSSOProviders = () => {
-  return ENABLE_OAUTH_SSO
-    ? SSO_PROVIDERS.split(/[,，]/).map((provider) => {
+  return authEnv.NEXT_PUBLIC_ENABLE_NEXT_AUTH
+    ? authEnv.NEXT_AUTH_SSO_PROVIDERS.split(/[,，]/).map((provider) => {
         const validProvider = ssoProviders.find((item) => item.id === provider);
 
         if (validProvider) return validProvider.provider;
@@ -38,7 +36,7 @@ const nextAuth = NextAuth({
     },
   },
   providers: initSSOProviders(),
-  secret: NEXTAUTH_SECRET,
+  secret: authEnv.NEXT_AUTH_SECRET,
   trustHost: true,
 });
 
@@ -46,10 +44,3 @@ export const {
   handlers: { GET, POST },
   auth,
 } = nextAuth;
-
-declare module '@auth/core/jwt' {
-  // Returned by the `jwt` callback and `auth`, when using JWT sessions
-  interface JWT {
-    userId?: string;
-  }
-}

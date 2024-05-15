@@ -2,8 +2,10 @@ import {
   Anthropic,
   Azure,
   Bedrock,
+  DeepSeek,
   Google,
   Groq,
+  Minimax,
   Mistral,
   Moonshot,
   Ollama,
@@ -33,6 +35,10 @@ const ModelProviderIcon = memo<ModelProviderIconProps>(({ provider }) => {
       return <Bedrock size={20} />;
     }
 
+    case ModelProvider.DeepSeek: {
+      return <DeepSeek size={20} />;
+    }
+    
     case ModelProvider.Google: {
       return (
         <Center height={20} width={20}>
@@ -63,6 +69,10 @@ const ModelProviderIcon = memo<ModelProviderIconProps>(({ provider }) => {
 
     case ModelProvider.Perplexity: {
       return <Perplexity size={20} />;
+    }
+
+    case ModelProvider.Minimax: {
+      return <Minimax size={20} />;
     }
 
     case ModelProvider.Mistral: {

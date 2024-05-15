@@ -46,6 +46,12 @@ export const AgentRuntimeErrorType = {
 
   InvalidTogetherAIAPIKey: 'InvalidTogetherAIAPIKey',
   TogetherAIBizError: 'TogetherAIBizError',
+
+  InvalidMinimaxAPIKey: 'InvalidMinimaxAPIKey',
+  MinimaxBizError: 'MinimaxBizError',
+
+  InvalidDeepSeekAPIKey: 'InvalidDeepSeekAPIKey',
+  DeepSeekBizError: 'DeepSeekBizError',
 } as const;
 
 export type ILobeAgentRuntimeErrorType =

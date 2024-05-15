@@ -3,8 +3,10 @@ import { ChatModelCard, ModelProviderCard } from '@/types/llm';
 import AnthropicProvider from './anthropic';
 import AzureProvider from './azure';
 import BedrockProvider from './bedrock';
+import DeepSeekProvider from './deepseek';
 import GoogleProvider from './google';
 import GroqProvider from './groq';
+import MinimaxProvider from './minimax';
 import MistralProvider from './mistral';
 import MoonshotProvider from './moonshot';
 import OllamaProvider from './ollama';
@@ -19,8 +21,10 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
   OpenAIProvider.chatModels,
   ZhiPuProvider.chatModels,
   BedrockProvider.chatModels,
+  DeepSeekProvider.chatModels,
   GoogleProvider.chatModels,
   GroqProvider.chatModels,
+  MinimaxProvider.chatModels,
   MistralProvider.chatModels,
   MoonshotProvider.chatModels,
   OllamaProvider.chatModels,
@@ -36,11 +40,13 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   { ...AzureProvider, chatModels: [] },
   OllamaProvider,
   AnthropicProvider,
+  DeepSeekProvider,
   GoogleProvider,
   OpenRouterProvider,
   TogetherAIProvider,
   BedrockProvider,
   PerplexityProvider,
+  MinimaxProvider,
   MistralProvider,
   GroqProvider,
   MoonshotProvider,
@@ -55,8 +61,10 @@ export const filterEnabledModels = (provider: ModelProviderCard) => {
 export { default as AnthropicProviderCard } from './anthropic';
 export { default as AzureProviderCard } from './azure';
 export { default as BedrockProviderCard } from './bedrock';
+export { default as DeepSeekProviderCard } from './deepseek';
 export { default as GoogleProviderCard } from './google';
 export { default as GroqProviderCard } from './groq';
+export { default as MinimaxProviderCard } from './minimax';
 export { default as MistralProviderCard } from './mistral';
 export { default as MoonshotProviderCard } from './moonshot';
 export { default as OllamaProviderCard } from './ollama';
