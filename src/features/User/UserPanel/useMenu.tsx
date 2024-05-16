@@ -1,4 +1,5 @@
-import { ActionIcon, DiscordIcon, Icon } from '@lobehub/ui';
+import { ActionIcon, Icon } from '@lobehub/ui';
+// import { ActionIcon, DiscordIcon, Icon } from '@lobehub/ui';
 import { Badge } from 'antd';
 import {
   Book,
@@ -20,7 +21,8 @@ import { Flexbox } from 'react-layout-kit';
 import urlJoin from 'url-join';
 
 import type { MenuProps } from '@/components/Menu';
-import { DISCORD, DOCUMENTS, EMAIL_SUPPORT, GITHUB_ISSUES } from '@/const/url';
+import { DOCUMENTS, EMAIL_SUPPORT, GITHUB_ISSUES } from '@/const/url';
+// import { DISCORD, DOCUMENTS, EMAIL_SUPPORT, GITHUB_ISSUES } from '@/const/url';
 import DataImporter from '@/features/DataImporter';
 import { useOpenSettings } from '@/hooks/useInterceptingRoutes';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
@@ -153,15 +155,15 @@ export const useMenu = () => {
   ];
 
   const helps: MenuProps['items'] = [
-    {
-      icon: <Icon icon={DiscordIcon} />,
-      key: 'discord',
-      label: (
-        <Link href={DISCORD} target={'_blank'}>
-          {t('userPanel.discord')}
-        </Link>
-      ),
-    },
+    // {
+    //   icon: <Icon icon={DiscordIcon} />,
+    //   key: 'discord',
+    //   label: (
+    //     <Link href={DISCORD} target={'_blank'}>
+    //       {t('userPanel.discord')}
+    //     </Link>
+    //   ),
+    // },
     {
       children: [
         {

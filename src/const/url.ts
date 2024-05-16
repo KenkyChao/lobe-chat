@@ -6,8 +6,10 @@ import { withBasePath } from '@/utils/basePath';
 import pkg from '../../package.json';
 import { INBOX_SESSION_ID } from './session';
 
-export const OFFICIAL_URL = 'https://chat-preview.lobehub.com/';
-export const OFFICIAL_SITE = 'https://lobehub.com/';
+// export const OFFICIAL_URL = 'https://chat-preview.lobehub.com/';
+export const OFFICIAL_URL = 'https://chat.naiyun.com/';
+export const OFFICIAL_SITE = 'https://chat.naiyun.com/';
+// export const OFFICIAL_SITE = 'https://lobehub.com/';
 
 export const getCanonicalUrl = (path: string) => urlJoin(OFFICIAL_URL, path);
 
@@ -32,7 +34,7 @@ export const DISCORD = 'https://discord.gg/AYFPHvv2jT';
 export const PRIVACY_URL = urlJoin(OFFICIAL_SITE, '/privacy');
 export const TERMS_URL = urlJoin(OFFICIAL_SITE, '/terms');
 
-export const PLUGINS_INDEX_URL = 'https://chat-plugins.lobehub.com';
+// export const PLUGINS_INDEX_URL = 'https://chat-plugins.lobehub.com';
 
 export const MORE_MODEL_PROVIDER_REQUEST_URL =
   'https://github.com/lobehub/lobe-chat/discussions/1284';
@@ -49,9 +51,9 @@ export const SESSION_CHAT_URL = (id: string = INBOX_SESSION_ID, mobile?: boolean
 export const imageUrl = (filename: string) => withBasePath(`/images/${filename}`);
 
 export const LOBE_URL_IMPORT_NAME = 'settings';
-export const EMAIL_SUPPORT = 'support@lobehub.com';
-export const EMAIL_BUSINESS = 'hello@lobehub.com';
+export const EMAIL_SUPPORT = 'zhaojuanchao@naiyun.com';
+export const EMAIL_BUSINESS = 'zhaojuanchao@naiyun.com';
 
-export const MEDIDUM = 'https://medium.com/@lobehub';
+// export const MEDIDUM = 'https://discord.gg/kvxFN9bZ';
 export const X = 'https://x.com/lobehub';
 export const RELEASES_URL = urlJoin(GITHUB, 'releases');

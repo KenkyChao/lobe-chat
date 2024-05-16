@@ -97,7 +97,8 @@ export const useAppearance = () => {
     baseTheme: isDarkMode ? dark : undefined,
     elements: styles,
     layout: {
-      helpPageUrl: 'https://lobehub.com/docs',
+      helpPageUrl: 'https://chat.naiyun.com/docs',
+      // helpPageUrl: 'https://lobehub.com/docs',
       privacyPageUrl: 'https://lobehub.com/privacy',
       socialButtonsVariant: 'blockButton',
       termsPageUrl: 'https://lobehub.com/terms',

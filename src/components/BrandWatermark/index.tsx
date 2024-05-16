@@ -1,6 +1,6 @@
 'use client';
 
-import { Logo } from '@lobehub/ui';
+// import { Logo } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import Link from 'next/link';
 import { memo } from 'react';
@@ -29,8 +29,10 @@ const BrandWatermark = memo<Omit<FlexboxProps, 'children'>>(({ style, ...rest })
       {...rest}
     >
       <span>Powered by</span>
-      <Link className={styles.logoLink} href={'https://lobehub.com'} target={'_blank'}>
-        <Logo size={20} type={'text'} />
+      <Link className={styles.logoLink} href={'https://chat.naiyun.com'} target={'_blank'}>
+        {/*<Logo size={20} type={'text'} />*/}
+        <strong size={20} type={'text'}>NaiYunHub</strong>
+        {/*<Logo size={20} type={'text'} />*/}
       </Link>
     </Flexbox>
   );

@@ -41,7 +41,7 @@ const Header = memo(() => {
           {/*<Logo className={styles.logo} size={36} type={'text'} />*/}
           <strong style={ {fontSize: '1.7em' }}>NaiYunHub</strong>
           {enableWebrtc && <SyncStatusTag />}
-          <SyncStatusTag />
+
         </Flexbox>
         {showCreateSession && (
           <ActionIcon

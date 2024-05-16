@@ -1,10 +1,11 @@
-import { GridShowcase, Logo } from '@lobehub/ui';
+import { GridShowcase } from '@lobehub/ui';
+// import { GridShowcase, Logo } from '@lobehub/ui';
 import { PropsWithChildren } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import Follow from '@/features/Follow';
 
-const COPYRIGHT = `© ${new Date().getFullYear()} LobeHub, LLC`;
+const COPYRIGHT = `© ${new Date().getFullYear()} NaiYunHub, LLC`;
 
 const DesktopLayout = ({ children }: PropsWithChildren) => {
   return (
@@ -16,7 +17,8 @@ const DesktopLayout = ({ children }: PropsWithChildren) => {
       style={{ overflow: 'hidden', position: 'relative' }}
       width={'100%'}
     >
-      <Logo size={36} style={{ alignSelf: 'flex-start' }} type={'text'} />
+      <strong size={46} style={{ alignSelf: 'flex-start' }} type={'text'}>NaiYunHub</strong>
+      {/*<Logo size={36} style={{ alignSelf: 'flex-start' }} type={'text'} />*/}
       <GridShowcase innerProps={{ gap: 24 }} style={{ maxWidth: 1024 }} width={'100%'}>
         {children}
       </GridShowcase>
