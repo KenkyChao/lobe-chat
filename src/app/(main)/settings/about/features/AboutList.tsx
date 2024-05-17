@@ -60,19 +60,19 @@ const AboutList = memo(() => {
   const { t } = useTranslation('common');
 
   const items = [
-    {
-      href: OFFICIAL_SITE,
-      icon: Home,
-      label: t('officialSite'),
-      value: 'officialSite',
-    },
+    // {
+    //   href: OFFICIAL_SITE,
+    //   icon: Home,
+    //   label: t('officialSite'),
+    //   value: 'officialSite',
+    // },
 
-    {
-      href: FEEDBACK,
-      icon: Book,
-      label: t('document'),
-      value: 'feedback',
-    },
+    // {
+    //   href: FEEDBACK,
+    //   icon: Book,
+    //   label: t('document'),
+    //   value: 'feedback',
+    // },
     {
       href: BLOG,
       icon: Rss,
@@ -82,39 +82,39 @@ const AboutList = memo(() => {
     {
       href: GITHUB,
       icon: Github,
-      label: 'GitHub',
+      label: 'Git',
       value: 'feedback',
     },
-    {
-      href: FEEDBACK,
-      icon: Feather,
-      label: t('feedback'),
-      value: 'feedback',
-    },
+    // {
+    //   href: FEEDBACK,
+    //   icon: Feather,
+    //   label: t('feedback'),
+    //   value: 'feedback',
+    // },
     {
       href: CHANGELOG,
       icon: FileClock,
       label: t('changelog'),
       value: 'changelog',
     },
-    {
-      href: TERMS_URL,
-      icon: HeartHandshake,
-      label: t('terms'),
-      value: 'terms',
-    },
-    {
-      href: PRIVACY_URL,
-      icon: Lock,
-      label: t('privacy'),
-      value: 'privacy',
-    },
-    {
-      href: ABOUT,
-      icon: Heart,
-      label: t('about'),
-      value: 'about',
-    },
+    // {
+    //   href: TERMS_URL,
+    //   icon: HeartHandshake,
+    //   label: t('terms'),
+    //   value: 'terms',
+    // },
+    // {
+    //   href: PRIVACY_URL,
+    //   icon: Lock,
+    //   label: t('privacy'),
+    //   value: 'privacy',
+    // },
+    // {
+    //   href: ABOUT,
+    //   icon: Heart,
+    //   label: t('about'),
+    //   value: 'about',
+    // },
   ];
 
   return (
