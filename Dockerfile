@@ -37,6 +37,8 @@ FROM base AS builder
 
 ARG USE_CN_MIRROR
 ARG NEXT_PUBLIC_BASE_PATH
+ARG NEXT_PUBLIC_SERVICE_MODE
+ARG NEXT_PUBLIC_ENABLE_NEXT_AUTH
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG NEXT_PUBLIC_ANALYTICS_POSTHOG
 ARG NEXT_PUBLIC_POSTHOG_HOST
@@ -46,6 +48,13 @@ ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL
 ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
 
 ENV NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH}"
+
+ENV NEXT_PUBLIC_SERVICE_MODE="${NEXT_PUBLIC_SERVICE_MODE:-server}" \
+    NEXT_PUBLIC_ENABLE_NEXT_AUTH="${NEXT_PUBLIC_ENABLE_NEXT_AUTH:-1}" \
+    APP_URL="http://app.com" \
+    DATABASE_DRIVER="node" \
+    DATABASE_URL="postgres://postgres:password@localhost:5432/postgres" \
+    KEY_VAULTS_SECRET="use-for-build"
 
 # Sentry
 ENV NEXT_PUBLIC_SENTRY_DSN="${NEXT_PUBLIC_SENTRY_DSN}" \
@@ -87,9 +96,9 @@ RUN \
     && corepack use $(sed -n 's/.*"packageManager": "\(.*\)".*/\1/p' package.json) \
     # Install the dependencies
     && pnpm i \
-    # Add sharp dependencies
+    # Add sharp and db migration dependencies
     && mkdir -p /deps \
-    && pnpm add sharp --prefix /deps
+    && pnpm add sharp pg drizzle-orm --prefix /deps
 
 COPY . .
 
@@ -107,7 +116,16 @@ COPY --from=builder /app/public /app/public
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/.next/standalone /app/
 COPY --from=builder /app/.next/static /app/.next/static
+
+# copy dependencies
 COPY --from=builder /deps/node_modules/.pnpm /app/node_modules/.pnpm
+COPY --from=builder /deps/node_modules/pg /app/node_modules/pg
+COPY --from=builder /deps/node_modules/drizzle-orm /app/node_modules/drizzle-orm
+
+# Copy database migrations
+COPY --from=builder /app/src/database/migrations /app/migrations
+COPY --from=builder /app/scripts/migrateServerDB/docker.cjs /app/docker.cjs
+COPY --from=builder /app/scripts/migrateServerDB/errorHint.js /app/errorHint.js
 
 # Copy server launcher
 COPY --from=builder /app/scripts/serverLauncher/startServer.js /app/startServer.js
@@ -141,11 +159,37 @@ ENV HOSTNAME="0.0.0.0" \
 
 # General Variables
 ENV ACCESS_CODE="" \
+    APP_URL="" \
     API_KEY_SELECT_MODE="" \
     DEFAULT_AGENT_CONFIG="" \
     SYSTEM_AGENT="" \
     FEATURE_FLAGS="" \
-    PROXY_URL=""
+    PROXY_URL="" \
+    SEARXNG_URL=""
+
+# Database
+ENV KEY_VAULTS_SECRET="" \
+    DATABASE_DRIVER="node" \
+    DATABASE_URL=""
+
+
+# 配置 Clerk 身份验证服务
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="" \
+    CLERK_SECRET_KEY="" \
+    CLERK_WEBHOOK_SECRET=""
+
+## Next Auth
+#ENV NEXT_AUTH_SECRET="" \
+#    NEXT_AUTH_SSO_PROVIDERS="" \
+#    NEXTAUTH_URL=""
+
+# S3
+ENV NEXT_PUBLIC_S3_DOMAIN="" \
+    S3_PUBLIC_DOMAIN="" \
+    S3_ACCESS_KEY_ID="" \
+    S3_BUCKET="" \
+    S3_ENDPOINT="" \
+    S3_SECRET_ACCESS_KEY=""
 
 # Model Variables
 ENV \

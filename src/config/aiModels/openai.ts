@@ -18,7 +18,7 @@ export const openaiChatModels: AIChatModelCard[] = [
       'o3-mini 是我们最新的小型推理模型，在与 o1-mini 相同的成本和延迟目标下提供高智能。',
     displayName: 'OpenAI o3-mini',
     enabled: true,
-    id: 'o3-mini',
+    id: 'o3-mini-2025-01-31',
     maxOutput: 100_000,
     pricing: {
       input: 1.1,
@@ -55,7 +55,7 @@ export const openaiChatModels: AIChatModelCard[] = [
       'o1是OpenAI新的推理模型，支持图文输入并输出文本，适用于需要广泛通用知识的复杂任务。该模型具有200K上下文和2023年10月的知识截止日期。',
     displayName: 'OpenAI o1',
     enabled: true,
-    id: 'o1',
+    id: 'o1-2024-12-17',
     maxOutput: 100_000,
     pricing: {
       input: 15,
