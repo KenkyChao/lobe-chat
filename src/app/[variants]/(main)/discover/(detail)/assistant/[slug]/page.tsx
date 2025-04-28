@@ -47,8 +47,8 @@ export const generateMetadata = async (props: DiscoverPageProps) => {
   return {
     authors: [
       { name: author, url: homepage },
-      { name: 'LobeHub', url: 'https://github.com/lobehub' },
-      { name: 'LobeChat', url: 'https://github.com/lobehub/lobe-chat' },
+      { name: 'NaiYunHub', url: 'http://192.168.8.26:61119/plugins/siyuan-blog/app/#/s/20250410135835-ohm45zl' },
+      { name: 'NaiYunChat', url: 'http://192.168.8.26:61119/plugins/siyuan-blog/app/#/s/20250410135835-ohm45zl' },
     ],
     keywords: meta.tags,
     ...metadataModule.generate({

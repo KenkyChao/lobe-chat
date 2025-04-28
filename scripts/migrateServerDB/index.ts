@@ -1,4 +1,5 @@
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
+// import * as dotenv from 'dotenv';
 import { migrate as neonMigrate } from 'drizzle-orm/neon-serverless/migrator';
 import { migrate as nodeMigrate } from 'drizzle-orm/node-postgres/migrator';
 import { join } from 'node:path';
@@ -7,7 +8,7 @@ import { DB_FAIL_INIT_HINT, PGVECTOR_HINT } from './errorHint';
 
 // Read the `.env` file if it exists, or a file specified by the
 // dotenv_config_path parameter that's passed to Node.js
-dotenv.config();
+// dotenv.config();
 
 const migrationsFolder = join(__dirname, '../../src/database/migrations');
 

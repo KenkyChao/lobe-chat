@@ -4,6 +4,23 @@ import { ModelProviderCard } from '@/types/llm';
 const OpenAI: ModelProviderCard = {
   chatModels: [
     {
+      contextWindowTokens: 128_000,
+      description:
+        'GPT-4.5 擅长于从创造性、开放式思维和对话中受益的任务，例如写作、学习或探索新想法。该模型具有128K上下文和2023年10-01月的知识截止日期。',
+      displayName: 'GPT-4.5（擅长写作和构思想法）',
+      enabled: true,
+      functionCall: true,
+      id: 'gpt-4.5-preview-2025-02-27',
+      maxOutput: 16_384,
+      pricing: {
+        input: 75,
+        output: 150,
+      },
+      reasoning: true,
+      releasedAt: '2023-02-27',
+      vision: true,
+    },
+    {
       contextWindowTokens: 1_047_576,
       description:
         'GPT-4.1 mini 提供了智能、速度和成本之间的平衡，使其成为许多用例中有吸引力的模型。',
@@ -82,7 +99,7 @@ const OpenAI: ModelProviderCard = {
       contextWindowTokens: 128_000,
       description:
         'ChatGPT-4o 是一款动态模型，实时更新以保持当前最新版本。它结合了强大的语言理解与生成能力，适合于大规模应用场景，包括客户服务、教育和技术支持。',
-      displayName: 'GPT-4o 1120',
+      displayName: 'GPT-4o(适用于大多数问题)',
       enabled: true,
       functionCall: true,
       id: 'gpt-4o-2024-11-20',
