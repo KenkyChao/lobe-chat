@@ -26,12 +26,12 @@ export const getServerGlobalConfig = async () => {
         enabledKey: 'ENABLED_AWS_BEDROCK',
         modelListKey: 'AWS_BEDROCK_MODEL_LIST',
       },
-      doubao: {
-        withDeploymentName: true,
-      },
       giteeai: {
         enabledKey: 'ENABLED_GITEE_AI',
         modelListKey: 'GITEE_AI_MODEL_LIST',
+      },
+      lmstudio: {
+        fetchOnClient: isDesktop ? false : undefined,
       },
       /* ↓ cloud slot ↓ */
 
