@@ -5,7 +5,7 @@
 export const LOBE_CHAT_CLOUD = 'NaiYunChat Cloud';
 
 export const BRANDING_NAME = 'NaiYunChat';
-export const BRANDING_LOGO_URL = 'https://erp.naiyun.com:1080/group1/M00/00/78/wKgB1GfzhMKAIwaqAACXARwFKAg518.png';
+export const BRANDING_LOGO_URL = 'https://erp.naiyun.com:1080/group1/M00/00/7D/wKgB1GghthmAWfwUAI5M8epVlE0545.png';
 
 export const ORG_NAME = 'NaiYunHub';
 
