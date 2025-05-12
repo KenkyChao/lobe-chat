@@ -21,6 +21,82 @@ const OpenAI: ModelProviderCard = {
       vision: true,
     },
     {
+      contextWindowTokens: 1_047_576,
+      description:
+        'GPT-4.1 nano 是速度最快、最具成本效益的 GPT-4.1 型号。',
+      displayName: 'gpt-4.1-nano',
+      enabled: true,
+      functionCall: true,
+      id: 'gpt-4.1-nano',
+      maxOutput: 32_768,
+      pricing: {
+        cachedInput: 0.1,
+        input: 0.4,
+        output: 1.6,
+      },
+      releasedAt: '2025-04-14',
+      vision: true,
+    },
+    {
+      contextWindowTokens: 1_047_576,
+      description:
+        'GPT-4.1 是针对复杂任务的旗舰模型，非常适合跨领域问题解决。',
+      displayName: 'GPT-4.1',
+      enabled: true,
+      functionCall: true,
+      id: 'gpt-4.1',
+      maxOutput: 32_768,
+      pricing: {
+        cachedInput: 0.1,
+        input: 0.4,
+        output: 1.6,
+      },
+      releasedAt: '2025-04-14',
+      vision: true,
+    },
+    // {
+    //   contextWindowTokens: 200_000,
+    //   description:
+    //     'o4-mini是一款针对快速、有效的推理进行了优化，在编码和视觉任务中表现出卓越的高效性能。该模型具有200K上下文和2024年6月的知识截止日期。',
+    //   displayName: 'OpenAI o4-mini',
+    //   enabled: true,
+    //   id: 'o4-mini-2025-04-16',
+    //   maxOutput: 100_000,
+    //   pricing: {
+    //     input: 1.1,
+    //     output: 4.4,
+    //   },
+    //   releasedAt: '2025-04-16',
+    // },
+    // {
+    //   contextWindowTokens: 200_000,
+    //   description:
+    //     'o3-mini是一款针对编程、数学和科学应用场景而设计的快速、经济高效的推理模型。该模型具有128K上下文和2023年10月的知识截止日期。',
+    //   displayName: 'o3-mini',
+    //   enabled: true,
+    //   id: 'o3-mini',
+    //   maxOutput: 100_000,
+    //   pricing: {
+    //     input: 1.1,
+    //     output: 4.4,
+    //   },
+    //   releasedAt: '2025-01-31',
+    // },
+    // {
+    //   contextWindowTokens: 200_000,
+    //   description:
+    //     'o3是一个全面且强大的跨领域模型。它为数学、科学、编程和视觉推理任务树立了新的标准。它在技术写作和指令执行方面也表现出色。使用它来思考涉及跨文本、代码和图像分析的多步骤问题。该模型具有200K上下文和2025年6月的知识截止日期。',
+    //   displayName: 'o3',
+    //   enabled: true,
+    //   id: 'o3',
+    //   maxOutput: 100_000,
+    //   pricing: {
+    //     input: 10,
+    //     output: 40,
+    //   },
+    //   releasedAt: '2025-04-16',
+    // },
+    {
       contextWindowTokens: 128_000,
       description:
         'o1-mini是一款针对编程、数学和科学应用场景而设计的快速、经济高效的推理模型。该模型具有128K上下文和2023年10月的知识截止日期。',
@@ -37,36 +113,39 @@ const OpenAI: ModelProviderCard = {
     {
       contextWindowTokens: 200_000,
       description:
-        'o1是OpenAI新的推理模型，支持图文输入并输出文本，适用于需要广泛通用知识的复杂任务。该模型具有200K上下文和2023年10月的知识截止日期。',
-      displayName: 'OpenAI o1',
+        'o1-pro系列模型经过强化学习训练，能够在回答之前进行思考，并执行复杂的推理。该模型具有200K上下文和2023年10月的知识截止日期。',
+      displayName: 'o1-pro',
       enabled: true,
-      id: 'o1-2024-12-17',
+      functionCall: true,
+      id: 'o1-pro',
       maxOutput: 100_000,
       pricing: {
-        input: 15,
-        output: 60,
+        input: 150,
+        output: 600,
       },
-      releasedAt: '2024-12-17',
+      reasoning: true,
+      releasedAt: '2025-03-19',
       vision: true,
+
     },
+    // {
+    //   contextWindowTokens: 128_000,
+    //   description:
+    //     'o1是OpenAI新的推理模型，适用于需要广泛通用知识的复杂任务。该模型具有128K上下文和2023年10月的知识截止日期。',
+    //   displayName: 'OpenAI o1-preview',
+    //   enabled: true,
+    //   id: 'o1-preview',
+    //   maxOutput: 32_768,
+    //   pricing: {
+    //     input: 15,
+    //     output: 60,
+    //   },
+    //   releasedAt: '2024-09-12',
+    // },
     {
       contextWindowTokens: 128_000,
       description:
-        'o1是OpenAI新的推理模型，适用于需要广泛通用知识的复杂任务。该模型具有128K上下文和2023年10月的知识截止日期。',
-      displayName: 'OpenAI o1-preview',
-      enabled: true,
-      id: 'o1-preview',
-      maxOutput: 32_768,
-      pricing: {
-        input: 15,
-        output: 60,
-      },
-      releasedAt: '2024-09-12',
-    },
-    {
-      contextWindowTokens: 128_000,
-      description:
-        'GPT-4o mini是OpenAI在GPT-4 Omni之后推出的最新模型，支持图文输入并输出文本。作为他们最先进的小型模型，它比其他近期的前沿模型便宜很多，并且比GPT-3.5 Turbo便宜超过60%。它保持了最先进的智能，同时具有显著的性价比。GPT-4o mini在MMLU测试中获得了 82% 的得分，目前在聊天偏好上排名高于 GPT-4。',
+        'GPT-4o mini（“o”代表“omni”）是轻量级多模态模型，支持文本和视觉输入，适合预算有限但需多模态处理的场景。',
       displayName: 'GPT-4o mini',
       enabled: true,
       functionCall: true,
@@ -82,7 +161,7 @@ const OpenAI: ModelProviderCard = {
       contextWindowTokens: 128_000,
       description:
         'ChatGPT-4o 是一款动态模型，实时更新以保持当前最新版本。它结合了强大的语言理解与生成能力，适合于大规模应用场景，包括客户服务、教育和技术支持。',
-      displayName: 'GPT-4o 1120',
+      displayName: 'GPT-4o(适用于大多数问题)',
       enabled: true,
       functionCall: true,
       id: 'gpt-4o-2024-11-20',

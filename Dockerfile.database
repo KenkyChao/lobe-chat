@@ -2,7 +2,7 @@
 ARG NODEJS_VERSION="22"
 
 ## Base image for all building stages
-FROM node:${NODEJS_VERSION}-slim AS base
+FROM --platform=linux/amd64 node:${NODEJS_VERSION}-slim AS base
 
 ARG USE_CN_MIRROR
 
@@ -111,7 +111,7 @@ COPY . .
 RUN npm run build:docker
 
 ## Application image, copy all the files for production
-FROM busybox:latest AS app
+FROM --platform=linux/amd64 busybox:latest AS app
 
 COPY --from=base /distroless/ /
 

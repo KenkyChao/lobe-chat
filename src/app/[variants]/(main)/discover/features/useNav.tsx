@@ -1,5 +1,6 @@
 import { Icon } from '@lobehub/ui';
-import { Bot, Brain, BrainCircuit, House, Puzzle } from 'lucide-react';
+// import { Bot, Brain, BrainCircuit, House, Puzzle } from 'lucide-react';
+import { Bot, House, Puzzle } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,16 +44,16 @@ export const useNav = () => {
         key: DiscoverTab.Plugins,
         label: t('tab.plugins'),
       },
-      {
-        icon: <Icon icon={Brain} size={iconSize} />,
-        key: DiscoverTab.Models,
-        label: t('tab.models'),
-      },
-      {
-        icon: <Icon icon={BrainCircuit} size={iconSize} />,
-        key: DiscoverTab.Providers,
-        label: t('tab.providers'),
-      },
+      // {
+      //   icon: <Icon icon={Brain} size={iconSize} />,
+      //   key: DiscoverTab.Models,
+      //   label: t('tab.models'),
+      // },
+      // {
+      //   icon: <Icon icon={BrainCircuit} size={iconSize} />,
+      //   key: DiscoverTab.Providers,
+      //   label: t('tab.providers'),
+      // },
     ],
     [t],
   );

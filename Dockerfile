@@ -2,7 +2,7 @@
 ARG NODEJS_VERSION="22"
 
 ## Base image for all building stages
-FROM node:${NODEJS_VERSION}-slim AS base
+FROM --platform=linux/amd64 node:${NODEJS_VERSION}-slim AS base
 
 ARG USE_CN_MIRROR
 
@@ -37,6 +37,8 @@ FROM base AS builder
 
 ARG USE_CN_MIRROR
 ARG NEXT_PUBLIC_BASE_PATH
+ARG NEXT_PUBLIC_SERVICE_MODE
+ARG NEXT_PUBLIC_ENABLE_NEXT_AUTH
 ARG NEXT_PUBLIC_SENTRY_DSN
 ARG NEXT_PUBLIC_ANALYTICS_POSTHOG
 ARG NEXT_PUBLIC_POSTHOG_HOST
@@ -48,6 +50,14 @@ ARG FEATURE_FLAGS
 
 ENV NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH}" \
     FEATURE_FLAGS="${FEATURE_FLAGS}"
+
+ENV NEXT_PUBLIC_SERVICE_MODE="${NEXT_PUBLIC_SERVICE_MODE:-server}" \
+    NEXT_PUBLIC_ENABLE_NEXT_AUTH="${NEXT_PUBLIC_ENABLE_NEXT_AUTH:-1}" \
+    APP_URL="http://app.com" \
+    DATABASE_DRIVER="node" \
+    DATABASE_URL="postgres://postgres:password@localhost:5432/postgres" \
+    KEY_VAULTS_SECRET="use-for-build"
+
 # Sentry
 ENV NEXT_PUBLIC_SENTRY_DSN="${NEXT_PUBLIC_SENTRY_DSN}" \
     SENTRY_ORG="" \
@@ -88,7 +98,12 @@ RUN \
     # Use pnpm for corepack
     && corepack use $(sed -n 's/.*"packageManager": "\(.*\)".*/\1/p' package.json) \
     # Install the dependencies
-    && pnpm i
+    && pnpm i \
+    # Add db migration dependencies
+    && mkdir -p /deps \
+    && cd /deps \
+    && pnpm init \
+    && pnpm add pg drizzle-orm
 
 COPY . .
 
@@ -96,13 +111,23 @@ COPY . .
 RUN npm run build:docker
 
 ## Application image, copy all the files for production
-FROM busybox:latest AS app
+FROM --platform=linux/amd64 busybox:latest AS app
 
 COPY --from=base /distroless/ /
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/.next/standalone /app/
+
+# Copy database migrations
+COPY --from=builder /app/src/database/migrations /app/migrations
+COPY --from=builder /app/scripts/migrateServerDB/docker.cjs /app/docker.cjs
+COPY --from=builder /app/scripts/migrateServerDB/errorHint.js /app/errorHint.js
+
+# copy dependencies
+COPY --from=builder /deps/node_modules/.pnpm /app/node_modules/.pnpm
+COPY --from=builder /deps/node_modules/pg /app/node_modules/pg
+COPY --from=builder /deps/node_modules/drizzle-orm /app/node_modules/drizzle-orm
 
 # Copy server launcher
 COPY --from=builder /app/scripts/serverLauncher/startServer.js /app/startServer.js
@@ -136,11 +161,30 @@ ENV HOSTNAME="0.0.0.0" \
 
 # General Variables
 ENV ACCESS_CODE="" \
+    APP_URL="" \
     API_KEY_SELECT_MODE="" \
     DEFAULT_AGENT_CONFIG="" \
     SYSTEM_AGENT="" \
     FEATURE_FLAGS="" \
     PROXY_URL=""
+
+# Database
+ENV KEY_VAULTS_SECRET="" \
+    DATABASE_DRIVER="node" \
+    DATABASE_URL=""
+
+# Next Auth
+ENV NEXT_AUTH_SECRET="" \
+    NEXT_AUTH_SSO_PROVIDERS="" \
+    NEXTAUTH_URL=""
+
+# S3
+ENV NEXT_PUBLIC_S3_DOMAIN="" \
+    S3_PUBLIC_DOMAIN="" \
+    S3_ACCESS_KEY_ID="" \
+    S3_BUCKET="" \
+    S3_ENDPOINT="" \
+    S3_SECRET_ACCESS_KEY=""
 
 # Model Variables
 ENV \
