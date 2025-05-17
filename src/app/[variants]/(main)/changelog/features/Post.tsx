@@ -21,7 +21,16 @@ const Post = async ({
   locale,
 }: ChangelogIndexItem & { branch?: string; locale: Locales; mobile?: boolean }) => {
   const changelogService = new ChangelogService();
-  const data = await changelogService.getPostById(id, { locale });
+
+  // 解决 github的changelog 无法拉取问题。
+  let data = null;
+  try {
+    data = await changelogService.getPostById(id, { locale });
+  } catch (error) {
+    console.warn(`Failed to fetch changelog post ${id}:`, error);
+    // 这里返回 null 或者一个默认数据，避免构建崩溃
+    data = null;
+  }
 
   if (!data || !data.title) return null;
 
