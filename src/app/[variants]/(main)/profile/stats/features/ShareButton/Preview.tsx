@@ -1,4 +1,4 @@
-import { Github } from '@lobehub/icons';
+
 import { Grid } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { memo } from 'react';
@@ -141,14 +141,7 @@ const Preview = memo(() => {
             </Grid>
           </Flexbox>
           <div className={styles.footer}>
-            {isOfficial ? (
-              OFFICIAL_URL
-            ) : (
-              <Flexbox align={'center'} gap={8} horizontal>
-                <Github size={16} />
-                <span>lobehub/lobe-chat</span>
-              </Flexbox>
-            )}
+            {isOfficial && OFFICIAL_URL}
           </div>
         </Center>
       </div>

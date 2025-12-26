@@ -1,6 +1,5 @@
 'use client';
 
-import { Github } from '@lobehub/icons';
 import { ActionIcon, Avatar, Button, Icon, Tag, Text, Tooltip } from '@lobehub/ui';
 import { createStyles, useResponsive } from 'antd-style';
 import { CircleIcon, DotIcon, DownloadIcon, ScaleIcon, StarIcon } from 'lucide-react';
@@ -141,11 +140,7 @@ const Header = memo<{ inModal?: boolean; mobile?: boolean }>(({ mobile: isMobile
               {recommendedDeployment?.installationMethod && (
                 <InstallationIcon type={recommendedDeployment.installationMethod} />
               )}
-              {github?.url && (
-                <Link href={github.url} onClick={(e) => e.stopPropagation()} target={'_blank'}>
-                  <ActionIcon fill={theme.colorTextDescription} icon={Github} />
-                </Link>
-              )}
+
             </Flexbox>
           </Flexbox>
           <Flexbox align={'center'} gap={4} horizontal>

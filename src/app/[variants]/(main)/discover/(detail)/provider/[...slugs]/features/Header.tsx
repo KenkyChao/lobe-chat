@@ -1,6 +1,6 @@
 'use client';
 
-import { Github, ProviderCombine } from '@lobehub/icons';
+import { ProviderCombine } from '@lobehub/icons';
 import { ActionIcon } from '@lobehub/ui';
 import { createStyles, useResponsive } from 'antd-style';
 import { GlobeIcon } from 'lucide-react';
@@ -69,16 +69,7 @@ const Header = memo<{ mobile?: boolean }>(({ mobile: isMobile }) => {
             </Link>
           )}
 
-          <Link
-            href={urlJoin(
-              'https://github.com/lobehub/lobe-chat-agents/tree/main/locales',
-              identifier as string,
-            )}
-            onClick={(e) => e.stopPropagation()}
-            target={'_blank'}
-          >
-            <ActionIcon fill={theme.colorTextDescription} icon={Github} />
-          </Link>
+
         </Flexbox>
       </Flexbox>
 

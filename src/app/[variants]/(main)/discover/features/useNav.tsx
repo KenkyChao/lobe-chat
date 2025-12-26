@@ -1,6 +1,6 @@
 import { MCP } from '@lobehub/icons';
 import { Icon } from '@lobehub/ui';
-import { Bot, Brain, BrainCircuit, House } from 'lucide-react';
+import { Bot, House } from 'lucide-react';
 import { ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
@@ -55,24 +55,7 @@ export const useNav = () => {
           </Link>
         ),
       },
-      {
-        icon: <Icon icon={Brain} size={ICON_SIZE} />,
-        key: DiscoverTab.Models,
-        label: (
-          <Link style={{ color: 'inherit' }} to={`/${DiscoverTab.Models}`}>
-            {t('tab.model')}
-          </Link>
-        ),
-      },
-      {
-        icon: <Icon icon={BrainCircuit} size={ICON_SIZE} />,
-        key: DiscoverTab.Providers,
-        label: (
-          <Link style={{ color: 'inherit' }} to={`/${DiscoverTab.Providers}`}>
-            {t('tab.provider')}
-          </Link>
-        ),
-      },
+
     ],
     [t],
   );

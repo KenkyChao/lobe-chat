@@ -1,4 +1,4 @@
-import { Github } from '@lobehub/icons';
+
 import { ActionIcon, Avatar, Block, Icon, Text } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { ClockIcon } from 'lucide-react';
@@ -129,17 +129,7 @@ const AssistantItem = memo<DiscoverAssistantItem>(
             </Flexbox>
           </Flexbox>
           <Flexbox align={'center'} gap={4} horizontal>
-            <a
-              href={urlJoin(
-                'https://github.com/lobehub/lobe-chat-agents/tree/main/locales',
-                identifier,
-              )}
-              onClick={(e) => e.stopPropagation()}
-              rel="noopener noreferrer"
-              target={'_blank'}
-            >
-              <ActionIcon fill={theme.colorTextDescription} icon={Github} />
-            </a>
+
           </Flexbox>
         </Flexbox>
         <Flexbox flex={1} gap={12} paddingInline={16}>

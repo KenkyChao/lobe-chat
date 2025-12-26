@@ -5,7 +5,6 @@ import {
   Database,
   EthernetPort,
   Image as ImageIcon,
-  Info,
   KeyboardIcon,
   Mic2,
   Settings2,
@@ -86,11 +85,7 @@ export const useCategory = () => {
           key: SettingsTabs.Storage,
           label: t('tab.storage'),
         },
-        !hideDocs && {
-          icon: <Icon icon={Info} />,
-          key: SettingsTabs.About,
-          label: t('tab.about'),
-        },
+
       ].filter(Boolean) as MenuProps['items'],
     [t, showLLM, enableSTT, hideDocs, mobile],
   );

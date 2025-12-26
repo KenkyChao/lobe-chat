@@ -1,4 +1,4 @@
-import { Github, ModelTag, ProviderCombine } from '@lobehub/icons';
+import { ModelTag, ProviderCombine } from '@lobehub/icons';
 import { ActionIcon, Block, MaskShadow, Text } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { GlobeIcon } from 'lucide-react';
@@ -93,14 +93,7 @@ const ProviderItem = memo<DiscoverProviderItem>(
             >
               <ActionIcon color={theme.colorTextDescription} icon={GlobeIcon} />
             </a>
-            <a
-              href={`https://github.com/lobehub/lobe-chat/blob/main/src/config/modelProviders/${identifier}.ts`}
-              onClick={(e) => e.stopPropagation()}
-              rel="noopener noreferrer"
-              target={'_blank'}
-            >
-              <ActionIcon fill={theme.colorTextDescription} icon={Github} />
-            </a>
+
           </Flexbox>
         </Flexbox>
         <Flexbox flex={1} gap={12} paddingInline={16}>
