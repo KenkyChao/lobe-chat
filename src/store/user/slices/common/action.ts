@@ -75,12 +75,7 @@ export class CommonActionImpl {
     return useSWR<boolean>(
       shouldFetch ? 'checkTrace' : null,
       () => {
-        const telemetry = userGeneralSettingsSelectors.telemetry(this.#get());
-
-        // if user have set the telemetry, return false
-        if (typeof telemetry === 'boolean') return Promise.resolve(false);
-
-        return Promise.resolve(this.#get().isUserCanEnableTrace);
+        return Promise.resolve(false);
       },
       {
         revalidateOnFocus: false,

@@ -46,6 +46,9 @@ tmp/
 .env.local
 .env*.local
 .env.development
+.env.dev
+.env.prod
+.env.test
 venv/
 .venv/
 
@@ -138,6 +141,7 @@ e2e/reports
 out
 i18n-unused-keys-report.json
 .vitest-reports
+build_log.txt
 
 pnpm-lock.yaml
 .turbo
