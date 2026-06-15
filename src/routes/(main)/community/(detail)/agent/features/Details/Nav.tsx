@@ -1,6 +1,5 @@
 'use client';
 
-import { SOCIAL_URL } from '@lobechat/business-const';
 import { Flexbox, Icon, Tabs, Tag } from '@lobehub/ui';
 import { createStaticStyles } from 'antd-style';
 import { BookOpenIcon, HistoryIcon, LayersIcon, ListIcon, SquareUserIcon } from 'lucide-react';
@@ -13,13 +12,6 @@ import { useDetailContext } from '../DetailProvider';
 
 const styles = createStaticStyles(({ css, cssVar }) => {
   return {
-    link: css`
-      color: ${cssVar.colorTextDescription};
-
-      &:hover {
-        color: ${cssVar.colorInfo};
-      }
-    `,
     nav: css`
       border-block-end: 1px solid ${cssVar.colorBorder};
     `,
@@ -102,11 +94,6 @@ const Nav = memo<NavProps>(({ mobile, setActiveTab, activeTab = AssistantNavKey.
   ) : (
     <Flexbox horizontal align={'center'} className={styles.nav} justify={'space-between'}>
       <div className={styles.tabsWrapper}>{nav}</div>
-      <Flexbox horizontal flex="none" gap={12} style={{ marginInlineStart: 12 }}>
-        <a className={styles.link} href={SOCIAL_URL.discord} rel="noreferrer" target="_blank">
-          {t('mcp.details.nav.needHelp')}
-        </a>
-      </Flexbox>
     </Flexbox>
   );
 });

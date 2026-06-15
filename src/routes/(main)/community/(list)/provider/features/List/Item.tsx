@@ -1,13 +1,13 @@
-import { Github, ModelTag, ProviderCombine } from '@lobehub/icons';
-import { ActionIcon, Block, Flexbox, MaskShadow, stopPropagation, Text } from '@lobehub/ui';
+import { ModelTag, ProviderCombine } from '@lobehub/icons';
+import { ActionIcon, Block, Flexbox, MaskShadow, Text, stopPropagation } from '@lobehub/ui';
 import { createStaticStyles, cssVar } from 'antd-style';
 import { GlobeIcon } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import urlJoin from 'url-join';
 
-import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwareNavigate';
 import WorkspaceLink from '@/features/Workspace/WorkspaceLink';
+import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwareNavigate';
 import { type DiscoverProviderItem } from '@/types/discover';
 
 const styles = createStaticStyles(({ css, cssVar }) => {
@@ -87,14 +87,6 @@ const ProviderItem = memo<DiscoverProviderItem>(
           <Flexbox horizontal align={'center'}>
             <a href={url} rel="noopener noreferrer" target={'_blank'} onClick={stopPropagation}>
               <ActionIcon color={cssVar.colorTextDescription} icon={GlobeIcon} />
-            </a>
-            <a
-              href={`https://github.com/lobehub/lobe-chat/blob/main/src/config/modelProviders/${identifier}.ts`}
-              rel="noopener noreferrer"
-              target={'_blank'}
-              onClick={stopPropagation}
-            >
-              <ActionIcon fill={cssVar.colorTextDescription} icon={Github} />
             </a>
           </Flexbox>
         </Flexbox>

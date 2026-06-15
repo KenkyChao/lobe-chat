@@ -12,10 +12,9 @@ import {
   EllipsisIcon,
   EthernetPort,
   Gift,
-  Info,
-  KeyboardIcon,
   KeyIcon,
   KeyRound,
+  KeyboardIcon,
   Map,
   MessageCircleIcon,
   MonitorSmartphoneIcon,
@@ -64,7 +63,7 @@ export const useCategory = () => {
   const { t: tAuth } = useTranslation('auth');
   const { t: tSubscription } = useTranslation('subscription');
   const mobile = useServerConfigStore((s) => s.isMobile);
-  const { hideDocs, showApiKeyManage, showProvider } = useServerConfigStore(featureFlagsSelectors);
+  const { showApiKeyManage, showProvider } = useServerConfigStore(featureFlagsSelectors);
   const [avatar, username] = useUserStore((s) => [
     userProfileSelectors.userAvatar(s),
     userProfileSelectors.nickName(s),
@@ -216,11 +215,6 @@ export const useCategory = () => {
         key: SettingsTabs.Advanced,
         label: t('tab.advanced'),
       },
-      !hideDocs && {
-        icon: Info,
-        key: SettingsTabs.About,
-        label: t('tab.about'),
-      },
     ].filter(Boolean) as CategoryItem[];
 
     groups.push({
@@ -235,7 +229,6 @@ export const useCategory = () => {
     tAuth,
     tSubscription,
     enableBusinessFeatures,
-    hideDocs,
     mobile,
     showApiKeyManage,
     showProvider,

@@ -1,4 +1,4 @@
-import { imageUrl, OFFICIAL_URL } from '@lobechat/const';
+import { imageUrl } from '@lobechat/const';
 import { Center, Flexbox, Grid, lobeStaticStylish } from '@lobehub/ui';
 import { createStaticStyles, cx, responsive } from 'antd-style';
 import { memo } from 'react';
@@ -136,7 +136,7 @@ const Preview = memo(() => {
               <TotalTokens inShare />
             </Grid>
           </Flexbox>
-          <div className={styles.footer}>{OFFICIAL_URL}</div>
+          <div className={styles.footer} />
         </Center>
       </div>
     </div>

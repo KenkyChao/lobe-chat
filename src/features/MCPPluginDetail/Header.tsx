@@ -1,17 +1,6 @@
 'use client';
 
-import { Github } from '@lobehub/icons';
-import {
-  ActionIcon,
-  Avatar,
-  Button,
-  Flexbox,
-  Icon,
-  stopPropagation,
-  Tag,
-  Text,
-  Tooltip,
-} from '@lobehub/ui';
+import { ActionIcon, Avatar, Button, Flexbox, Icon, Tag, Text, Tooltip } from '@lobehub/ui';
 import { App } from 'antd';
 import { createStaticStyles, cssVar, useResponsive } from 'antd-style';
 import {
@@ -203,11 +192,6 @@ const Header = memo<{ inModal?: boolean; mobile?: boolean }>(({ mobile: isMobile
             <Flexbox horizontal align={'center'} gap={6}>
               {recommendedDeployment?.installationMethod && (
                 <InstallationIcon type={recommendedDeployment.installationMethod} />
-              )}
-              {github?.url && (
-                <a href={github.url} rel="noreferrer" target={'_blank'} onClick={stopPropagation}>
-                  <ActionIcon fill={cssVar.colorTextDescription} icon={Github} />
-                </a>
               )}
               <Tooltip title={isFavorited ? t('assistant.unfavorite') : t('assistant.favorite')}>
                 <ActionIcon

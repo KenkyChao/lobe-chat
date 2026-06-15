@@ -1,17 +1,6 @@
 'use client';
 
-import { Github } from '@lobehub/icons';
-import {
-  ActionIcon,
-  Avatar,
-  Block,
-  Flexbox,
-  Icon,
-  stopPropagation,
-  Tag,
-  Text,
-  Tooltip,
-} from '@lobehub/ui';
+import { Avatar, Block, Flexbox, Icon, Tag, Text, Tooltip } from '@lobehub/ui';
 import { Spotlight } from '@lobehub/ui/awesome';
 import { createStaticStyles, cssVar } from 'antd-style';
 import { ClockIcon } from 'lucide-react';
@@ -23,8 +12,8 @@ import InstallationIcon from '@/components/MCPDepsIcon';
 import OfficialIcon from '@/components/OfficialIcon';
 import PublishedTime from '@/components/PublishedTime';
 import Scores from '@/features/MCP/Scores';
-import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwareNavigate';
 import WorkspaceLink from '@/features/Workspace/WorkspaceLink';
+import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwareNavigate';
 import { discoverService } from '@/services/discover';
 import { type DiscoverMcpItem } from '@/types/discover';
 
@@ -165,16 +154,6 @@ const McpItem = memo<DiscoverMcpItem>(
           </Flexbox>
           <Flexbox horizontal align={'center'} gap={4}>
             {installationMethods && <InstallationIcon type={installationMethods} />}
-            {github && (
-              <a
-                href={github.url}
-                rel="noopener noreferrer"
-                target={'_blank'}
-                onClick={stopPropagation}
-              >
-                <ActionIcon fill={cssVar.colorTextDescription} icon={Github} />
-              </a>
-            )}
           </Flexbox>
         </Flexbox>
         <Flexbox flex={1} gap={12} paddingInline={16}>

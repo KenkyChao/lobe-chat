@@ -1,4 +1,4 @@
-import { Block, Flexbox, Grid } from '@lobehub/ui';
+import { Block, Flexbox } from '@lobehub/ui';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +12,6 @@ import { useScoreList } from '@/features/MCP/useScoreList';
 import Title from '@/routes/(main)/community/features/Title';
 
 import { useDetailContext } from '../DetailProvider';
-import GithubBadge from './GithubBadge';
 import ScoreList from './ScoreList';
 import TotalScore from './TotalScore';
 
@@ -66,20 +65,12 @@ const Score = memo(() => {
 
       {/* Score details */}
 
-      <Grid rows={2}>
-        <Flexbox gap={16}>
-          <Title>{t('mcp.details.score.listTitle')}</Title>
-          <Block variant={'outlined'}>
-            <ScoreList items={sortedScoreListItems} />
-          </Block>
-        </Flexbox>
-        <Flexbox gap={16}>
-          <Title>GitHub Badge</Title>
-          <Block gap={16} padding={16} variant={'outlined'}>
-            <GithubBadge />
-          </Block>
-        </Flexbox>
-      </Grid>
+      <Flexbox gap={16} width={'100%'}>
+        <Title>{t('mcp.details.score.listTitle')}</Title>
+        <Block variant={'outlined'}>
+          <ScoreList items={sortedScoreListItems} />
+        </Block>
+      </Flexbox>
     </Flexbox>
   );
 });
