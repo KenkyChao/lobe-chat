@@ -119,3 +119,9 @@ prd
 GEMINI.md
 e2e/reports
 build_log.txt
+
+# config
+.env
+.env.dev
+.env.test
+.env.prod
