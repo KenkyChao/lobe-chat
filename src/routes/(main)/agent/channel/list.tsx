@@ -5,7 +5,7 @@ import { Icon, Tag } from '@lobehub/ui';
 import { confirmModal } from '@lobehub/ui/base-ui';
 import { App, Dropdown, type MenuProps } from 'antd';
 import { createStaticStyles, cx, useTheme } from 'antd-style';
-import { Book, Download, MoreHorizontal, Trash2, Upload } from 'lucide-react';
+import { Download, MoreHorizontal, Trash2, Upload } from 'lucide-react';
 import { memo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -304,24 +304,10 @@ const PlatformList = memo<PlatformListProps>(
             alignItems: 'center',
             borderTop: `1px solid ${theme.colorBorder}`,
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             padding: 12,
           }}
         >
-          <a
-            href="https://lobehub.com/docs/usage/channels/overview"
-            rel="noopener noreferrer"
-            target="_blank"
-            style={{
-              alignItems: 'center',
-              color: theme.colorTextSecondary,
-              display: 'flex',
-              fontSize: 12,
-              gap: 4,
-            }}
-          >
-            <Icon icon={Book} size={'small'} /> {t('channel.documentation')}
-          </a>
           <Dropdown menu={{ items: menuItems }} trigger={['click']}>
             <button
               style={{

@@ -1,12 +1,9 @@
 'use client';
 
-import { Flexbox } from '@lobehub/ui';
+import { Flexbox, Text } from '@lobehub/ui';
 import { memo } from 'react';
 
-import type { MessengerPlatform } from '../constants';
-import DiscordLinkBody from './Discord';
-import SlackLinkBody from './Slack';
-import TelegramLinkBody from './Telegram';
+import { type MessengerPlatform, PlatformAvatar } from '../constants';
 
 export interface LinkModalContentProps {
   appId?: string;
@@ -15,27 +12,17 @@ export interface LinkModalContentProps {
   platform: MessengerPlatform;
 }
 
-const LinkModalContent = memo<LinkModalContentProps>(({ appId, botUsername, name, platform }) => {
-  const renderBody = () => {
-    switch (platform) {
-      case 'slack': {
-        return <SlackLinkBody />;
-      }
-      case 'discord': {
-        return <DiscordLinkBody appId={appId} name={name} />;
-      }
-      case 'telegram': {
-        return <TelegramLinkBody botUsername={botUsername} name={name} />;
-      }
-    }
-  };
-
-  return (
-    <Flexbox align={'center'} gap={20} style={{ paddingBlockEnd: 16, paddingBlockStart: 24 }}>
-      {renderBody()}
+const LinkModalContent = memo<LinkModalContentProps>(({ name, platform }) => (
+  <Flexbox align={'center'} gap={20} style={{ paddingBlockEnd: 16, paddingBlockStart: 24 }}>
+    <PlatformAvatar platform={platform} size={64} />
+    <Flexbox align="center" gap={8}>
+      <Text strong style={{ fontSize: 18 }}>
+        {name}
+      </Text>
+      <Text type="secondary">请按照该平台 Bot 配置完成消息频道接入。</Text>
     </Flexbox>
-  );
-});
+  </Flexbox>
+));
 
 LinkModalContent.displayName = 'MessengerLinkModalContent';
 

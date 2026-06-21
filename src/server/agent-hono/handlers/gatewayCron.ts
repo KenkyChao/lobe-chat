@@ -23,6 +23,7 @@ const GATEWAY_DURATION_MS = 600_000; // 10 minutes
 const POLL_INTERVAL_MS = 30_000; // 30 seconds
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const getGatewayAppUrl = () => process.env.INTERNAL_APP_URL || process.env.APP_URL;
 
 const waitUntil = (task: Promise<unknown>) => {
   after(() => task);
@@ -30,7 +31,7 @@ const waitUntil = (task: Promise<unknown>) => {
 
 function createRuntimeContext(): BotPlatformRuntimeContext {
   return {
-    appUrl: process.env.APP_URL,
+    appUrl: getGatewayAppUrl(),
     redisClient: getAgentRuntimeRedisClient() as any,
   };
 }

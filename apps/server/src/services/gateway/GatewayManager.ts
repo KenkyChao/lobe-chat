@@ -15,6 +15,8 @@ import {
 
 const log = debug('lobe-server:bot-gateway');
 
+const getGatewayAppUrl = () => process.env.INTERNAL_APP_URL || process.env.APP_URL;
+
 export interface GatewayManagerConfig {
   definitions: PlatformDefinition[];
 }
@@ -202,7 +204,7 @@ export class GatewayManager {
     const { config } = resolveBotProviderConfig(def, provider);
 
     const context: BotPlatformRuntimeContext = {
-      appUrl: process.env.APP_URL,
+      appUrl: getGatewayAppUrl(),
       redisClient: getAgentRuntimeRedisClient() as any,
       userId: provider.userId,
     };

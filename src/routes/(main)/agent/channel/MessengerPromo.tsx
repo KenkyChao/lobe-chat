@@ -1,19 +1,19 @@
 'use client';
 
 import { ActionIcon } from '@lobehub/ui';
-import { Discord, Slack, Telegram } from '@lobehub/ui/icons';
 import { createStaticStyles } from 'antd-style';
 import { X } from 'lucide-react';
 import React, { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { PlatformBrandIcon } from '@/features/Messenger/constants';
 import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwareNavigate';
 import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
 
 // Bump this id when the card content changes so dismissing the old
 // variant does not hide the new one.
-const MESSENGER_PROMO_ID = 'messenger-promo-v1';
+const MESSENGER_PROMO_ID = 'messenger-promo-v2';
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   card: css`
@@ -100,9 +100,10 @@ const MessengerPromo = memo(() => {
         />
       </div>
       <div className={styles.iconRow}>
-        <Slack.Color size={ICON_SIZE} />
-        <Discord.Color size={ICON_SIZE} />
-        <Telegram.Color size={ICON_SIZE} />
+        <PlatformBrandIcon platform="wechat" size={ICON_SIZE} />
+        <PlatformBrandIcon platform="qq" size={ICON_SIZE} />
+        <PlatformBrandIcon platform="feishu" size={ICON_SIZE} />
+        <PlatformBrandIcon platform="lark" size={ICON_SIZE} />
       </div>
       <div className={styles.title}>{t('channel.messengerPromo.title')}</div>
       <div className={styles.desc}>{t('channel.messengerPromo.desc')}</div>

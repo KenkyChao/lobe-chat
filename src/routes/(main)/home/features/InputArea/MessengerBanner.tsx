@@ -13,13 +13,13 @@ import { useGlobalStore } from '@/store/global';
 
 // Bump this id when the banner content changes so dismissing the old
 // variant does not hide the new one.
-export const MESSENGER_BANNER_ID = 'messenger-v1';
+export const MESSENGER_BANNER_ID = 'messenger-v2';
 
 const ICON_SIZE = 16;
 const AVATAR_SIZE = 24;
 
-// Platforms supported by the Messenger feature (see src/features/Messenger/constants.tsx).
-const BANNER_PLATFORM_NAMES = ['Discord', 'Slack', 'Telegram'] as const;
+// Platforms kept in the message channel entry.
+const BANNER_PLATFORM_NAMES = ['WeChat', 'QQ', 'Feishu', 'Lark'] as const;
 
 const styles = createStaticStyles(({ css, cssVar }) => ({
   avatar: css`

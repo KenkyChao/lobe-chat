@@ -248,6 +248,37 @@ describe('GatewayManager', () => {
       expect(mockBot.start).toHaveBeenCalled();
     });
 
+    it('should prefer INTERNAL_APP_URL for gateway callbacks', async () => {
+      const originalAppUrl = process.env.APP_URL;
+      const originalInternalAppUrl = process.env.INTERNAL_APP_URL;
+      const mockBot = createMockBot();
+      const factory = vi.fn().mockReturnValue(mockBot);
+      mockFindEnabledByPlatformAndAppId.mockResolvedValue({
+        applicationId: 'app-123',
+        credentials: { token: 'tok123' },
+        settings: {},
+        userId: 'provider-user',
+      });
+
+      process.env.APP_URL = 'http://127.0.0.1:3010';
+      process.env.INTERNAL_APP_URL = 'http://127.0.0.1:3210';
+
+      try {
+        const manager = new GatewayManager({
+          definitions: [createFakeDefinition('slack', factory)],
+        });
+
+        await manager.startClient('slack', 'app-123');
+
+        expect(factory.mock.calls[0][1]).toMatchObject({
+          appUrl: 'http://127.0.0.1:3210',
+        });
+      } finally {
+        process.env.APP_URL = originalAppUrl;
+        process.env.INTERNAL_APP_URL = originalInternalAppUrl;
+      }
+    });
+
     it('should stop existing bot before starting a new one for the same key', async () => {
       const mockBot1 = createMockBot();
       const mockBot2 = createMockBot();

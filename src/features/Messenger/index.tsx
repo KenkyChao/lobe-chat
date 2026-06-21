@@ -12,17 +12,16 @@ import { useWorkspaceAwareNavigate } from '@/features/Workspace/useWorkspaceAwar
 import { messengerService } from '@/services/messenger';
 
 import { type MessengerPlatform, PlatformAvatar } from './constants';
-import { getDiscordInstallErrorReason, getSlackInstallErrorReason } from './i18n';
 import IntegrationDetail from './IntegrationDetail';
 import IntegrationList from './IntegrationList';
 
 interface BlockedInstall {
   // Empty string sentinel = open modal even when the tenant name is unknown.
   name: string;
-  platform: 'slack' | 'discord';
+  platform: MessengerPlatform;
 }
 
-const VALID_PLATFORMS: ReadonlySet<MessengerPlatform> = new Set(['slack', 'telegram', 'discord']);
+const VALID_PLATFORMS: ReadonlySet<MessengerPlatform> = new Set(['qq', 'wechat', 'feishu', 'lark']);
 
 const isMessengerPlatform = (value: string | undefined): value is MessengerPlatform =>
   !!value && VALID_PLATFORMS.has(value as MessengerPlatform);
@@ -58,6 +57,8 @@ const MessengerSettings = memo(() => {
   const platformsSWR = useSWR('messenger:availablePlatforms', () =>
     messengerService.availablePlatforms(),
   );
+  const platforms = platformsSWR.data ?? [];
+  const selectedMeta = platforms.find((p) => p.id === selected);
 
   // If the URL points at an unknown platform sub-segment, replace it with the
   // bare list URL — keeps deep-links graceful when bots get removed from the
@@ -86,36 +87,21 @@ const MessengerSettings = memo(() => {
     const workspace = url.searchParams.get('workspace');
     if (!installed && !error) return;
 
-    if (installed && selected === 'slack') {
-      message.success(t('messenger.slack.installResult.success'));
-    } else if (error === 'already_installed' && selected === 'slack') {
-      setBlocked({ name: workspace ?? '', platform: 'slack' });
-    } else if (error && selected === 'slack') {
-      message.error(
-        t('messenger.slack.installResult.failed', {
-          reason: getSlackInstallErrorReason(t, error),
-        }),
+    if (installed) {
+      message.success(
+        t('messenger.installResult.success', { platform: selectedMeta?.name ?? selected }),
       );
-    } else if (installed && selected === 'discord') {
-      message.success(t('messenger.discord.installResult.success'));
-    } else if (error === 'already_installed' && selected === 'discord') {
-      setBlocked({ name: workspace ?? '', platform: 'discord' });
-    } else if (error && selected === 'discord') {
-      message.error(
-        t('messenger.discord.installResult.failed', {
-          reason: getDiscordInstallErrorReason(t, error),
-        }),
-      );
+    } else if (error === 'already_installed') {
+      setBlocked({ name: workspace ?? '', platform: selected });
+    } else if (error) {
+      message.error(t('messenger.installResult.failed'));
     }
 
     url.searchParams.delete('installed');
     url.searchParams.delete('error');
     url.searchParams.delete('workspace');
     window.history.replaceState({}, '', url.pathname + (url.search ? `?${url.searchParams}` : ''));
-  }, [message, t, selected, ready]);
-
-  const platforms = platformsSWR.data ?? [];
-  const selectedMeta = platforms.find((p) => p.id === selected);
+  }, [message, t, selected, selectedMeta?.name, ready]);
 
   return (
     <div className={styles.page}>
@@ -150,7 +136,7 @@ const MessengerSettings = memo(() => {
         open={blocked !== null}
         width={480}
         title={
-          blocked ? t(`messenger.${blocked.platform}.installBlocked.title` as const) : undefined
+          blocked ? t('messenger.installBlocked.title', { platform: blocked.platform }) : undefined
         }
         onCancel={() => setBlocked(null)}
       >
@@ -160,17 +146,18 @@ const MessengerSettings = memo(() => {
             <Flexbox align="center" gap={8}>
               <Text strong style={{ fontSize: 16, textAlign: 'center' }}>
                 {blocked.name
-                  ? t(`messenger.${blocked.platform}.installBlocked.withName` as const, {
+                  ? t('messenger.installBlocked.withName', {
+                      platform: blocked.platform,
                       workspace: blocked.name,
                     })
-                  : t(`messenger.${blocked.platform}.installBlocked.withoutName` as const)}
+                  : t('messenger.installBlocked.withoutName', { platform: blocked.platform })}
               </Text>
               <Text style={{ textAlign: 'center' }} type="secondary">
-                {t(`messenger.${blocked.platform}.installBlocked.suggestion` as const)}
+                {t('messenger.installBlocked.suggestion')}
               </Text>
             </Flexbox>
             <Button block size="large" type="primary" onClick={() => setBlocked(null)}>
-              {t(`messenger.${blocked.platform}.installBlocked.dismiss` as const)}
+              {t('messenger.installBlocked.dismiss')}
             </Button>
           </Flexbox>
         )}
