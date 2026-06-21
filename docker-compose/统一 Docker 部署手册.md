@@ -7,7 +7,7 @@
 | 目录 | 用途 | 业务镜像 | 依赖服务 | 适用场景 |
 | --- | --- | --- | --- | --- |
 | `dev/` | 本地源码镜像验证环境 | `naiyunchat-db:${package.json.version}` | 内置 PostgreSQL / Redis / SearXNG，外接 MinIO / Casdoor | 本地私有化联调、验证当前代码镜像 |
-| `production/grafana/` | 带观测组件的生产模板 | 生产镜像配置 | PostgreSQL / MinIO / Casdoor / SearXNG / Grafana / Tempo / Prometheus | 生产化观测链路验证 |
+| `production/grafana/` | 带观测组件的 NaiYunHub 生产模板 | `naiyunchat-db:${package.json.version}` | 内置 PostgreSQL / Redis / SearXNG / Grafana / Tempo / Prometheus / OTel，外接 MinIO / Casdoor | 后续生产观测链路验证 |
 
 当前我们主要使用 `docker-compose/dev/` 做本地源码镜像验证。
 
@@ -50,7 +50,7 @@ naiyunchat-db:2.2.4
 - PostgreSQL 使用 `paradedb/paradedb:latest-pg17`。
 - Redis 使用 `redis:7-alpine`。
 - SearXNG 使用 `searxng/searxng`。
-- MinIO / Casdoor 不在本地容器中启动，连接信息从项目根目录 `.env.development` 读取。
+- MinIO / Casdoor 不在本地容器中启动，连接信息从所选根目录 env 文件读取。
 
 服务网络采用共享 network namespace：
 
@@ -82,10 +82,32 @@ http://127.0.0.1:3010
 
 ### 环境变量来源
 
-`dev` 环境读取项目根目录：
+`dev` 环境默认读取项目根目录：
 
 ```text
 .env.development
+```
+
+也可以通过 `--env` 选择其他根目录环境文件：
+
+```bash
+docker-compose/dev/setup.sh up --env development
+docker-compose/dev/setup.sh up --env test
+docker-compose/dev/setup.sh up --env prod
+```
+
+对应关系：
+
+| 参数 | 实际文件 |
+| --- | --- |
+| `--env development` | `.env.development` |
+| `--env test` | `.env.test` |
+| `--env prod` | `.env.prod` |
+
+也可以通过环境变量选择：
+
+```bash
+NAIYUN_ENV=prod docker-compose/dev/setup.sh up --no-build
 ```
 
 关键变量：
@@ -128,7 +150,7 @@ docker-compose/dev/setup.sh
 
 1. 检查 Docker / Compose。
 2. 读取 `package.json` 版本。
-3. 检查 `.env.development` 必要变量。
+3. 检查所选根目录 env 文件的必要变量。
 4. 构建本地业务镜像 `naiyunchat-db:<version>`。
 5. 校验 compose 配置。
 6. 启动 `network-service`、`postgresql`、`redis`、`searxng`、`lobe`。
@@ -153,10 +175,11 @@ docker-compose/dev/setup.sh up --no-build
 docker-compose/dev/setup.sh up --no-build --logs
 ```
 
-如果只改了 `.env.development`，需要重建容器读取新环境变量，但不重新打镜像：
+如果只改了环境变量文件，需要重建容器读取新环境变量，但不重新打镜像：
 
 ```bash
 docker-compose/dev/setup.sh restart --no-build
+docker-compose/dev/setup.sh restart --env prod --no-build
 ```
 
 ### 常用命令
@@ -197,18 +220,19 @@ docker compose --env-file .env.development -f docker-compose/dev/docker-compose.
 
 ## production/grafana 环境：生产观测模板
 
-`docker-compose/production/grafana/` 包含带观测组件的生产模板。
+`docker-compose/production/grafana/` 包含带观测组件的 NaiYunHub 生产模板。它不是当前主启动方式，主要用于后续验证生产观测链路。
 
 主要服务：
 
-- LobeChat
+- NaiYunHub
 - PostgreSQL
-- MinIO
-- Casdoor
+- Redis
 - SearXNG
 - Grafana
 - Tempo
 - Prometheus / OpenTelemetry Collector
+
+其中 MinIO / Casdoor 不在该 compose 内启动，连接信息来自仓库根目录 `.env.prod`。
 
 适用场景：
 
@@ -219,17 +243,14 @@ docker compose --env-file .env.development -f docker-compose/dev/docker-compose.
 启动方式参考：
 
 ```bash
-cd docker-compose/production/grafana
-cp .env.example .env
-docker compose config
-docker compose up -d
+docker compose --env-file .env.prod -f docker-compose/production/grafana/docker-compose.yml config
+docker compose --env-file .env.prod -f docker-compose/production/grafana/docker-compose.yml up -d
 ```
 
 停止：
 
 ```bash
-cd docker-compose/production/grafana
-docker compose down
+docker compose --env-file .env.prod -f docker-compose/production/grafana/docker-compose.yml down
 ```
 
 ## 微信 / Bot Gateway 容器部署说明
@@ -280,20 +301,20 @@ INTERNAL_APP_URL=http://127.0.0.1:3210
 
 ```bash
 # 查看业务容器日志
-docker logs --tail 200 lobehub
+docker logs --tail 200 NaiYunHub
 
 # 查看 Redis 是否可用
-docker exec lobe-redis redis-cli ping
+docker exec NaiYun-redis redis-cli ping
 
-# 查看 lobe 容器内 Redis 配置
-docker exec lobehub printenv REDIS_URL
+# 查看 NaiYunHub 容器内 Redis 配置
+docker exec NaiYunHub printenv REDIS_URL
 
 # 查看微信 Gateway 运行状态
-docker exec lobe-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
-docker exec lobe-redis redis-cli get 'bot:runtime-status:wechat:<applicationId>'
+docker exec NaiYun-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
+docker exec NaiYun-redis redis-cli get 'bot:runtime-status:wechat:<applicationId>'
 
 # 容器内验证内部 Web 端口
-docker exec lobehub node -e "fetch('http://127.0.0.1:3210').then(r=>console.log(r.status)).catch(e=>console.error(e.cause?.code||e.message))"
+docker exec NaiYunHub node -e "fetch('http://127.0.0.1:3210').then(r=>console.log(r.status)).catch(e=>console.error(e.cause?.code||e.message))"
 ```
 
 正常状态示例：
@@ -307,12 +328,12 @@ Gateway Started successfully
 
 ## 常见问题
 
-### 1. `lobehub` 一直 Restarting
+### 1. `NaiYunHub` 一直 Restarting
 
 查看日志：
 
 ```bash
-docker logs --tail 200 lobehub
+docker logs --tail 200 NaiYunHub
 ```
 
 如果看到 deprecated env 报错，删除或注释：
@@ -329,9 +350,9 @@ NEXT_PUBLIC_SERVICE_MODE
 优先确认：
 
 ```bash
-docker exec lobe-redis redis-cli ping
-docker exec lobe-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
-docker logs --tail 300 lobehub
+docker exec NaiYun-redis redis-cli ping
+docker exec NaiYun-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
+docker logs --tail 300 NaiYunHub
 ```
 
 如果 Redis 正常且状态为 `connected`，重点检查：
@@ -391,7 +412,7 @@ SearXNG: 仅容器内部
 LOBE_PORT=3020 docker-compose/dev/setup.sh up --no-build
 ```
 
-或在 `.env.development` 中配置：
+或在当前选择的根目录 env 文件中配置，例如 `.env.development`：
 
 ```text
 LOBE_PORT=3020
@@ -435,6 +456,5 @@ docker-compose/dev/setup.sh down
 带观测生产模板：
 
 ```bash
-cd docker-compose/production/grafana
-docker compose up -d
+docker compose --env-file .env.prod -f docker-compose/production/grafana/docker-compose.yml up -d
 ```

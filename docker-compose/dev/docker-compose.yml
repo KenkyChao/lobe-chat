@@ -1,7 +1,7 @@
 name: lobehub
 services:
   network-service:
-    image: alpine
+    image: 192.168.1.211:5001/naiyun-registry/alpine:latest
     container_name: NaiYun-network
     restart: always
     ports:
@@ -36,7 +36,7 @@ services:
       - 'SEARXNG_URL=http://127.0.0.1:8080'
 
   postgresql:
-    image: paradedb/paradedb:latest-pg17
+    image: 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
     container_name: NaiYun-postgres
     restart: always
     network_mode: 'service:network-service'
@@ -52,7 +52,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: 192.168.1.211:5001/naiyun-registry/redis:7-alpine
     container_name: NaiYun-redis
     restart: always
     network_mode: 'service:network-service'
@@ -66,7 +66,7 @@ services:
       retries: 5
 
   searxng:
-    image: searxng/searxng
+    image: 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
     container_name: NaiYun-searxng
     restart: always
     network_mode: 'service:network-service'
