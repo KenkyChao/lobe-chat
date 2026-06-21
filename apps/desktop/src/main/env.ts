@@ -95,7 +95,7 @@ export const getDesktopEnv = memoize(() =>
       NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
 
       // cloud server url (can be overridden for selfhost/dev)
-      OFFICIAL_CLOUD_SERVER: z.string().optional().default('https://app.lobehub.com'),
+      OFFICIAL_CLOUD_SERVER: z.string().optional().default('http://127.0.0.1:3010'),
 
       // updater
       // process.env.xxx will replace in build stage

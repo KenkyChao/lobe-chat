@@ -45,7 +45,7 @@ const stripChannelSuffix = (url) => url.replace(/\/(stable|nightly|canary|beta)\
 
 // 根据 channel 配置 publish provider
 // - 所有渠道 + UPDATE_SERVER_URL: 使用 generic (S3)
-// - 无 UPDATE_SERVER_URL: 回退到 GitHub (本地开发)
+// - 无 UPDATE_SERVER_URL: 不写入更新源，避免自定义包回退到上游官方更新
 const getPublishConfig = () => {
   const channelPath = isStable ? 'stable' : isNightly ? 'nightly' : channel || 'stable';
 
@@ -61,16 +61,11 @@ const getPublishConfig = () => {
     ];
   }
 
-  // 本地开发无 S3 时回退到 GitHub
-  console.info(`📦 ${channelPath} channel: No UPDATE_SERVER_URL, falling back to GitHub provider`);
-  return [
-    {
-      owner: 'lobehub',
-      provider: 'github',
-      repo: 'lobehub',
-    },
-  ];
+  console.info(`📦 ${channelPath} channel: No UPDATE_SERVER_URL, update provider disabled`);
+  return undefined;
 };
+
+const publishConfig = getPublishConfig();
 
 // Keep only these Electron Framework localization folders (*.lproj)
 // (aligned with previous Electron Forge build config)
@@ -91,13 +86,6 @@ const getProtocolScheme = () => {
 };
 
 const protocolScheme = getProtocolScheme();
-
-// Determine icon file based on version type
-const getIconFileName = () => {
-  if (isStable || isCanary) return 'Icon';
-  // nightly uses pre-release icon
-  return 'Icon-nightly';
-};
 
 /**
  * @type {import('electron-builder').Configuration}
@@ -138,8 +126,7 @@ const config = {
   /**
    * AfterPack hook for post-processing:
    * 1. Copy native modules to asar.unpacked (resolving pnpm symlinks)
-   * 2. Copy Liquid Glass Assets.car for macOS 26+
-   * 3. Remove unused Electron Framework localizations
+   * 2. Remove unused Electron Framework localizations
    *
    * @see https://github.com/electron-userland/electron-builder/issues/9254
    * @see https://github.com/MultiboxLabs/flow-browser/pull/159
@@ -171,10 +158,6 @@ const config = {
       return;
     }
 
-    const iconFileName = getIconFileName();
-    const assetsCarSource = path.join(__dirname, 'build', `${iconFileName}.Assets.car`);
-    const assetsCarDest = path.join(resourcesPath, 'Assets.car');
-
     // Remove unused Electron Framework localizations to reduce app size
     const frameworkResourcePath = path.join(
       context.appOutDir,
@@ -202,18 +185,8 @@ const config = {
     } catch {
       // Non-critical: folder may not exist depending on packaging details
     }
-
-    try {
-      await fs.access(assetsCarSource);
-      await fs.copyFile(assetsCarSource, assetsCarDest);
-      console.info(`✅ Copied Liquid Glass icon: ${iconFileName}.Assets.car`);
-    } catch {
-      // Non-critical: Assets.car not found or copy failed
-      // App will use fallback .icns icon on all macOS versions
-      console.info(`⏭️  Skipping Assets.car (not found or copy failed)`);
-    }
   },
-  appId: 'com.lobehub.lobehub-desktop',
+  appId: 'com.naiyun.naiyunhub-desktop',
   appImage: {
     artifactName: '${productName}-${version}.${ext}',
   },
@@ -236,6 +209,7 @@ const config = {
       { type: 'link', path: '/Applications', x: 450, y: 240 },
     ],
     iconSize: 80,
+    title: 'NaiYunHub',
     window: {
       height: 400,
       width: 600,
@@ -259,7 +233,8 @@ const config = {
     // Include non-native runtime modules that are intentionally externalized from Vite.
     ...getExternalRuntimeModulesFilesConfig(),
   ],
-  generateUpdatesFilesForAllChannels: true,
+  generateUpdatesFilesForAllChannels: Boolean(publishConfig),
+  productName: 'NaiYunHub',
   linux: {
     category: 'Utility',
     icon: 'build/icon.png',
@@ -270,10 +245,9 @@ const config = {
     compression: 'maximum',
     entitlementsInherit: 'build/entitlements.mac.plist',
     extendInfo: {
-      CFBundleIconName: 'AppIcon',
       CFBundleURLTypes: [
         {
-          CFBundleURLName: 'LobeHub Protocol',
+          CFBundleURLName: 'NaiYunHub Protocol',
           CFBundleURLSchemes: [protocolScheme],
         },
       ],
@@ -290,6 +264,7 @@ const config = {
     },
     gatekeeperAssess: false,
     hardenedRuntime: hasAppleCertificate,
+    icon: 'build/Icon.icns',
     notarize: hasAppleCertificate,
     ...(hasAppleCertificate ? {} : { identity: null }),
     target: [
@@ -311,11 +286,11 @@ const config = {
   },
   protocols: [
     {
-      name: 'LobeHub Protocol',
+      name: 'NaiYunHub Protocol',
       schemes: [protocolScheme],
     },
   ],
-  publish: getPublishConfig(),
+  ...(publishConfig ? { publish: publishConfig } : {}),
 
   // Release notes 配置
   // 可以通过环境变量 RELEASE_NOTES 传入，或从文件读取
@@ -330,7 +305,8 @@ const config = {
   ],
 
   win: {
-    executableName: 'LobeHub',
+    executableName: 'NaiYunHub',
+    icon: 'build/icon.ico',
   },
 };
 

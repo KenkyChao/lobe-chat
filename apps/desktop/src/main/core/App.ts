@@ -8,6 +8,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import * as electronIs from 'electron-is';
 
 import { name } from '@/../../package.json';
+import { APP_DISPLAY_NAME } from '@/const/branding';
 import { binDir, buildDir } from '@/const/dir';
 import { isDev } from '@/const/env';
 import type { IControlModule } from '@/controllers';
@@ -93,7 +94,7 @@ export class App {
     logger.info(` lng: ${app.getLocale()}`);
     logger.info(` bin: ${binDir}`);
     logger.info('----------------------------------------------');
-    logger.info('Starting LobeHub...');
+    logger.info(`Starting ${APP_DISPLAY_NAME}...`);
 
     // Append bundled binaries and CLI wrapper directories to PATH for tool resolution
     const pathSep = process.platform === 'win32' ? ';' : ':';
@@ -230,14 +231,13 @@ export class App {
       app.exit(0);
     }
 
-    this.initDevBranding();
-
     //  ==============
     await this.ipcServer.start();
     logger.debug('IPC server started');
 
     // Initialize app
     await this.makeAppReady();
+    this.initDevBranding();
 
     // Generate CLI wrapper for terminal usage
     generateCliWrapper().catch((error) => {
@@ -427,8 +427,8 @@ export class App {
     if (!isDev) return;
 
     logger.debug('Setting up dev branding');
-    if (electronIs.macOS()) {
-      app.dock!.setIcon(path.join(buildDir, 'icon-dev.png'));
+    if (electronIs.macOS() && app.dock) {
+      app.dock.setIcon(path.join(buildDir, 'icon-dev.png'));
     }
   };
 

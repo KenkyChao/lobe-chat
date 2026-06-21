@@ -87,7 +87,7 @@ cd ../..
 UPDATE_SERVER_URL=http://localhost:8787 bun run dev
 ```
 
-**重要**: 必须设置 `UPDATE_SERVER_URL` 环境变量，否则 channel 切换时 `configureUpdateProvider()` 会回退到 GitHub。
+**重要**: 必须设置 `UPDATE_SERVER_URL` 环境变量，否则更新检查会被跳过，不会回退到上游 GitHub。
 
 #### 6. 测试 Channel 切换
 

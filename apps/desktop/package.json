@@ -1,14 +1,14 @@
 {
-  "name": "lobehub-desktop-dev",
+  "name": "naiyunhub-desktop-dev",
   "version": "0.0.0",
   "private": true,
-  "description": "LobeHub Desktop Application",
-  "homepage": "https://lobehub.com",
+  "description": "NaiYunHub Desktop Application",
+  "homepage": "http://127.0.0.1:3010",
   "repository": {
     "type": "git",
     "url": "https://github.com/lobehub/lobe-chat.git"
   },
-  "author": "LobeHub",
+  "author": "NaiYunHub",
   "main": "./dist/main/index.js",
   "scripts": {
     "build:cli": "cd ../cli && cross-env MINIFY=1 bun run build",
@@ -131,5 +131,6 @@
       "react-dom": "19.2.4",
       "vitest": "3.2.6"
     }
-  }
+  },
+  "productName": "NaiYunHub"
 }

@@ -117,7 +117,10 @@ export class UpdaterManager {
       logger.info(
         `Production mode: channel=${this.currentChannel}, allowPrerelease=${this.currentChannel !== 'stable'}`,
       );
-      this.configureUpdateProvider();
+      if (!this.configureUpdateProvider()) {
+        logger.info('No UPDATE_SERVER_URL configured, skipping updater initialization');
+        return;
+      }
     }
 
     this.registerEvents();
@@ -147,9 +150,13 @@ export class UpdaterManager {
     logger.info(`allowDowngrade=${isDowngrade}`);
 
     autoUpdater.allowPrerelease = channel !== 'stable';
-    this.configureUpdateProvider();
 
     this.mainWindow.broadcast('updateChannelChanged', channel);
+
+    if (!this.configureUpdateProvider()) {
+      logger.info('No UPDATE_SERVER_URL configured, skipping update check after channel switch');
+      return;
+    }
 
     // Invalidate any in-flight check and schedule a recheck
     this.checkGeneration++;
@@ -164,6 +171,11 @@ export class UpdaterManager {
    * Check for updates
    */
   public checkForUpdates = async ({ manual = false }: { manual?: boolean } = {}) => {
+    if (!this.hasUpdateProvider()) {
+      logger.info('No update provider configured, skipping update check');
+      return;
+    }
+
     if (this.checking || this.downloading) return;
 
     this.checking = true;
@@ -389,12 +401,16 @@ export class UpdaterManager {
     return UPDATE_SERVER_URL.replace(/\/(stable|nightly|canary|beta)\/?$/, '');
   }
 
+  private hasUpdateProvider(): boolean {
+    return Boolean(this.getBaseUpdateUrl()) || autoUpdater.forceDevUpdateConfig;
+  }
+
   /**
    * Configure update provider — all channels use generic HTTP provider (S3)
    * URL format: {base}/{channel}/
    * electron-updater looks for {channel}-mac.yml
    */
-  private configureUpdateProvider() {
+  private configureUpdateProvider(): boolean {
     const baseUrl = this.getBaseUpdateUrl();
     if (baseUrl) {
       const feedUrl = `${baseUrl}/${this.currentChannel}`;
@@ -410,20 +426,11 @@ export class UpdaterManager {
         provider: 'generic',
         url: feedUrl,
       });
-    } else {
-      // Fallback to GitHub when no S3 URL configured (local dev)
-      logger.info(
-        `No UPDATE_SERVER_URL configured, falling back to GitHub provider for ${this.currentChannel} channel`,
-      );
-
-      autoUpdater.setFeedURL({
-        owner: 'lobehub',
-        provider: 'github',
-        repo: 'lobehub',
-      });
-
-      autoUpdater.allowPrerelease = this.currentChannel !== 'stable';
+      return true;
     }
+
+    logger.info('No UPDATE_SERVER_URL configured, update provider disabled');
+    return false;
   }
 
   private registerEvents() {

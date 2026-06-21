@@ -20,13 +20,22 @@ import sharp from 'sharp';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '..', 'resources');
 
-// Silhouette derived from the LobeHub logo. Eyes and mouth are cut as
-// transparent holes via fill-rule=evenodd so they remain visible when
-// macOS tints the entire shape in a single color.
+// Silhouette derived from the NaiYunHub cloud logo. The speech bubble is cut as
+// a transparent hole so it remains visible when macOS tints the template image.
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
-  <path fill="#000" d="M172.997 19.016c-14.027 0-19.5-11.5-41-11-23.394 0-34 13-45.5 23-1.958 1.702-11.5 7-16 9-19.683 8.748-34.5 21.5-34.5 40.5 0 20.711 17.461 37.5 39 37.5 3.536 0 6.963-.453 10.22-1.301 8.7 10.539 22.179 16.658 37.28 17.301 23.5 1 31-15.25 44.5-8.5 9.259 4.629 13.83 8.5 28.5 8.5 17.108 0 25.057-5.233 30-11 9-10.5 22.879-4 31.5-4 18.778 0 34-14.551 34-32.5 0-17.95-15.222-32.5-34-32.5-5.15 0-14.856 1.27-17-7-3.5-13.5-20.148-29-44-29-9.318 0-17.691 1-23 1z"/>
-  <path fill="#000" fill-rule="evenodd" d="M294 172.519c0 75.655-59.442 128.5-134 128.5-74.558 0-134-53.845-134-129.5 0-22.5 5-32.141 31.5-35.671 47.5-6.329 72.542-3.829 102.5-3.829 29.959 0 72.556-1.27 102.5 3.829 24.5 4.171 30 8.671 31.5 36.671zM101 221.012c15.464 0 28-12.536 28-28s-12.536-28-28-28-28 12.536-28 28 12.536 28 28 28zM219 221.012c15.464 0 28-12.536 28-28s-12.536-28-28-28-28 12.536-28 28 12.536 28 28 28zM159.75 242.51c-28.25 0-35.75 3.5-35.75 3.5s3.5 27 35.75 27 35.75-27 35.75-27-7.5-3.5-35.75-3.5z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <path
+    fill="#000"
+    fill-rule="evenodd"
+    d="M17.2 48.5h31.6C56.1 48.5 62 42.8 62 35.8c0-6.6-5.1-12.1-11.7-12.7C48.2 14.3 40.6 8 31.7 8c-7.2 0-13.5 4.1-16.7 10.1C7.7 19.1 2 25.5 2 33.1c0 8.5 6.8 15.4 15.2 15.4ZM33.5 37.4c6.8 0 12.4-4.4 12.4-9.9s-5.6-9.9-12.4-9.9S21.1 22 21.1 27.5c0 2.8 1.5 5.3 3.9 7.1l-1.7 6.3 6.7-3.4c1.1.2 2.3.4 3.5.4Z"
+  />
+  <path
+    fill="none"
+    stroke="#000"
+    stroke-linecap="round"
+    stroke-width="4"
+    d="M11.5 11.5 8 7.5M19.5 8.5 18.5 3.5"
+  />
 </svg>
 `;
 

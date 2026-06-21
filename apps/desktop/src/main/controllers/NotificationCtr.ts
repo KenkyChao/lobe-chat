@@ -5,6 +5,7 @@ import type {
 import { app, Notification } from 'electron';
 import * as electronIs from 'electron-is';
 
+import { APP_DISPLAY_NAME, APP_ID } from '@/const/branding';
 import { getIpcContext } from '@/utils/ipc';
 import { createLogger } from '@/utils/logger';
 
@@ -56,7 +57,7 @@ export default class NotificationCtr extends ControllerModule {
     }
 
     const notification = new Notification({
-      body: 'LobeHub can now send you notifications.',
+      body: `${APP_DISPLAY_NAME} can now send you notifications.`,
       title: 'Notification Permission',
     });
 
@@ -89,7 +90,7 @@ export default class NotificationCtr extends ControllerModule {
 
       // Set app user model ID on Windows
       if (electronIs.windows()) {
-        app.setAppUserModelId('com.lobehub.chat');
+        app.setAppUserModelId(APP_ID);
         logger.debug('Set Windows App User Model ID for notifications');
       }
 

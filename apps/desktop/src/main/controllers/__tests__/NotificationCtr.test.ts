@@ -113,7 +113,7 @@ describe('NotificationCtr', () => {
 
       controller.afterAppReady();
 
-      expect(app.setAppUserModelId).toHaveBeenCalledWith('com.lobehub.chat');
+      expect(app.setAppUserModelId).toHaveBeenCalledWith('com.naiyun.naiyunhub-desktop');
 
       vi.mocked(windows).mockReturnValue(false);
     });
