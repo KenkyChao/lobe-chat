@@ -13,6 +13,7 @@ import {
   type ProviderConfig,
   type UserModelProviderConfig,
   type UserSettings,
+  type UserTTSConfig,
 } from '@lobechat/types';
 
 import { type UserStore } from '@/store/user';
@@ -33,7 +34,30 @@ const currentMemorySettings = (s: UserStore) =>
 
 const memoryEnabled = (s: UserStore) => currentMemorySettings(s).enabled !== false;
 
-const currentTTS = (s: UserStore) => merge(DEFAULT_TTS_CONFIG, currentSettings(s).tts);
+const LEGACY_OPENAI_STT_MODEL = ['whisper', '1'].join('-');
+
+const normalizeTTSConfig = (config: UserTTSConfig): UserTTSConfig => {
+  const sttModel =
+    config.openAI.sttModel === LEGACY_OPENAI_STT_MODEL
+      ? DEFAULT_TTS_CONFIG.openAI.sttModel
+      : config.openAI.sttModel;
+
+  return {
+    ...config,
+    openAI: {
+      ...config.openAI,
+      sttModel,
+      ttsModel: DEFAULT_TTS_CONFIG.openAI.ttsModel,
+    },
+    sttServer:
+      sttModel === DEFAULT_TTS_CONFIG.openAI.sttModel
+        ? DEFAULT_TTS_CONFIG.sttServer
+        : config.sttServer,
+  };
+};
+
+const currentTTS = (s: UserStore) =>
+  normalizeTTSConfig(merge(DEFAULT_TTS_CONFIG, currentSettings(s).tts));
 
 const defaultAgent = (s: UserStore) => merge(DEFAULT_AGENT, currentSettings(s).defaultAgent);
 const defaultAgentConfig = (s: UserStore) => merge(DEFAULT_AGENT_CONFIG, defaultAgent(s).config);

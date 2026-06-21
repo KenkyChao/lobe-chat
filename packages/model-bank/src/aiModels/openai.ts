@@ -1492,6 +1492,14 @@ export const openaiChatModels: AIChatModelCard[] = [
 export const openaiEmbeddingModels: AIEmbeddingModelCard[] = [
   {
     contextWindowTokens: 8192,
+    description: 'Private OpenAI-compatible BGE-M3 embedding model served through OPENAI_PROXY_URL.',
+    displayName: 'BGE-M3',
+    id: 'bge-m3',
+    maxDimension: 1024,
+    type: 'embedding',
+  },
+  {
+    contextWindowTokens: 8192,
     description: 'The most capable embedding model for English and non-English tasks.',
     displayName: 'Text Embedding 3 Large',
     id: 'text-embedding-3-large',
@@ -1522,57 +1530,16 @@ export const openaiEmbeddingModels: AIEmbeddingModelCard[] = [
 // Text-to-speech models
 export const openaiTTSModels: AITTSModelCard[] = [
   {
-    description: 'The latest text-to-speech model optimized for real-time speed.',
-    displayName: 'TTS-1',
-    id: 'tts-1',
-    pricing: {
-      units: [{ name: 'textInput', rate: 15, strategy: 'fixed', unit: 'millionCharacters' }],
-    },
-    type: 'tts',
-  },
-  {
-    description: 'The latest text-to-speech model optimized for quality.',
-    displayName: 'TTS-1 HD',
-    id: 'tts-1-hd',
-    pricing: {
-      units: [{ name: 'textInput', rate: 30, strategy: 'fixed', unit: 'millionCharacters' }],
-    },
-    type: 'tts',
-  },
-  {
     description:
-      'GPT-4o mini TTS is a text-to-speech model built on GPT-4o mini, converting text into natural-sounding speech with a max input of 2000 tokens.',
-    displayName: 'GPT-4o Mini TTS',
-    id: 'gpt-4o-mini-tts',
-    pricing: {
-      units: [
-        { name: 'textInput', rate: 0.6, strategy: 'fixed', unit: 'millionTokens' },
-        { name: 'audioOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
-      ],
-    },
+      'Private OpenAI-compatible Edge TTS model served through OPENAI_PROXY_URL.',
+    displayName: 'Edge TTS',
+    id: 'edge-tts',
     type: 'tts',
   },
 ];
 
 // Speech recognition models
 export const openaiSTTModels: AISTTModelCard[] = [
-  {
-    description:
-      'A general speech recognition model supporting multilingual ASR, speech translation, and language identification.',
-    displayName: 'Whisper',
-    id: 'whisper-1',
-    pricing: {
-      units: [
-        {
-          name: 'audioInput',
-          rate: 0.0001, // $0.006 per minute => $0.0001 per second
-          strategy: 'fixed',
-          unit: 'second',
-        },
-      ],
-    },
-    type: 'stt',
-  },
   {
     contextWindowTokens: 16_000,
     description:

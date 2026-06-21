@@ -158,6 +158,7 @@ async function processImageUrlForChat(imageUrl: string): Promise<string> {
 async function generateByChatModel(
   client: OpenAI,
   payload: CreateImagePayload,
+  provider?: string,
 ): Promise<CreateImageResponse> {
   const { model, params } = payload;
   const actualModel = model.replace(':image', ''); // Remove :image suffix
@@ -189,17 +190,32 @@ async function generateByChatModel(
     }
   }
 
+  const isOpenRouter = provider === 'openrouter';
+  const resolution = (params as any).resolution;
+  const aspectRatio = (params as any).aspectRatio;
+  const imageSizeValue = resolution ? (resolution === '512' ? '0.5K' : resolution) : undefined;
+  const aspectRatioValue = aspectRatio && aspectRatio !== 'auto' ? aspectRatio : undefined;
+  const imageConfig =
+    isOpenRouter && (aspectRatioValue || imageSizeValue)
+      ? {
+          ...(aspectRatioValue && { aspect_ratio: aspectRatioValue }),
+          ...(imageSizeValue && { image_size: imageSizeValue }),
+        }
+      : undefined;
+
   // Call chat completion API
   const response = await client.chat.completions.create({
+    ...(imageConfig && { image_config: imageConfig }),
     messages: [
       {
         content,
         role: 'user',
       },
     ],
+    ...(isOpenRouter && { modalities: ['image', 'text'] }),
     model: actualModel,
     stream: false,
-  });
+  } as any);
 
   log('Chat API response: %O', response);
 
@@ -234,10 +250,12 @@ export async function createOpenAICompatibleImage(
   provider: string,
 ): Promise<CreateImageResponse> {
   const { model } = payload;
+  const isOpenRouterImageModel =
+    provider === 'openrouter' && (model.includes('-image') || model.includes('flux'));
 
   // Check if it's a chat model for image generation (via :image suffix)
-  if (model.endsWith(':image')) {
-    return await generateByChatModel(client, payload);
+  if (model.endsWith(':image') || isOpenRouterImageModel) {
+    return await generateByChatModel(client, payload, provider);
   }
 
   // Default to traditional images API

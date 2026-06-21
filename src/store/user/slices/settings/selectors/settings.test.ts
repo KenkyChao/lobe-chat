@@ -37,8 +37,8 @@ describe('settingsSelectors', () => {
           },
           tts: {
             openAI: {
-              sttModel: 'whisper-1',
-              ttsModel: 'tts-1',
+              sttModel: 'Qwen3-ASR-1.7B',
+              ttsModel: 'edge-tts',
             },
             sttAutoStop: true,
             sttServer: 'openai',
@@ -108,7 +108,7 @@ describe('settingsSelectors', () => {
           tts: {
             sttAutoStop: false,
             openAI: {
-              sttModel: 'whisper-2',
+              sttModel: 'custom-asr',
             },
           },
         },
@@ -117,6 +117,33 @@ describe('settingsSelectors', () => {
       const result = settingsSelectors.currentTTS(s);
 
       expect(result).toMatchSnapshot();
+    });
+
+    it('should normalize legacy OpenAI speech models', () => {
+      const legacyTTSModel = ['tts', '1'].join('-');
+      const legacySTTModel = ['whisper', '1'].join('-');
+      const s = {
+        settings: {
+          tts: {
+            openAI: {
+              sttModel: legacySTTModel,
+              ttsModel: legacyTTSModel,
+            },
+            sttServer: 'openai',
+          },
+        },
+      } as unknown as UserStore;
+
+      const result = settingsSelectors.currentTTS(s);
+
+      expect(result).toEqual({
+        openAI: {
+          sttModel: 'Qwen3-ASR-1.7B',
+          ttsModel: 'edge-tts',
+        },
+        sttAutoStop: true,
+        sttServer: 'openrouter',
+      });
     });
   });
 

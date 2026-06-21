@@ -158,14 +158,26 @@ const currentAgentTTSVoice =
   (s: AgentStoreState): string => {
     const { voice, ttsService } = currentAgentTTS(s);
     const voiceList = new VoiceList(lang);
+    const allVoiceList = new VoiceList();
+    const edgeVoiceOptions = [
+      ...(allVoiceList.edgeVoiceOptions || []),
+      ...(voiceList.edgeVoiceOptions || []),
+    ];
+    const edgeVoiceValues = new Set(edgeVoiceOptions?.map((option) => option.value as string));
+    const edgeVoice =
+      voice.edge ||
+      (voiceList.edgeVoiceOptions?.[0].value as string | undefined) ||
+      (edgeVoiceOptions?.[0]?.value as string | undefined) ||
+      'zh-CN-XiaoxiaoNeural';
     let currentVoice;
     switch (ttsService) {
       case 'openai': {
-        currentVoice = voice.openai || (VoiceList.openaiVoiceOptions?.[0].value as string);
+        currentVoice =
+          voice.openai && edgeVoiceValues.has(voice.openai) ? voice.openai : edgeVoice;
         break;
       }
       case 'edge': {
-        currentVoice = voice.edge || (voiceList.edgeVoiceOptions?.[0].value as string);
+        currentVoice = edgeVoice;
         break;
       }
       case 'microsoft': {
@@ -173,7 +185,7 @@ const currentAgentTTSVoice =
         break;
       }
     }
-    return currentVoice || 'alloy';
+    return currentVoice || 'zh-CN-XiaoxiaoNeural';
   };
 
 const currentEnabledKnowledge = (s: AgentStoreState) => {

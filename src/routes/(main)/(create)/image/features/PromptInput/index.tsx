@@ -260,6 +260,17 @@ const PromptInput = ({ showTitle = false }: PromptInputProps) => {
 
   const showInlineRef = isSupportImageUrl || isSupportImageUrls;
   const hasRefImages = imagePreviewUrls.length > 0;
+  const hasConfigContent =
+    isSupportQuality ||
+    isSupportResolution ||
+    isSupportSize ||
+    showDimensionControl ||
+    isSupportSteps ||
+    isSupportCfg ||
+    isSupportSeed ||
+    isSupportWatermark ||
+    isSupportPromptExtend ||
+    isSupportWebSearch;
 
   const maxCount = useMemo(() => {
     let count = 0;
@@ -321,6 +332,7 @@ const PromptInput = ({ showTitle = false }: PromptInputProps) => {
               />
             </ModelSwitchPanel>
             <ConfigAction
+              disabled={!hasConfigContent}
               title={t('config.title', { defaultValue: 'Config' })}
               content={
                 <Flexbox gap={12}>

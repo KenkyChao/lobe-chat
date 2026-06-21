@@ -420,7 +420,7 @@ describe('ModelRuntime', () => {
   describe('ModelRuntime textToSpeech method', () => {
     it('should run correctly', async () => {
       const payload = {
-        model: 'tts-1',
+        model: 'edge-tts',
         input: 'Hello world',
         voice: 'alloy',
       };
@@ -437,7 +437,7 @@ describe('ModelRuntime', () => {
 
     it('should handle options correctly', async () => {
       const payload = {
-        model: 'tts-1',
+        model: 'edge-tts',
         input: 'Hello world',
         voice: 'alloy',
       };
@@ -456,7 +456,7 @@ describe('ModelRuntime', () => {
 
     it('should handle undefined textToSpeech method gracefully', async () => {
       const payload = {
-        model: 'tts-1',
+        model: 'edge-tts',
         input: 'Hello world',
         voice: 'alloy',
       };

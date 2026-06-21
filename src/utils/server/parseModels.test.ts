@@ -384,6 +384,57 @@ describe('parseModelString', () => {
     });
   });
 
+  describe('OpenRouter media models', () => {
+    it('should parse OpenRouter-prefixed image and video model ids as media models', async () => {
+      const result = await parseModelString(
+        'openrouter',
+        '-all,+openrouter/openai/gpt-5.4-image-2=GPT Image,+openrouter/x-ai/grok-imagine-video=Grok Video',
+      );
+
+      expect(result.add).toEqual([
+        {
+          id: 'openrouter/openai/gpt-5.4-image-2',
+          displayName: 'GPT Image',
+          abilities: {},
+          type: 'image',
+        },
+        {
+          id: 'openrouter/x-ai/grok-imagine-video',
+          displayName: 'Grok Video',
+          abilities: {},
+          type: 'video',
+        },
+      ]);
+    });
+
+    it('should keep OpenRouter-prefixed media model ids when merging known model details', async () => {
+      const result = await transformToAiModelList({
+        modelString:
+          '-all,+openrouter/openai/gpt-5.4-image-2=gpt-5.4-image-2,+openrouter/google/gemini-3.1-flash-image-preview=gemini-3.1-flash-image-preview,+openrouter/x-ai/grok-imagine-video=grok-imagine-video',
+        defaultModels: [],
+        providerId: 'openrouter',
+      });
+
+      expect(result).toMatchObject([
+        {
+          displayName: 'gpt-5.4-image-2',
+          id: 'openrouter/openai/gpt-5.4-image-2',
+          type: 'image',
+        },
+        {
+          displayName: 'gemini-3.1-flash-image-preview',
+          id: 'openrouter/google/gemini-3.1-flash-image-preview',
+          type: 'image',
+        },
+        {
+          displayName: 'grok-imagine-video',
+          id: 'openrouter/x-ai/grok-imagine-video',
+          type: 'video',
+        },
+      ]);
+    });
+  });
+
   describe('deployment name', () => {
     it('should have no deployment name', async () => {
       const result = await parseModelString('test-provider', 'model1=Model 1', true);
@@ -527,6 +578,223 @@ describe('transformToChatModelCards', () => {
       ...knownModel,
       displayName: knownModel.displayName || knownModel.id,
       enabled: true,
+    });
+  });
+
+  it('should merge OpenRouter local proxy aliases from model-bank', async () => {
+    const result = await transformToAiModelList({
+      modelString:
+        '+Qwen3.6-35B-A3B=Qwen3.6-35B-A3B<262144:fc:vision:reasoning>,+Qwen3.6-27B=Qwen3.6-27B<262144:fc:vision:reasoning>,+DeepSeek-V4-Flash=DeepSeek-V4-Flash<1048576:fc:reasoning>,+DeepSeek-V4-Pro=DeepSeek-V4-Pro<1048576:fc:reasoning>',
+      defaultModels: [],
+      providerId: 'openrouter',
+    });
+
+    expect(result).toHaveLength(4);
+
+    expect(result?.[0]).toMatchObject({
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        structuredOutput: true,
+        video: true,
+        vision: true,
+      },
+      contextWindowTokens: 262_144,
+      description: expect.stringContaining('Local vLLM deployment alias for Qwen3.6-35B-A3B'),
+      displayName: 'Qwen3.6-35B-A3B',
+      family: 'qwen',
+      generation: 'qwen3.6',
+      id: 'Qwen3.6-35B-A3B',
+      maxOutput: 65_536,
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      providerId: 'openrouter',
+      releasedAt: '2026-04-16',
+      type: 'chat',
+    });
+
+    expect(result?.[1]).toMatchObject({
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        structuredOutput: true,
+        video: true,
+        vision: true,
+      },
+      contextWindowTokens: 262_144,
+      description: expect.stringContaining('Local vLLM deployment alias for Qwen3.6-27B'),
+      displayName: 'Qwen3.6-27B',
+      family: 'qwen',
+      generation: 'qwen3.6',
+      id: 'Qwen3.6-27B',
+      maxOutput: 65_536,
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      providerId: 'openrouter',
+      releasedAt: '2026-04-23',
+      type: 'chat',
+    });
+
+    expect(result?.[2]).toMatchObject({
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        structuredOutput: true,
+      },
+      contextWindowTokens: 1_048_576,
+      description: expect.stringContaining('Local vLLM deployment alias for DeepSeek-V4-Flash'),
+      displayName: 'DeepSeek-V4-Flash',
+      family: 'deepseek',
+      generation: 'deepseek-v4',
+      id: 'DeepSeek-V4-Flash',
+      maxOutput: 393_216,
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      providerId: 'openrouter',
+      releasedAt: '2026-04-24',
+      type: 'chat',
+    });
+
+    expect(result?.[3]).toMatchObject({
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        structuredOutput: true,
+      },
+      contextWindowTokens: 1_048_576,
+      description: expect.stringContaining('Local vLLM deployment alias for DeepSeek-V4-Pro'),
+      displayName: 'DeepSeek-V4-Pro',
+      family: 'deepseek',
+      generation: 'deepseek-v4',
+      id: 'DeepSeek-V4-Pro',
+      maxOutput: 393_216,
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      providerId: 'openrouter',
+      releasedAt: '2026-04-24',
+      type: 'chat',
+    });
+  });
+
+  it('should merge OpenRouter public model details while keeping clean display names', async () => {
+    const result = await transformToAiModelList({
+      modelString: [
+        '+openrouter/google/gemma-4-31b-it:free=gemma-4-31b:free',
+        '+openrouter/qwen/qwen3.5-flash-02-23=qwen3.5-flash',
+        '+openrouter/z-ai/glm-4.7-flash=glm-4.7-flash',
+        '+openrouter/qwen/qwen3-coder-next=qwen3-coder-next',
+        '+openrouter/google/gemini-3.1-flash-lite-preview=gemini-3.1-flash-lite-preview',
+        '+openrouter/minimax/minimax-m2.7=minimax-m2.7',
+        '+openrouter/qwen/qwen3.6-plus=qwen3.6-plus',
+        '+openrouter/google/gemini-3.1-pro-preview=gemini-3.1-pro-preview',
+        '+openrouter/openai/gpt-5.4=gpt-5.4',
+        '+openrouter/anthropic/claude-sonnet-4.6=claude-sonnet-4.6',
+        '+openrouter/anthropic/claude-opus-4.8=claude-opus-4.8',
+      ].join(','),
+      defaultModels: [],
+      providerId: 'openrouter',
+    });
+
+    expect(result).toHaveLength(11);
+    expect(result?.map((model) => model.displayName)).toEqual([
+      'gemma-4-31b:free',
+      'qwen3.5-flash',
+      'glm-4.7-flash',
+      'qwen3-coder-next',
+      'gemini-3.1-flash-lite-preview',
+      'minimax-m2.7',
+      'qwen3.6-plus',
+      'gemini-3.1-pro-preview',
+      'gpt-5.4',
+      'claude-sonnet-4.6',
+      'claude-opus-4.8',
+    ]);
+
+    const modelsById = Object.fromEntries(result!.map((model) => [model.id, model]));
+
+    expect(modelsById['openrouter/google/gemma-4-31b-it:free']).toMatchObject({
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      description: expect.stringContaining('Google DeepMind'),
+      family: 'gemma',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+    });
+
+    expect(modelsById['openrouter/qwen/qwen3-coder-next']).toMatchObject({
+      abilities: {
+        functionCall: true,
+        search: true,
+      },
+      description: expect.stringContaining('does not emit think blocks'),
+      family: 'qwen',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.11, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0.8, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+    });
+
+    expect(modelsById['openrouter/google/gemini-3.1-pro-preview']).toMatchObject({
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        structuredOutput: true,
+        video: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_048_576,
+      description: expect.stringContaining('frontier reasoning model'),
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+    });
+
+    expect(modelsById['openrouter/anthropic/claude-opus-4.8']).toMatchObject({
+      abilities: {
+        files: true,
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_000_000,
+      description: expect.stringContaining('text, image, and file inputs'),
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 5, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 25, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
     });
   });
 

@@ -302,13 +302,13 @@ describe('createRouterRuntime', () => {
             apiType: 'openai',
             options: {},
             runtime: MockRuntime as any,
-            models: ['tts-1'],
+            models: ['edge-tts'],
           },
         ],
       });
 
       const runtime = new Runtime();
-      const payload = { model: 'tts-1', input: 'Hello world', voice: 'alloy' };
+      const payload = { model: 'edge-tts', input: 'Hello world', voice: 'alloy' };
       const options = {} as any;
 
       const result = await runtime.textToSpeech(payload, options);

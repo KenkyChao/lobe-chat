@@ -2,18 +2,12 @@ import { LOBE_USER_ID, OPENAI_API_KEY_HEADER_KEY, OPENAI_END_POINT } from '@/con
 import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { useUserStore } from '@/store/user';
 
-/**
- * TODO: Need to be removed after tts refactor
- * @deprecated
- */
- 
-export const createHeaderWithOpenAI = (header?: HeadersInit): HeadersInit => {
+export const createHeaderWithProvider = (provider: string, header?: HeadersInit): HeadersInit => {
   const state = useUserStore.getState();
 
   const keyVaults: Record<string, any> =
-    aiProviderSelectors.providerKeyVaults('openai')(useAiInfraStore.getState()) || {};
+    aiProviderSelectors.providerKeyVaults(provider)(useAiInfraStore.getState()) || {};
 
-   
   return {
     ...header,
     [LOBE_USER_ID]: state.user?.id || '',
@@ -21,3 +15,10 @@ export const createHeaderWithOpenAI = (header?: HeadersInit): HeadersInit => {
     [OPENAI_END_POINT]: keyVaults.baseURL || '',
   };
 };
+
+/**
+ * TODO: Need to be removed after tts refactor
+ * @deprecated
+ */
+export const createHeaderWithOpenAI = (header?: HeadersInit): HeadersInit =>
+  createHeaderWithProvider('openai', header);

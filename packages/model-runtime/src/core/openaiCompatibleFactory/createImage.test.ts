@@ -252,21 +252,24 @@ describe('createOpenAICompatibleImage', () => {
         const result = await createOpenAICompatibleImage(mockClient, payload, 'openrouter');
 
         expect(result.imageUrl).toBe('data:image/png;base64,generatedWithoutInputImage');
-        expect(mockClient.chat.completions.create).toHaveBeenCalledWith({
-          messages: [
-            {
-              content: [
-                {
-                  text: 'Generate a cat image',
-                  type: 'text',
-                },
-              ],
-              role: 'user',
-            },
-          ],
-          model: 'gemini-2.0-flash',
-          stream: false,
-        });
+        expect(mockClient.chat.completions.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            messages: [
+              {
+                content: [
+                  {
+                    text: 'Generate a cat image',
+                    type: 'text',
+                  },
+                ],
+                role: 'user',
+              },
+            ],
+            modalities: ['image', 'text'],
+            model: 'gemini-2.0-flash',
+            stream: false,
+          }),
+        );
       });
 
       it('should handle null imageUrl parameter', async () => {
@@ -553,6 +556,49 @@ describe('createOpenAICompatibleImage', () => {
       expect(result.imageUrl).toBe('data:image/png;base64,imageModelBase64Result');
       expect(mockClient.images.generate).toHaveBeenCalled();
       expect(mockClient.chat.completions.create).not.toHaveBeenCalled();
+    });
+
+    it('should route OpenRouter image models without :image suffix to chat mode', async () => {
+      const mockChatResponse = {
+        choices: [
+          {
+            message: {
+              images: [
+                {
+                  image_url: {
+                    url: 'data:image/png;base64,openrouterImageResult',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      vi.mocked(mockClient.chat.completions.create).mockResolvedValue(mockChatResponse as any);
+
+      const payload: CreateImagePayload = {
+        model: 'openrouter/google/gemini-3.1-flash-image-preview',
+        params: {
+          aspectRatio: '16:9',
+          prompt: 'Generate a cat image',
+          resolution: '512',
+        },
+      };
+
+      const result = await createOpenAICompatibleImage(mockClient, payload, 'openrouter');
+
+      expect(result.imageUrl).toBe('data:image/png;base64,openrouterImageResult');
+      expect(mockClient.chat.completions.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          image_config: { aspect_ratio: '16:9', image_size: '0.5K' },
+          modalities: ['image', 'text'],
+          model: 'openrouter/google/gemini-3.1-flash-image-preview',
+          stream: false,
+        }),
+      );
+      expect(mockClient.images.generate).not.toHaveBeenCalled();
+      expect(mockClient.images.edit).not.toHaveBeenCalled();
     });
   });
 

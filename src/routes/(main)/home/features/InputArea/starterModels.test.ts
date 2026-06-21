@@ -1,52 +1,38 @@
-import { ENABLE_BUSINESS_FEATURES } from '@lobechat/business-const';
 import { describe, expect, it } from 'vitest';
 
-import {
-  DEFAULT_HOME_NEW_MODELS,
-  NEW_CHAT_MODEL,
-  NEW_CHAT_PROVIDER,
-  NEW_MINIMAX_PROVIDER,
-} from './starterModels';
+import { DEFAULT_HOME_NEW_MODELS, NEW_CHAT_PROVIDER } from './starterModels';
 
 describe('starter models', () => {
-  it('uses the Anthropic provider in OSS and the LobeHub provider in business builds', () => {
-    expect(NEW_CHAT_MODEL).toBe('claude-opus-4-8');
-    expect(NEW_CHAT_PROVIDER).toBe(ENABLE_BUSINESS_FEATURES ? 'lobehub' : 'anthropic');
-    expect(NEW_MINIMAX_PROVIDER).toBe(ENABLE_BUSINESS_FEATURES ? 'lobehub' : 'minimax');
+  it('uses the configured OpenAI-compatible provider for home shortcut models', () => {
+    expect(NEW_CHAT_PROVIDER).toBe('openai');
   });
 
-  it('keeps the fallback home new model entries in the current product order', () => {
-    const sharedItems = [
+  it('keeps the fallback home shortcut model entries in the configured product order', () => {
+    expect(DEFAULT_HOME_NEW_MODELS).toEqual([
       {
-        model: 'claude-opus-4-8',
+        model: 'Qwen3.6-35B-A3B',
         provider: NEW_CHAT_PROVIDER,
-        title: 'Claude Opus 4.8',
+        title: 'Qwen3.6-35B-A3B',
         type: 'chat',
       },
       {
-        model: 'gpt-image-2',
-        title: 'GPT Image 2',
-        type: 'image',
+        model: 'Qwen3.6-27B',
+        provider: NEW_CHAT_PROVIDER,
+        title: 'Qwen3.6-27B',
+        type: 'chat',
       },
       {
-        model: 'dreamina-seedance-2-0-260128',
-        title: 'Seedance 2.0',
-        type: 'video',
+        model: 'DeepSeek-V4-Flash',
+        provider: NEW_CHAT_PROVIDER,
+        title: 'DeepSeek-V4-Flash',
+        type: 'chat',
       },
-    ];
-
-    expect(DEFAULT_HOME_NEW_MODELS).toEqual(
-      ENABLE_BUSINESS_FEATURES
-        ? [
-            {
-              model: 'MiniMax-M3',
-              provider: NEW_MINIMAX_PROVIDER,
-              title: 'MiniMax M3',
-              type: 'chat',
-            },
-            ...sharedItems,
-          ]
-        : sharedItems,
-    );
+      {
+        model: 'DeepSeek-V4-Pro',
+        provider: NEW_CHAT_PROVIDER,
+        title: 'DeepSeek-V4-Pro',
+        type: 'chat',
+      },
+    ]);
   });
 });

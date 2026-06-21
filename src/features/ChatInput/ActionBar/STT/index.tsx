@@ -26,6 +26,9 @@ const STT = memo<{ mobile?: boolean }>(({ mobile }) => {
     case 'openai': {
       return <OpenaiSTT mobile={mobile} />;
     }
+    case 'openrouter': {
+      return <OpenaiSTT mobile={mobile} provider={'openrouter'} />;
+    }
   }
   return <BrowserSTT mobile={mobile} />;
 });

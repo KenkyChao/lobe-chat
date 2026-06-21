@@ -8,7 +8,7 @@ import { memo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type SWRConfiguration } from 'swr';
 
-import { createHeaderWithOpenAI } from '@/services/_header';
+import { createHeaderWithProvider } from '@/services/_header';
 import { API_ENDPOINTS } from '@/services/_url';
 import { useAgentStore } from '@/store/agent';
 import { agentByIdSelectors } from '@/store/agent/selectors';
@@ -26,7 +26,7 @@ interface STTConfig extends SWRConfiguration {
   onTextChange: (value: string) => void;
 }
 
-const useOpenaiSTT = (config: STTConfig) => {
+const useOpenaiSTT = (config: STTConfig, provider: 'openai' | 'openrouter' = 'openai') => {
   const ttsSettings = useUserStore(settingsSelectors.currentTTS, isEqual);
   const agentId = useAgentId();
   const ttsAgentSettings = useAgentStore(
@@ -44,8 +44,8 @@ const useOpenaiSTT = (config: STTConfig) => {
   return useOpenAISTT(sttLocale, {
     ...config,
     api: {
-      headers: createHeaderWithOpenAI(),
-      serviceUrl: API_ENDPOINTS.stt,
+      headers: createHeaderWithProvider(provider),
+      serviceUrl: provider === 'openrouter' ? API_ENDPOINTS.sttOpenRouter : API_ENDPOINTS.stt,
     },
     autoStop,
     options: {
@@ -55,83 +55,88 @@ const useOpenaiSTT = (config: STTConfig) => {
   } as OpenAISTTOptions);
 };
 
-const OpenaiSTT = memo<{ mobile?: boolean }>(({ mobile }) => {
-  const [error, setError] = useState<ChatMessageError>();
-  const { t } = useTranslation('chat');
+const OpenaiSTT = memo<{ mobile?: boolean; provider?: 'openai' | 'openrouter' }>(
+  ({ mobile, provider = 'openai' }) => {
+    const [error, setError] = useState<ChatMessageError>();
+    const { t } = useTranslation('chat');
 
-  const [loading, updateMessageInput] = useChatStore((s) => [
-    operationSelectors.isAgentRuntimeRunning(s),
-    s.updateMessageInput,
-  ]);
+    const [loading, updateMessageInput] = useChatStore((s) => [
+      operationSelectors.isAgentRuntimeRunning(s),
+      s.updateMessageInput,
+    ]);
 
-  const setDefaultError = useCallback(
-    (err?: any) => {
-      setError({ body: err, message: t('stt.responseError', { ns: 'error' }), type: 500 });
-    },
-    [t],
-  );
+    const setDefaultError = useCallback(
+      (err?: any) => {
+        setError({ body: err, message: t('stt.responseError', { ns: 'error' }), type: 500 });
+      },
+      [t],
+    );
 
-  const { start, isLoading, stop, formattedTime, time, response, isRecording } = useOpenaiSTT({
-    onError: (err) => {
-      stop();
-      setDefaultError(err);
-    },
-    onErrorRetry: (err) => {
-      stop();
-      setDefaultError(err);
-    },
-    onSuccess: async () => {
-      if (!response) return;
-      if (response.status === 200) return;
-      const message = await getMessageError(response);
-      if (message) {
-        setError(message);
+    const { start, isLoading, stop, formattedTime, time, response, isRecording } = useOpenaiSTT(
+      {
+        onError: (err) => {
+          stop();
+          setDefaultError(err);
+        },
+        onErrorRetry: (err) => {
+          stop();
+          setDefaultError(err);
+        },
+        onSuccess: async () => {
+          if (!response) return;
+          if (response.status === 200) return;
+          const message = await getMessageError(response);
+          if (message) {
+            setError(message);
+          } else {
+            setDefaultError();
+          }
+          stop();
+        },
+        onTextChange: (text) => {
+          if (loading) stop();
+          if (text) updateMessageInput(text);
+        },
+      },
+      provider,
+    );
+
+    const desc = t('stt.action');
+
+    const handleTriggerStartStop = useCallback(() => {
+      if (loading) return;
+      if (!isLoading) {
+        start();
       } else {
-        setDefaultError();
+        stop();
       }
+    }, [loading, isLoading, start, stop]);
+
+    const handleCloseError = useCallback(() => {
+      setError(undefined);
       stop();
-    },
-    onTextChange: (text) => {
-      if (loading) stop();
-      if (text) updateMessageInput(text);
-    },
-  });
+    }, [stop]);
 
-  const desc = t('stt.action');
-
-  const handleTriggerStartStop = useCallback(() => {
-    if (loading) return;
-    if (!isLoading) {
+    const handleRetry = useCallback(() => {
+      setError(undefined);
       start();
-    } else {
-      stop();
-    }
-  }, [loading, isLoading, start, stop]);
+    }, [start]);
 
-  const handleCloseError = useCallback(() => {
-    setError(undefined);
-    stop();
-  }, [stop]);
-
-  const handleRetry = useCallback(() => {
-    setError(undefined);
-    start();
-  }, [start]);
-
-  return (
-    <CommonSTT
-      desc={desc}
-      error={error}
-      formattedTime={formattedTime}
-      handleCloseError={handleCloseError}
-      handleRetry={handleRetry}
-      handleTriggerStartStop={handleTriggerStartStop}
-      isLoading={isLoading}
-      isRecording={isRecording}
-      mobile={mobile}
-      time={time}
-    />
-  );
-});
+    return (
+      <CommonSTT
+        desc={desc}
+        error={error}
+        formattedTime={formattedTime}
+        handleCloseError={handleCloseError}
+        handleRetry={handleRetry}
+        handleTriggerStartStop={handleTriggerStartStop}
+        isLoading={isLoading}
+        isRecording={isRecording}
+        mobile={mobile}
+        time={time}
+      />
+    );
+  },
+);
 
 export default OpenaiSTT;

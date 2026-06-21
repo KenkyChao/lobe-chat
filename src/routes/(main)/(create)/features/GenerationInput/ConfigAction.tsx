@@ -8,12 +8,14 @@ import Action from '@/features/ChatInput/ActionBar/components/Action';
 
 interface ConfigActionProps {
   content: ReactNode;
+  disabled?: boolean;
   title: ReactNode;
 }
 
-const ConfigAction = memo<ConfigActionProps>(({ title, content }) => {
+const ConfigAction = memo<ConfigActionProps>(({ title, content, disabled }) => {
   return (
     <Action
+      disabled={disabled}
       icon={SlidersHorizontal}
       popover={{ content, minWidth: 300, title }}
       title={typeof title === 'string' ? title : undefined}

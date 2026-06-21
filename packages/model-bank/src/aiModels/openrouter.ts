@@ -1,6 +1,118 @@
-import type { AIChatModelCard } from '../types/aiModel';
+import type { ModelParamsSchema } from '../standard-parameters';
+import type {
+  AIChatModelCard,
+  AIImageModelCard,
+  AISTTModelCard,
+  AIVideoModelCard,
+} from '../types/aiModel';
+
+const openrouterImageParameters: ModelParamsSchema = {
+  aspectRatio: {
+    default: 'auto',
+    enum: ['auto', '1:1', '16:9', '9:16', '4:3', '3:4', '3:2', '2:3'],
+  },
+  prompt: { default: '' },
+  resolution: {
+    default: '1K',
+    enum: ['512', '1K', '2K', '4K'],
+  },
+};
+
+const openrouterVideoParameters = {
+  prompt: { default: '' },
+};
+
+const withOpenRouterPrefix = <
+  T extends AIChatModelCard | AIImageModelCard | AISTTModelCard | AIVideoModelCard,
+>(
+  models: T[],
+): T[] => models.flatMap((model) => [model, { ...model, id: `openrouter/${model.id}` }]);
+
+const freeTokenPricing = {
+  units: [
+    { name: 'textInput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+    { name: 'textOutput', rate: 0, strategy: 'fixed', unit: 'millionTokens' },
+  ],
+} satisfies AIChatModelCard['pricing'];
 
 // https://openrouter.ai/docs/api-reference/list-available-models
+const openrouterImageModels: AIImageModelCard[] = withOpenRouterPrefix([
+  {
+    description: 'OpenRouter image generation route for GPT Image 2-compatible generation.',
+    displayName: 'GPT 5.4 Image 2',
+    enabled: true,
+    id: 'openai/gpt-5.4-image-2',
+    parameters: openrouterImageParameters,
+    type: 'image',
+  },
+  {
+    description:
+      'Gemini 3.1 Flash Image Preview through OpenRouter for text-to-image generation and image editing.',
+    displayName: 'Gemini 3.1 Flash Image Preview',
+    enabled: true,
+    id: 'google/gemini-3.1-flash-image-preview',
+    parameters: openrouterImageParameters,
+    type: 'image',
+  },
+  {
+    description: 'Gemini 2.5 Flash Image through OpenRouter for fast image generation.',
+    displayName: 'Gemini 2.5 Flash Image',
+    enabled: true,
+    id: 'google/gemini-2.5-flash-image',
+    parameters: openrouterImageParameters,
+    type: 'image',
+  },
+  {
+    description: 'Gemini 3 Pro Image Preview through OpenRouter for higher-quality image generation.',
+    displayName: 'Gemini 3 Pro Image Preview',
+    enabled: true,
+    id: 'google/gemini-3-pro-image-preview',
+    parameters: openrouterImageParameters,
+    type: 'image',
+  },
+]);
+
+const openrouterVideoModels: AIVideoModelCard[] = withOpenRouterPrefix([
+  {
+    description: 'Grok Imagine Video through OpenRouter for text-to-video generation.',
+    displayName: 'Grok Imagine Video',
+    enabled: true,
+    id: 'x-ai/grok-imagine-video',
+    parameters: openrouterVideoParameters,
+    type: 'video',
+  },
+  {
+    description: 'Veo 3.1 Fast through OpenRouter for text-to-video generation.',
+    displayName: 'Veo 3.1 Fast',
+    enabled: true,
+    id: 'google/veo-3.1-fast',
+    parameters: openrouterVideoParameters,
+    type: 'video',
+  },
+  {
+    description: 'Kling v3.0 Pro through OpenRouter for text-to-video generation.',
+    displayName: 'Kling v3.0 Pro',
+    enabled: true,
+    id: 'kwaivgi/kling-v3.0-pro',
+    parameters: openrouterVideoParameters,
+    type: 'video',
+  },
+]);
+
+const openrouterSTTModels: AISTTModelCard[] = [
+  {
+    description:
+      'Private OpenRouter speech recognition model alias for Qwen3-ASR-1.7B. The Apache-2.0 Qwen3-ASR family supports language identification and ASR for 30 languages plus 22 Chinese dialects, covering offline and streaming inference for speech, singing voice, and songs with background music. The Hugging Face release provides transformers and vLLM backends, forced alignment timestamps through Qwen3-ForcedAligner-0.6B, and vLLM serving with OpenAI-compatible transcription APIs.',
+    displayName: 'Qwen3-ASR-1.7B（私有化）',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen3-asr',
+    id: 'Qwen3-ASR-1.7B',
+    organization: 'Qwen',
+    type: 'stt',
+  },
+];
+
 const openrouterChatModels: AIChatModelCard[] = [
   {
     contextWindowTokens: 2_000_000,
@@ -9,6 +121,126 @@ const openrouterChatModels: AIChatModelCard[] = [
     displayName: 'Auto (best for prompt)',
     enabled: true,
     id: 'openrouter/auto',
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+      video: true,
+      vision: true,
+    },
+    contextWindowTokens: 262_144,
+    description:
+      'Local vLLM deployment alias for Qwen3.6-35B-A3B. This Apache-2.0 open-weight Qwen model uses a sparse MoE architecture with 35B total parameters and 3B activated per token, combining Gated DeltaNet linear attention with gated attention layers. The Hugging Face release is a causal language model with a vision encoder, compatible with Transformers, vLLM, and SGLang, and supports OpenAI-compatible chat completions for text, image, and video understanding. It provides thinking mode, tool calling, structured output, and reasoning trace preservation for multi-turn work, with strong agentic coding, repository-level reasoning, math/code reasoning, spatial intelligence, object localization, and target detection. Native context is 262K tokens and can be extended to about 1.01M tokens.',
+    displayName: 'Qwen3.6-35B-A3B（私有化）',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen3.6',
+    id: 'Qwen3.6-35B-A3B',
+    maxOutput: 65_536,
+    organization: 'Qwen',
+    pricing: freeTokenPricing,
+    releasedAt: '2026-04-16',
+    settings: {
+      extendParams: ['enableReasoning', 'reasoningBudgetToken'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+      video: true,
+      vision: true,
+    },
+    contextWindowTokens: 262_144,
+    description:
+      'Local vLLM deployment alias for Qwen3.6-27B. This Apache-2.0 open-weight dense Qwen3.6 model has 27B parameters and is released as a causal language model with a vision encoder. Its Hugging Face card provides Transformers and vLLM examples with OpenAI-compatible chat completions, including image inputs, and the benchmark section covers both vision-language and video understanding. The architecture alternates Gated DeltaNet linear-attention blocks with gated attention blocks and FFN layers, includes MTP training, supports thinking mode by default, tool calling, structured output, and long agent workflows. Native context is 262K tokens and can be extended to about 1.01M tokens.',
+    displayName: 'Qwen3.6-27B（私有化）',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen3.6',
+    id: 'Qwen3.6-27B',
+    maxOutput: 65_536,
+    organization: 'Qwen',
+    pricing: freeTokenPricing,
+    releasedAt: '2026-04-23',
+    settings: {
+      extendParams: ['enableReasoning', 'reasoningBudgetToken'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+    },
+    contextWindowTokens: 131_072,
+    description:
+      'Private OpenRouter/vLLM deployment alias for Qwen3-8B. Qwen3-8B is an Apache-2.0 dense 8.2B-parameter causal language model from the Qwen3 series, designed for reasoning-heavy tasks and efficient dialogue. It supports switching between thinking mode for math, coding, and logical inference, and non-thinking mode for general conversation. The Hugging Face release supports Transformers, vLLM, and SGLang with OpenAI-compatible chat completions, strong instruction following, agent integration, creative writing, and multilingual use across 100+ languages and dialects. Native context is 32K tokens and can be extended to 131K tokens with YaRN.',
+    displayName: 'Qwen3-8B（私有化）',
+    enabled: true,
+    family: 'qwen',
+    generation: 'qwen3',
+    id: 'qwen3-8b',
+    knowledgeCutoff: '2025-03',
+    maxOutput: 32_768,
+    organization: 'Qwen',
+    pricing: freeTokenPricing,
+    releasedAt: '2025-04-28',
+    settings: {
+      extendParams: ['enableReasoning', 'reasoningBudgetToken'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+    },
+    contextWindowTokens: 1_048_576,
+    description:
+      'Local vLLM deployment alias for DeepSeek-V4-Flash. This DeepSeek V4 MoE language model is designed for high-throughput local or private inference, with 284B total parameters, 13B activated parameters, and a 1M-token context window. The DeepSeek V4 series uses a hybrid attention architecture that combines Compressed Sparse Attention (CSA) and Heavily Compressed Attention (HCA), plus mHC and the Muon optimizer for stable and efficient long-context reasoning. Flash keeps the V4 reasoning, coding, and agent capabilities while prioritizing lower latency and deployment efficiency. It supports non-thinking, Think High, and Think Max reasoning-effort modes through the DeepSeek V4 chat template.',
+    displayName: 'DeepSeek-V4-Flash（私有化）',
+    enabled: true,
+    family: 'deepseek',
+    generation: 'deepseek-v4',
+    id: 'DeepSeek-V4-Flash',
+    maxOutput: 393_216,
+    organization: 'DeepSeek',
+    pricing: freeTokenPricing,
+    releasedAt: '2026-04-24',
+    settings: {
+      extendParams: ['deepseekV4ReasoningEffort'],
+    },
+    type: 'chat',
+  },
+  {
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+    },
+    contextWindowTokens: 1_048_576,
+    description:
+      'Local vLLM deployment alias for DeepSeek-V4-Pro. This flagship DeepSeek V4 MoE language model has 1.6T total parameters, 49B activated parameters, and a 1M-token context window. It uses the V4 hybrid CSA + HCA attention design to improve million-token inference efficiency, with mHC for signal propagation stability and the Muon optimizer for convergence. Pro targets high-complexity reasoning, code generation, long-context understanding, and agent workflows. Its instruct model supports non-thinking, Think High, and Think Max reasoning-effort modes, with the Max mode aimed at pushing reasoning depth for difficult coding, math, planning, and tool-use tasks.',
+    displayName: 'DeepSeek-V4-Pro（私有化）',
+    enabled: true,
+    family: 'deepseek',
+    generation: 'deepseek-v4',
+    id: 'DeepSeek-V4-Pro',
+    maxOutput: 393_216,
+    organization: 'DeepSeek',
+    pricing: freeTokenPricing,
+    releasedAt: '2026-04-24',
+    settings: {
+      extendParams: ['deepseekV4ReasoningEffort'],
+    },
     type: 'chat',
   },
   {
@@ -32,6 +264,325 @@ const openrouterChatModels: AIChatModelCard[] = [
     releasedAt: '2025-08-21',
     type: 'chat',
   },
+  ...withOpenRouterPrefix([
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 262_144,
+      description:
+        'Gemma 4 31B Instruct is Google DeepMind\'s Apache-2.0 dense multimodal model with 30.7B parameters. It supports text and image input with text output, a 256K-token context window, configurable thinking mode, native function calling, multilingual use across 140+ languages, and strong coding, reasoning, and document understanding. The Hugging Face release supports Transformers, vLLM, and SGLang through OpenAI-compatible chat completions.',
+      displayName: 'Gemma 4 31B Free',
+      enabled: true,
+      family: 'gemma',
+      generation: 'gemma-4',
+      id: 'google/gemma-4-31b-it:free',
+      organization: 'Google',
+      pricing: freeTokenPricing,
+      releasedAt: '2026-04-02',
+      settings: {
+        extendParams: ['enableReasoning', 'reasoningBudgetToken'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_000_000,
+      description:
+        'Qwen3.5-Flash is a native vision-language Flash model built on Qwen\'s hybrid linear-attention and sparse-MoE architecture. It is optimized for fast responses while balancing inference speed and quality across pure-text and multimodal tasks, with a 1M-token context window and strong improvements over the Qwen 3 series.',
+      displayName: 'Qwen3.5 Flash',
+      enabled: true,
+      family: 'qwen',
+      generation: 'qwen3.5',
+      id: 'qwen/qwen3.5-flash-02-23',
+      organization: 'Qwen',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.065, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0.26, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-02-25',
+      settings: {
+        extendParams: ['enableReasoning', 'reasoningBudgetToken'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+      },
+      contextWindowTokens: 202_752,
+      description:
+        'GLM-4.7-Flash is a 30B-class Z.ai model that balances performance and efficiency. It is optimized for agentic coding, long-horizon task planning, tool collaboration, and open-source same-size benchmark performance, with a 203K context window. The OpenRouter model links to open weights on Hugging Face.',
+      displayName: 'GLM 4.7 Flash',
+      enabled: true,
+      family: 'glm',
+      generation: 'glm-4.7',
+      id: 'z-ai/glm-4.7-flash',
+      organization: 'Z.ai',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.06, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0.4, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-01-19',
+      settings: {
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        search: true,
+      },
+      contextWindowTokens: 262_144,
+      description:
+        'Qwen3-Coder-Next is an open-weight causal language model for coding agents and local development. It uses a sparse MoE design with 80B total parameters and 3B activated per token, plus a 256K native context window. Hugging Face highlights long-horizon coding, complex tool use, execution-failure recovery, and real-world CLI/IDE integration. It runs in non-thinking mode and does not emit think blocks.',
+      displayName: 'Qwen3 Coder Next',
+      enabled: true,
+      family: 'qwen',
+      generation: 'qwen3-coder',
+      id: 'qwen/qwen3-coder-next',
+      maxOutput: 262_144,
+      organization: 'Qwen',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.11, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 0.8, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-02-04',
+      settings: {
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_048_576,
+      description:
+        'Gemini 3.1 Flash Lite Preview is Google\'s high-efficiency Gemini 3.1 model for high-volume use cases. It improves over Gemini 2.5 Flash Lite and approaches Gemini 2.5 Flash across key capabilities, including audio input and ASR, RAG snippet ranking, translation, data extraction, and code completion. It supports full thinking levels for cost/performance trade-offs.',
+      displayName: 'Gemini 3.1 Flash Lite Preview',
+      enabled: true,
+      family: 'gemini',
+      generation: 'gemini-3.1',
+      id: 'google/gemini-3.1-flash-lite-preview',
+      maxOutput: 65_536,
+      organization: 'Google',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.25, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 1.5, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-03-03',
+      settings: {
+        extendParams: ['thinkingLevel', 'urlContext'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+      },
+      contextWindowTokens: 205_000,
+      description:
+        'MiniMax M2.7 is an open-weight, agent-oriented model for autonomous real-world productivity. It emphasizes multi-agent collaboration, planning, execution, and refinement across dynamic workflows. The Hugging Face card highlights production debugging, root-cause analysis, financial modeling, editable Word/Excel/PowerPoint generation, 56.22% on SWE-Pro, 57.0% on Terminal Bench 2, and native Agent Teams. MiniMax recommends SGLang, vLLM, Transformers, ModelScope, or NVIDIA NIM for deployment.',
+      displayName: 'MiniMax M2.7',
+      enabled: true,
+      family: 'minimax',
+      generation: 'minimax-m2.7',
+      id: 'minimax/minimax-m2.7',
+      organization: 'MiniMax',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.25, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 1, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-03-18',
+      settings: {
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        video: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_000_000,
+      description:
+        'Qwen3.6 Plus builds on a hybrid architecture combining efficient linear attention with sparse MoE routing. Compared with the Qwen 3.5 series, it improves agentic coding, frontend development, reasoning, multimodal capability, and repository-level problem solving, with OpenRouter noting a 78.8 score on SWE-bench Verified and strong performance on complex tasks such as 3D scenes and games.',
+      displayName: 'Qwen3.6 Plus',
+      enabled: true,
+      family: 'qwen',
+      generation: 'qwen3.6',
+      id: 'qwen/qwen3.6-plus',
+      organization: 'Qwen',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 0.325, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 1.95, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-04-02',
+      settings: {
+        extendParams: ['enableReasoning', 'reasoningBudgetToken', 'preserveThinking'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        structuredOutput: true,
+        video: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_048_576,
+      description:
+        'Gemini 3.1 Pro Preview is Google\'s frontier reasoning model for complex workflows. It combines text, image, video, audio, and code understanding with a 1M-token context window, stronger software engineering performance, improved agentic reliability, reasoning-details preservation for multi-turn tool calling, better long-horizon tool orchestration, and a new medium thinking level for cost/speed/performance balance.',
+      displayName: 'Gemini 3.1 Pro Preview',
+      enabled: true,
+      family: 'gemini',
+      generation: 'gemini-3.1',
+      id: 'google/gemini-3.1-pro-preview',
+      maxOutput: 65_536,
+      organization: 'Google',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-02-19',
+      settings: {
+        extendParams: ['thinkingLevel', 'urlContext'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_050_000,
+      description:
+        'GPT-5.4 is OpenAI\'s frontier model on OpenRouter, unifying Codex and GPT-style workflows into a single system. It supports text and image inputs, a 1M+ token window with 922K input and 128K output, high-context reasoning, coding, multimodal analysis, document understanding, tool use, instruction following, and complex multi-step software engineering workflows with fewer iterations.',
+      displayName: 'GPT-5.4',
+      enabled: true,
+      family: 'gpt',
+      generation: 'gpt-5.4',
+      id: 'openai/gpt-5.4',
+      maxOutput: 128_000,
+      organization: 'OpenAI',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 2.5, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 15, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-03-05',
+      settings: {
+        extendParams: ['enableReasoning', 'reasoningBudgetToken'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_000_000,
+      description:
+        'Claude Sonnet 4.6 is Anthropic\'s most capable Sonnet-class model on OpenRouter, with frontier performance across coding, agents, and professional work. It is suited for iterative development, complex codebase navigation, end-to-end project management with memory, polished document creation, confident computer use, web QA, and workflow automation.',
+      displayName: 'Claude Sonnet 4.6',
+      enabled: true,
+      family: 'claude-sonnet',
+      generation: 'claude-4.6',
+      id: 'anthropic/claude-sonnet-4.6',
+      maxOutput: 64_000,
+      organization: 'Anthropic',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 3, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 15, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-02-17',
+      settings: {
+        extendParams: ['disableContextCaching', 'enableReasoning', 'reasoningBudgetToken'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+    {
+      abilities: {
+        files: true,
+        functionCall: true,
+        reasoning: true,
+        search: true,
+        vision: true,
+      },
+      contextWindowTokens: 1_000_000,
+      description:
+        'Claude Opus 4.8 is Anthropic\'s most capable generally available Opus-family model on OpenRouter. It supports text, image, and file inputs with text output, reasoning, and a 1M-token context window. It is aimed at highly autonomous agents, long-horizon agentic work, memory-driven tasks, multi-step reasoning, complex coding, project orchestration, multi-stage debugging, long-running asynchronous agent pipelines, document drafting, presentation building, and data analysis.',
+      displayName: 'Claude Opus 4.8',
+      enabled: true,
+      family: 'claude-opus',
+      generation: 'claude-4.8',
+      id: 'anthropic/claude-opus-4.8',
+      maxOutput: 64_000,
+      organization: 'Anthropic',
+      pricing: {
+        units: [
+          { name: 'textInput', rate: 5, strategy: 'fixed', unit: 'millionTokens' },
+          { name: 'textOutput', rate: 25, strategy: 'fixed', unit: 'millionTokens' },
+        ],
+      },
+      releasedAt: '2026-05-27',
+      settings: {
+        extendParams: ['disableContextCaching', 'enableReasoning', 'reasoningBudgetToken'],
+        searchImpl: 'params',
+      },
+      type: 'chat',
+    },
+  ]),
   {
     abilities: {
       imageOutput: true,
@@ -867,6 +1418,11 @@ const openrouterChatModels: AIChatModelCard[] = [
   },
 ];
 
-export const allModels = [...openrouterChatModels];
+export const allModels = [
+  ...openrouterImageModels,
+  ...openrouterVideoModels,
+  ...openrouterSTTModels,
+  ...openrouterChatModels,
+];
 
 export default allModels;

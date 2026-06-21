@@ -771,15 +771,15 @@ describe('AiInfraRepos', () => {
       const userModels: AiProviderModelListItem[] = [
         { id: 'dall-e-3', type: 'chat', enabled: true },
         { id: 'text-embedding-3-small', type: 'chat', enabled: true },
-        { id: 'tts-1', type: 'chat', enabled: true },
-        { id: 'whisper-1', type: 'chat', enabled: true },
+        { id: 'edge-tts', type: 'chat', enabled: true },
+        { id: 'gpt-4o-mini-transcribe', type: 'chat', enabled: true },
       ] as AiProviderModelListItem[];
 
       const builtinModels: AiProviderModelListItem[] = [
         { id: 'dall-e-3', type: 'image', enabled: true },
         { id: 'text-embedding-3-small', type: 'embedding', enabled: true },
-        { id: 'tts-1', type: 'tts', enabled: true },
-        { id: 'whisper-1', type: 'stt', enabled: true },
+        { id: 'edge-tts', type: 'tts', enabled: true },
+        { id: 'gpt-4o-mini-transcribe', type: 'stt', enabled: true },
       ] as AiProviderModelListItem[];
 
       vi.spyOn(repo.aiModelModel, 'getModelListByProviderId').mockResolvedValue(userModels);
@@ -789,8 +789,8 @@ describe('AiInfraRepos', () => {
 
       expect(result.find((m) => m.id === 'dall-e-3')!.type).toBe('image');
       expect(result.find((m) => m.id === 'text-embedding-3-small')!.type).toBe('embedding');
-      expect(result.find((m) => m.id === 'tts-1')!.type).toBe('tts');
-      expect(result.find((m) => m.id === 'whisper-1')!.type).toBe('stt');
+      expect(result.find((m) => m.id === 'edge-tts')!.type).toBe('tts');
+      expect(result.find((m) => m.id === 'gpt-4o-mini-transcribe')!.type).toBe('stt');
     });
 
     it('should keep user type for custom models not in builtin list', async () => {

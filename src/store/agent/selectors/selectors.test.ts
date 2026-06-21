@@ -19,7 +19,6 @@ import { agentSelectors, currentAgentConfig } from './selectors';
 // Mock VoiceList
 vi.mock('@lobehub/tts', () => ({
   VoiceList: class {
-    static openaiVoiceOptions = [{ value: 'alloy' }];
     edgeVoiceOptions = [{ value: 'edge-voice' }];
     microsoftVoiceOptions = [{ value: 'microsoft-voice' }];
   },
@@ -510,7 +509,20 @@ describe('agentSelectors', () => {
   });
 
   describe('currentAgentTTSVoice', () => {
-    it('should return openai voice when ttsService is openai', () => {
+    it('should return edge-compatible voice when ttsService is openai', () => {
+      const state = createState({
+        activeAgentId: 'agent-1',
+        agentMap: {
+          'agent-1': {
+            tts: { ttsService: 'openai', voice: { openai: 'edge-voice' } },
+          },
+        },
+      });
+
+      expect(agentSelectors.currentAgentTTSVoice('en-US')(state)).toBe('edge-voice');
+    });
+
+    it('should fallback to edge voice when ttsService is openai with official voice', () => {
       const state = createState({
         activeAgentId: 'agent-1',
         agentMap: {
@@ -520,7 +532,7 @@ describe('agentSelectors', () => {
         },
       });
 
-      expect(agentSelectors.currentAgentTTSVoice('en-US')(state)).toBe('nova');
+      expect(agentSelectors.currentAgentTTSVoice('en-US')(state)).toBe('edge-voice');
     });
 
     it('should return edge voice when ttsService is edge', () => {
@@ -559,7 +571,7 @@ describe('agentSelectors', () => {
         },
       });
 
-      expect(agentSelectors.currentAgentTTSVoice('en-US')(state)).toBe('alloy');
+      expect(agentSelectors.currentAgentTTSVoice('en-US')(state)).toBe('edge-voice');
     });
   });
 

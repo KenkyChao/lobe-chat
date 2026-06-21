@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
 
   // STT
   stt: '/webapi/stt/openai',
+  sttOpenRouter: '/webapi/stt/openrouter',
 
   // TTS
   tts: (provider: string) => `/webapi/tts/${provider}`,

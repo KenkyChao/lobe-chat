@@ -10,7 +10,7 @@ export function registerAsrCommand(parent: Command) {
   parent
     .command('asr <audio-file>')
     .description('Convert speech to text (automatic speech recognition)')
-    .option('--model <model>', 'STT model', 'whisper-1')
+    .option('--model <model>', 'STT model', 'Qwen3-ASR-1.7B')
     .option('--language <lang>', 'Language code (e.g. en, zh)')
     .option('--json', 'Output raw JSON')
     .action(

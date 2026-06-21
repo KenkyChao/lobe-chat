@@ -13,7 +13,7 @@ export function registerTtsCommand(parent: Command) {
     .option('-o, --output <file>', 'Output audio file path', 'output.mp3')
     .option('--voice <voice>', 'Voice name', 'alloy')
     .option('--speed <n>', 'Speed multiplier (0.25-4.0)', '1')
-    .option('--model <model>', 'TTS model', 'tts-1')
+    .option('--model <model>', 'TTS model', 'edge-tts')
     .option('--backend <backend>', 'TTS backend: openai, microsoft, edge', 'openai')
     .action(
       async (

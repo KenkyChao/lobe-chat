@@ -14,7 +14,8 @@ export const DEFAUTT_AGENT_TTS_CONFIG: LobeAgentTTSConfig = {
   sttLocale: 'auto',
   ttsService: 'openai',
   voice: {
-    openai: 'alloy',
+    edge: 'zh-CN-XiaoxiaoNeural',
+    openai: 'zh-CN-XiaoxiaoNeural',
   },
 };
 

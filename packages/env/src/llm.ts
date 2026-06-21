@@ -273,7 +273,12 @@ export const getLLMConfig = () => {
       ENABLED_ZHIPU: !!process.env.ZHIPU_API_KEY,
       ZHIPU_API_KEY: process.env.ZHIPU_API_KEY,
 
-      ENABLED_DEEPSEEK: !!process.env.DEEPSEEK_API_KEY,
+      ENABLED_DEEPSEEK:
+        process.env.ENABLED_DEEPSEEK === '1'
+          ? true
+          : process.env.ENABLED_DEEPSEEK === '0'
+            ? false
+            : !!process.env.DEEPSEEK_API_KEY,
       DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
 
       ENABLED_GOOGLE: process.env.ENABLED_GOOGLE !== '0',
