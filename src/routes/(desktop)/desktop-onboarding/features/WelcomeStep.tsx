@@ -11,6 +11,7 @@ import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ProductLogo } from '@/components/Branding';
+import { DEFAULT_INBOX_TITLE } from '@/const/meta';
 import { useUserStore } from '@/store/user';
 
 interface WelcomeStepProps {
@@ -23,8 +24,7 @@ const WelcomeStep = memo<WelcomeStepProps>(({ onNext }) => {
   const updateGeneralConfig = useUserStore((s) => s.updateGeneralConfig);
 
   const handleNext = () => {
-    // Enable telemetry by default
-    updateGeneralConfig({ telemetry: true });
+    updateGeneralConfig({ telemetry: false });
     onNext();
   };
 
@@ -60,7 +60,7 @@ const WelcomeStep = memo<WelcomeStepProps>(({ onNext }) => {
             pauseDuration={16_000}
             typingSpeed={64}
             sentences={[
-              t('telemetry.title', { name: 'Lobe AI' }),
+              t('telemetry.title', { name: DEFAULT_INBOX_TITLE }),
               t('telemetry.title2'),
               t('telemetry.title3'),
             ]}

@@ -141,8 +141,7 @@ export default {
   'betterAuth.verifyEmail.title': 'Verify Your Email',
   'date.prevMonth': 'Last Month',
   'date.recent30Days': 'Last 30 Days',
-  'footer.agreement':
-    'By continuing, you confirm that you have read and agree to the <terms>Terms and Conditions</terms> and <privacy>Privacy Policy</privacy>',
+  'footer.agreement': "By continuing, you agree to follow your organization's usage policies.",
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
   'header.desc': 'Manage your account information.',

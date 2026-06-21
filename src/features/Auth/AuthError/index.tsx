@@ -1,8 +1,6 @@
 'use client';
 
-import { SiDiscord } from '@icons-pack/react-simple-icons';
-import { SOCIAL_URL } from '@lobechat/business-const';
-import { Button, Flexbox, Icon, Text } from '@lobehub/ui';
+import { Button, Flexbox, Text } from '@lobehub/ui';
 import { cssVar } from 'antd-style';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,11 +33,6 @@ const AuthErrorPage = memo(() => {
           <a href={'/'}>
             <Button block size={'large'}>
               {t('actions.home')}
-            </Button>
-          </a>
-          <a href={SOCIAL_URL.discord} rel="noopener noreferrer" target="_blank">
-            <Button block icon={<Icon fill={cssVar.colorText} icon={SiDiscord} />} type="text">
-              {t('actions.discord')}
             </Button>
           </a>
         </Flexbox>

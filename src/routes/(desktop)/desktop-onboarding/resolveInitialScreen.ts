@@ -1,6 +1,8 @@
 import { DesktopOnboardingScreen } from './types';
 
 interface ResolveInitialScreenInput {
+  /** Whether the telemetry/data-mode step is available in the current build. */
+  dataModeEnabled?: boolean;
   /** Has the user previously completed onboarding on this install? */
   everCompleted: boolean;
   /** Running on macOS — drives the Permissions screen fallback. */
@@ -22,10 +24,11 @@ interface ResolveInitialScreenInput {
  *    screens and would force the whole flow again).
  * 4. `Welcome` for first-time users.
  *
- * On non-macOS, `Permissions` is rewritten to `DataMode` since the macOS-only
- * screen has no useful content.
+ * On non-macOS, `Permissions` is rewritten to `DataMode` when that step is
+ * available; otherwise it falls through to `Login`.
  */
 export const resolveInitialScreen = ({
+  dataModeEnabled = true,
   everCompleted,
   isMac,
   requested,
@@ -35,7 +38,12 @@ export const resolveInitialScreen = ({
   const chosen = requested ?? saved ?? fallback;
 
   if (!isMac && chosen === DesktopOnboardingScreen.Permissions) {
-    return DesktopOnboardingScreen.DataMode;
+    return dataModeEnabled ? DesktopOnboardingScreen.DataMode : DesktopOnboardingScreen.Login;
   }
+
+  if (!dataModeEnabled && chosen === DesktopOnboardingScreen.DataMode) {
+    return DesktopOnboardingScreen.Login;
+  }
+
   return chosen;
 };

@@ -43,15 +43,10 @@ vi.mock('@lobehub/ui', () => {
     Center: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     Flexbox: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     Icon: () => <span />,
-    Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
     Text: ({ as, children }: { as?: 'p' | 'span'; children: ReactNode }) =>
       as === 'p' ? <p>{children}</p> : <span>{children}</span>,
   };
 });
-
-vi.mock('antd', () => ({
-  Divider: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-}));
 
 vi.mock('antd-style', () => ({
   cssVar: {
@@ -63,18 +58,18 @@ vi.mock('antd-style', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, fallback?: string) =>
+    t: (key: string, fallback?: string | { defaultValue?: string }) =>
       (
         ({
           'authResult.failed.desc': 'Authorization failed',
           'authResult.failed.title': 'Authorization Failed',
           'authResult.success.desc':
-            'Please click the Start button below to continue using LobeHub Desktop',
+            'Please click the Start button below to continue using NaiYunHub Desktop',
           'authResult.success.title': 'Authorization Successful',
           'back': 'Back',
           'screen5.actions.cancel': 'Cancel',
           'screen5.actions.connectToServer': 'Connect to server',
-          'screen5.actions.signInCloud': 'Sign in Cloud',
+          'screen5.actions.signInCloud': 'Sign in NaiYunHub',
           'screen5.actions.tryAgain': 'Try again',
           'screen5.description':
             'Sign in to sync Agents, Groups, settings, and Context across all devices.',
@@ -86,7 +81,7 @@ vi.mock('react-i18next', () => ({
           'screen5.title3': '',
         }) as Record<string, string>
       )[key] ||
-      fallback ||
+      (typeof fallback === 'string' ? fallback : fallback?.defaultValue) ||
       key,
   }),
 }));
@@ -99,24 +94,9 @@ vi.mock('@/features/User/UserInfo', () => ({
   default: () => <div>User Info</div>,
 }));
 
-vi.mock('@/hooks/useIMECompositionEvent', () => ({
-  useIMECompositionEvent: () => ({
-    compositionProps: {},
-    isComposingRef: { current: false },
-  }),
-}));
-
 vi.mock('@/services/electron/remoteServer', () => ({
   remoteServerService: {
     cancelAuthorization: vi.fn(),
-  },
-}));
-
-vi.mock('@/services/electron/system', () => ({
-  electronSystemService: {
-    hasLegacyLocalDb: vi.fn().mockResolvedValue(false),
-    openExternalLink: vi.fn(),
-    showContextMenu: vi.fn(),
   },
 }));
 
@@ -156,7 +136,7 @@ afterEach(() => {
 });
 
 describe('Desktop onboarding LoginStep', () => {
-  it('renders a focused success state and returns to login methods without duplicate auth UI', async () => {
+  it('renders a focused success state and returns to the fixed NaiYunHub login', async () => {
     await renderLoginStep();
 
     expect(screen.getByText('Authorization Successful')).toBeInTheDocument();
@@ -168,7 +148,21 @@ describe('Desktop onboarding LoginStep', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back' }));
 
     expect(screen.queryByText('Authorization Successful')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign in Cloud' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Use self-hosted server' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sign in NaiYunHub' })).toBeInTheDocument();
+    expect(screen.queryByText('Use self-hosted server')).not.toBeInTheDocument();
+    expect(screen.queryByText('Migrate legacy local database')).not.toBeInTheDocument();
+  });
+
+  it('uses the fixed NaiYunHub cloud configuration when starting login', async () => {
+    mockElectronState.dataSyncConfig = { active: false, storageMode: 'cloud' };
+
+    await renderLoginStep();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in NaiYunHub' }));
+
+    expect(mockElectronState.connectRemoteServer).toHaveBeenCalledWith({
+      remoteServerUrl: undefined,
+      storageMode: 'cloud',
+    });
   });
 });

@@ -37,9 +37,7 @@ const needsOnboarding = (s: Pick<UserStore, 'agentOnboarding' | 'onboarding'>) =
  *
  * Only `responseLanguage` is checked: completing the shared prefix is
  * marked by writing it on step 2. Telemetry can't be used as a signal
- * because `setSettings` strips fields that match the default
- * (DEFAULT_COMMON_SETTINGS.telemetry === true), so a user who keeps
- * the default-on choice never persists telemetry to s.settings.
+ * because it can match stripped defaults, and desktop builds can force it off.
  */
 const commonStepsCompleted = (s: Pick<UserStore, 'settings'>) =>
   s.settings?.general?.responseLanguage !== undefined;

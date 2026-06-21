@@ -60,4 +60,28 @@ describe('resolveInitialScreen', () => {
       }),
     ).toBe(DesktopOnboardingScreen.DataMode);
   });
+
+  it('rewrites DataMode to Login when the data-mode step is disabled', () => {
+    expect(
+      resolveInitialScreen({
+        dataModeEnabled: false,
+        everCompleted: false,
+        isMac: true,
+        requested: DesktopOnboardingScreen.DataMode,
+        saved: null,
+      }),
+    ).toBe(DesktopOnboardingScreen.Login);
+  });
+
+  it('rewrites non-macOS Permissions to Login when the data-mode step is disabled', () => {
+    expect(
+      resolveInitialScreen({
+        dataModeEnabled: false,
+        everCompleted: false,
+        isMac: false,
+        requested: DesktopOnboardingScreen.Permissions,
+        saved: null,
+      }),
+    ).toBe(DesktopOnboardingScreen.Login);
+  });
 });

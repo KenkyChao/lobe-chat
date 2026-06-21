@@ -6,6 +6,7 @@ import { memo, Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import Loading from '@/components/Loading/BrandTextLoading';
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { electronSystemService } from '@/services/electron/system';
 
 import OnboardingContainer from './_layout';
@@ -28,29 +29,31 @@ const DesktopOnboardingPage = memo(() => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isMac, setIsMac] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const dataModeEnabled = !ANALYTICS_DISABLED;
 
   const flow = isMac
     ? [
         DesktopOnboardingScreen.Welcome,
         DesktopOnboardingScreen.Permissions,
-        DesktopOnboardingScreen.DataMode,
+        ...(dataModeEnabled ? [DesktopOnboardingScreen.DataMode] : []),
         DesktopOnboardingScreen.Login,
       ]
     : [
         DesktopOnboardingScreen.Welcome,
-        DesktopOnboardingScreen.DataMode,
+        ...(dataModeEnabled ? [DesktopOnboardingScreen.DataMode] : []),
         DesktopOnboardingScreen.Login,
       ];
 
   const resolveScreenForPlatform = useCallback(
     (screen: DesktopOnboardingScreen) =>
       resolveInitialScreen({
+        dataModeEnabled,
         everCompleted: false,
         isMac,
         requested: screen,
         saved: null,
       }),
-    [isMac],
+    [dataModeEnabled, isMac],
   );
 
   const getRequestedScreenFromUrl = useCallback((): DesktopOnboardingScreen | null => {
@@ -68,6 +71,7 @@ const DesktopOnboardingPage = memo(() => {
     if (isLoading) return;
 
     const initial = resolveInitialScreen({
+      dataModeEnabled,
       everCompleted: getDesktopOnboardingEverCompleted(),
       isMac,
       requested: getRequestedScreenFromUrl(),
@@ -81,7 +85,7 @@ const DesktopOnboardingPage = memo(() => {
     if (currentUrlScreen !== initial) {
       setSearchParams({ screen: initial });
     }
-  }, [getRequestedScreenFromUrl, isLoading, isMac, searchParams, setSearchParams]);
+  }, [dataModeEnabled, getRequestedScreenFromUrl, isLoading, isMac, searchParams, setSearchParams]);
 
   // Persist current screen to localStorage.
   useEffect(() => {
@@ -166,7 +170,7 @@ const DesktopOnboardingPage = memo(() => {
       setSearchParams({ screen: next });
       return next;
     });
-  }, [isMac, setSearchParams]);
+  }, [dataModeEnabled, isMac, setSearchParams]);
 
   const goToPreviousStep = useCallback(() => {
     setCurrentScreen((prev) => {
@@ -175,7 +179,7 @@ const DesktopOnboardingPage = memo(() => {
       setSearchParams({ screen: prevScreen });
       return prevScreen;
     });
-  }, [isMac, setSearchParams]);
+  }, [dataModeEnabled, isMac, setSearchParams]);
 
   if (isLoading) {
     return <Loading debugId="DesktopOnboarding" />;
@@ -195,6 +199,10 @@ const DesktopOnboardingPage = memo(() => {
         return <PermissionsStep onBack={goToPreviousStep} onNext={goToNextStep} />;
       }
       case DesktopOnboardingScreen.DataMode: {
+        if (!dataModeEnabled) {
+          setCurrentScreen(DesktopOnboardingScreen.Login);
+          return null;
+        }
         return <DataModeStep onBack={goToPreviousStep} onNext={goToNextStep} />;
       }
       case DesktopOnboardingScreen.Login: {

@@ -3,9 +3,11 @@
 import { Block, Button, Checkbox, Empty, Flexbox, Text } from '@lobehub/ui';
 import { cssVar } from 'antd-style';
 import { HeartHandshake, Undo2Icon } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ANALYTICS_DISABLED } from '@/const/analytics';
+import { isDesktop } from '@/const/version';
 import { useUserStore } from '@/store/user';
 import { userGeneralSettingsSelectors } from '@/store/user/selectors';
 
@@ -13,6 +15,7 @@ import LobeMessage from '../components/LobeMessage';
 import OnboardingFooterActions from '../components/OnboardingFooterActions';
 
 type DataMode = 'share' | 'privacy';
+const DESKTOP_TELEMETRY_DISABLED = ANALYTICS_DISABLED || isDesktop;
 
 interface DataModeStepProps {
   onBack: () => void;
@@ -23,14 +26,19 @@ const DataModeStep = memo<DataModeStepProps>(({ onBack, onNext }) => {
   const { t } = useTranslation('desktop-onboarding');
   const telemetryEnabled = useUserStore(userGeneralSettingsSelectors.telemetry);
   const updateGeneralConfig = useUserStore((s) => s.updateGeneralConfig);
-  const [selectedMode, setSelectedMode] = useState<DataMode>(
-    telemetryEnabled ? 'share' : 'privacy',
-  );
+  const [selectedMode, setSelectedMode] = useState<DataMode>('privacy');
+
+  useEffect(() => {
+    if (telemetryEnabled) {
+      void updateGeneralConfig({ telemetry: false });
+    }
+  }, [telemetryEnabled, updateGeneralConfig]);
 
   const setMode = useCallback(
     (mode: DataMode) => {
-      setSelectedMode(mode);
-      const nextTelemetry = mode === 'share';
+      const nextMode = DESKTOP_TELEMETRY_DISABLED ? 'privacy' : mode;
+      setSelectedMode(nextMode);
+      const nextTelemetry = !DESKTOP_TELEMETRY_DISABLED && nextMode === 'share';
       if (telemetryEnabled !== nextTelemetry) {
         void updateGeneralConfig({ telemetry: nextTelemetry });
       }
@@ -57,13 +65,17 @@ const DataModeStep = memo<DataModeStepProps>(({ onBack, onNext }) => {
       <Flexbox gap={16} style={{ width: '100%' }}>
         {/* Shared data option */}
         <Block
-          clickable
+          clickable={!DESKTOP_TELEMETRY_DISABLED}
           flex={1}
           gap={16}
           padding={16}
-          style={{ borderColor: selectedMode === 'share' ? cssVar.colorSuccess : undefined }}
+          style={{
+            borderColor: selectedMode === 'share' ? cssVar.colorSuccess : undefined,
+            opacity: DESKTOP_TELEMETRY_DISABLED ? 0.45 : undefined,
+            pointerEvents: DESKTOP_TELEMETRY_DISABLED ? 'none' : undefined,
+          }}
           variant={'outlined'}
-          onClick={() => setMode('share')}
+          onClick={DESKTOP_TELEMETRY_DISABLED ? undefined : () => setMode('share')}
         >
           {selectedMode === 'share' && checkIcon}
           <Empty
