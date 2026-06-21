@@ -6,15 +6,24 @@ import { appEnv } from '@/envs/app';
 import { type TelemetryContext } from './telemetry';
 import { checkTelemetryEnabled } from './telemetry';
 
-const { mockGetUserSettings, mockGetUserPreference, MockUserModel } = vi.hoisted(() => {
-  const mockGetUserSettings = vi.fn();
-  const mockGetUserPreference = vi.fn();
-  const MockUserModel = vi.fn().mockImplementation(() => ({
-    getUserPreference: mockGetUserPreference,
-    getUserSettings: mockGetUserSettings,
-  })) as any;
-  return { MockUserModel, mockGetUserPreference, mockGetUserSettings };
-});
+const { mockAnalyticsConfig, mockGetUserSettings, mockGetUserPreference, MockUserModel } =
+  vi.hoisted(() => {
+    const mockAnalyticsConfig = { disabled: false };
+    const mockGetUserSettings = vi.fn();
+    const mockGetUserPreference = vi.fn();
+    const MockUserModel = vi.fn().mockImplementation(() => ({
+      getUserPreference: mockGetUserPreference,
+      getUserSettings: mockGetUserSettings,
+    })) as any;
+
+    return { MockUserModel, mockAnalyticsConfig, mockGetUserPreference, mockGetUserSettings };
+  });
+
+vi.mock('@/const/analytics', () => ({
+  get ANALYTICS_DISABLED() {
+    return mockAnalyticsConfig.disabled;
+  },
+}));
 
 vi.mock('@/envs/app', () => ({
   appEnv: {
@@ -29,6 +38,7 @@ vi.mock('@/database/models/user', () => ({
 describe('checkTelemetryEnabled', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAnalyticsConfig.disabled = false;
     // Reset appEnv mock
     vi.mocked(appEnv).TELEMETRY_DISABLED = false;
     // Default mock returns
@@ -37,6 +47,18 @@ describe('checkTelemetryEnabled', () => {
   });
 
   describe('environment variable priority (highest)', () => {
+    it('should return telemetryEnabled: false when global analytics kill switch is on', async () => {
+      mockAnalyticsConfig.disabled = true;
+
+      const result = await checkTelemetryEnabled({
+        serverDB: {} as TelemetryContext['serverDB'],
+        userId: 'test-user',
+      });
+
+      expect(result).toEqual({ telemetryEnabled: false });
+      expect(mockGetUserSettings).not.toHaveBeenCalled();
+    });
+
     it('should return telemetryEnabled: false when TELEMETRY_DISABLED=true', async () => {
       vi.mocked(appEnv).TELEMETRY_DISABLED = true;
 

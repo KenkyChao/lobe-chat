@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { LobeAnalyticsProvider } from '@/components/Analytics/LobeAnalyticsProvider';
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { analyticsEnv } from '@/envs/analytics';
 import { isDev } from '@/utils/env';
 
@@ -9,6 +10,8 @@ interface AnalyticsRSCProviderProps {
 }
 
 const AnalyticsRSCProvider = ({ children }: AnalyticsRSCProviderProps) => {
+  if (ANALYTICS_DISABLED) return children;
+
   return (
     <LobeAnalyticsProvider
       ga4Config={{

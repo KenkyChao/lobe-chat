@@ -7,7 +7,9 @@ import { Switch } from 'antd';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { FORM_STYLE } from '@/const/layoutTokens';
+import { isDesktop } from '@/const/version';
 import { useUserStore } from '@/store/user';
 import { userGeneralSettingsSelectors } from '@/store/user/selectors';
 
@@ -22,7 +24,10 @@ const Analytics = memo(() => {
         children: (
           <Switch
             checked={!!checked}
+            disabled={ANALYTICS_DISABLED || isDesktop}
             onChange={(e) => {
+              if (ANALYTICS_DISABLED || isDesktop) return;
+
               updateGeneralConfig({ telemetry: e });
             }}
           />

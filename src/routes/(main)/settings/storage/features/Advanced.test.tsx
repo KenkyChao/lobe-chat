@@ -63,11 +63,22 @@ vi.mock('antd', () => ({
       modal: { confirm: vi.fn() },
     }),
   },
-  Switch: ({ checked, onChange }: { checked?: boolean; onChange?: (checked: boolean) => void }) => (
+  Switch: ({
+    checked,
+    disabled,
+    onChange,
+  }: {
+    checked?: boolean;
+    disabled?: boolean;
+    onChange?: (checked: boolean) => void;
+  }) => (
     <button
       aria-checked={checked}
+      disabled={disabled}
       role="switch"
       onClick={() => {
+        if (disabled) return;
+
         onChange?.(!checked);
       }}
     />
@@ -135,9 +146,10 @@ describe('AdvancedActions', () => {
 
     expect(screen.getByText('analytics.title')).toBeDefined();
     expect(screen.getByText('analytics.telemetry.title')).toBeDefined();
+    expect(screen.getByRole('switch')).toBeDisabled();
 
     fireEvent.click(screen.getByRole('switch'));
 
-    expect(updateGeneralConfig).toHaveBeenCalledWith({ telemetry: false });
+    expect(updateGeneralConfig).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import UserAvatar from './index';
 
@@ -10,6 +10,9 @@ const mocks = vi.hoisted(() => ({
     isWorkspaceScope: true,
     username: 'workspace-market-namespace',
   },
+  enableMarketTrustedClient: true,
+  isAuthenticated: true,
+  userProfile: { avatarUrl: 'user-avatar', namespace: 'personal-user', userName: 'personal-user' },
 }));
 
 vi.mock('@lobehub/ui', () => ({
@@ -37,18 +40,18 @@ vi.mock('@/features/Workspace/useWorkspaceAwareNavigate', () => ({
 vi.mock('@/layout/AuthProvider/MarketAuth', () => ({
   useMarketAuth: () => ({
     getCurrentUserInfo: () => ({ sub: 'current-user' }),
-    isAuthenticated: true,
+    isAuthenticated: mocks.isAuthenticated,
     isLoading: false,
     signIn: vi.fn(),
   }),
   useMarketUserProfile: () => ({
-    data: { avatarUrl: 'user-avatar', namespace: 'personal-user', userName: 'personal-user' },
+    data: mocks.userProfile,
   }),
 }));
 
 vi.mock('@/store/serverConfig', () => ({
   useServerConfigStore: (selector: (state: { enableMarketTrustedClient: boolean }) => boolean) =>
-    selector({ enableMarketTrustedClient: true }),
+    selector({ enableMarketTrustedClient: mocks.enableMarketTrustedClient }),
 }));
 
 vi.mock('@/store/serverConfig/selectors', () => ({
@@ -59,9 +62,29 @@ vi.mock('@/store/serverConfig/selectors', () => ({
 }));
 
 describe('Community UserAvatar', () => {
+  beforeEach(() => {
+    mocks.enableMarketTrustedClient = true;
+    mocks.isAuthenticated = true;
+    mocks.userProfile = {
+      avatarUrl: 'user-avatar',
+      namespace: 'personal-user',
+      userName: 'personal-user',
+    };
+  });
+
   it('uses the provided avatar override before workspace fallback', () => {
     render(<UserAvatar avatarOverride={'🏢'} />);
 
     expect(screen.getByTestId('community-user-avatar')).toHaveAttribute('data-avatar', '🏢');
+  });
+
+  it('hides the Market onboarding action when unauthenticated', () => {
+    mocks.enableMarketTrustedClient = false;
+    mocks.isAuthenticated = false;
+
+    render(<UserAvatar />);
+
+    expect(screen.queryByText('user.login')).toBeNull();
+    expect(screen.queryByTestId('community-user-avatar')).toBeNull();
   });
 });

@@ -5,6 +5,10 @@ describe('getServerConfig', () => {
   beforeEach(() => {
     // Reset modules to clear the cached config
     vi.resetModules();
+    delete process.env.FEEDBACK_CHANNEL;
+    delete process.env.FEEDBACK_EMAIL;
+    delete process.env.FEEDBACK_INTERNAL_ENDPOINT;
+    delete process.env.FEEDBACK_INTERNAL_TOKEN;
   });
 
   describe('index url', () => {
@@ -81,6 +85,30 @@ describe('getServerConfig', () => {
       expect(config.INTERNAL_APP_URL).toBe('http://127.0.0.1:3210');
     });
   });
+
+  describe('feedback channel', () => {
+    it('should default to mailto', async () => {
+      const { getAppConfig } = await import('../app');
+      const config = getAppConfig();
+
+      expect(config.FEEDBACK_CHANNEL).toBe('mailto');
+    });
+
+    it('should support internal feedback configuration', async () => {
+      process.env.FEEDBACK_CHANNEL = 'internal';
+      process.env.FEEDBACK_EMAIL = 'feedback@example.com';
+      process.env.FEEDBACK_INTERNAL_ENDPOINT = 'https://internal.example.com/feedback';
+      process.env.FEEDBACK_INTERNAL_TOKEN = 'token';
+
+      const { getAppConfig } = await import('../app');
+      const config = getAppConfig();
+
+      expect(config.FEEDBACK_CHANNEL).toBe('internal');
+      expect(config.FEEDBACK_EMAIL).toBe('feedback@example.com');
+      expect(config.FEEDBACK_INTERNAL_ENDPOINT).toBe('https://internal.example.com/feedback');
+      expect(config.FEEDBACK_INTERNAL_TOKEN).toBe('token');
+    });
+  });
 });
 
 describe('APP_URL fallback', () => {
@@ -93,6 +121,10 @@ describe('APP_URL fallback', () => {
     delete process.env.VERCEL_URL;
     delete process.env.VERCEL_BRANCH_URL;
     delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    delete process.env.FEEDBACK_CHANNEL;
+    delete process.env.FEEDBACK_EMAIL;
+    delete process.env.FEEDBACK_INTERNAL_ENDPOINT;
+    delete process.env.FEEDBACK_INTERNAL_TOKEN;
   });
 
   it('should use APP_URL when explicitly set', async () => {

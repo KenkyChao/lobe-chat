@@ -85,7 +85,11 @@ export async function submitBotFeedback(
       title,
     });
 
-    return { issueUrl: result?.issueUrl, success: true };
+    if (result.channel === 'mailto') {
+      return { success: false };
+    }
+
+    return { issueUrl: result.issueUrl, success: true };
   } catch (error) {
     log(
       'submitBotFeedback failed: platform=%s, applicationId=%s, userId=%s, error=%O',

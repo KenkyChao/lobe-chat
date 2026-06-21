@@ -919,7 +919,12 @@ export const marketRouter = router({
 
       try {
         const result = await ctx.marketService.submitFeedback(input);
-        return { issueUrl: result?.issueUrl, success: true };
+        return {
+          channel: result.channel,
+          issueUrl: result.issueUrl,
+          mailtoUrl: result.mailtoUrl,
+          success: true,
+        };
       } catch (error) {
         console.error('Error submitting feedback: %O', error);
         throw new TRPCError({

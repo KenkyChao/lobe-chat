@@ -78,9 +78,9 @@ const genInstallCommand = (identifier?: string, platform?: PlatformType) => {
       return `npx -y @lobehub/market-cli skills install ${id} --agent ${agentMap[platform]}`;
     }
     default: {
-      return `# Recommended for LobeHub users:
+      return `# Recommended for NaiYun AI users:
 # Open the marketplace page and install with one click:
-# https://lobechat.com/community/skills/${id}`;
+# /community/skill/${id}`;
     }
   }
 };
@@ -192,19 +192,20 @@ const Platform = memo<PlatformProps>(
     }, [active, t]);
 
     const command = genInstallCommand(identifier, active);
+    const skillIdentifier = identifier || '<skill-identifier>';
 
-    const agentPrompt = `Curl https://lobehub.com/skills/${identifier}/skill.md, then follow the instructions to set up LobeHub Skills Marketplace and install the skill. Once installed, read the SKILL.md file in the installed directory and follow its instructions to complete the task.`;
+    const agentPrompt = `Install the "${skillIdentifier}" skill into NaiYun AI Skills for the current Agent. Use the skill detail page resources if you need the SKILL.md package. Once installed, read the SKILL.md file in the installed directory and follow its instructions to complete the task.`;
 
-    const handleUseOnLobeAI = useCallback(() => {
+    const handleUseOnNaiYunAI = useCallback(() => {
       if (!inboxAgentId) return;
 
-      // Send message to LobeAI
+      // Send the installation prompt to the inbox agent.
       sendMessage({
         context: { agentId: inboxAgentId },
         message: agentPrompt,
       });
 
-      // Navigate to LobeAI chat session
+      // Navigate to the inbox chat session.
       navigate(SESSION_CHAT_URL(inboxAgentId, mobile));
     }, [agentPrompt, inboxAgentId, mobile, navigate, sendMessage]);
 
@@ -257,9 +258,9 @@ const Platform = memo<PlatformProps>(
                 icon={<Avatar avatar={DEFAULT_INBOX_AVATAR} size={18} />}
                 size={'large'}
                 type={'primary'}
-                onClick={handleUseOnLobeAI}
+                onClick={handleUseOnNaiYunAI}
               >
-                {t('skills.details.sidebar.agent.useOnLobeAI')}
+                {t('skills.details.sidebar.agent.useOnNaiYunAI')}
               </Button>
             </Flexbox>
           </Flexbox>

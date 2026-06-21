@@ -8,7 +8,6 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useUserDetailContext } from '../DetailProvider';
-import FollowButton from '../FollowButton';
 import FollowStats from '../FollowStats';
 import Banner from './Banner';
 
@@ -69,12 +68,10 @@ const UserHeader = memo(() => {
               @{username}
             </Text>
           </Flexbox>
-          {showEditButton ? (
+          {showEditButton && (
             <Button shape={'round'} onClick={() => onEditProfile?.()}>
               {t('user.editProfile')}
             </Button>
-          ) : (
-            <FollowButton userId={user.id} />
           )}
         </Flexbox>
 

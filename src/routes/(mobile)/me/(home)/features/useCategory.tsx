@@ -16,11 +16,13 @@ import { useNavigate } from 'react-router-dom';
 import useBusinessMeCells from '@/business/client/features/User/useBusinessMeCells';
 import { type CellProps } from '@/components/Cell';
 import { openChangelogModal } from '@/components/ChangelogModal';
-import { DOCUMENTS, FEEDBACK } from '@/const/index';
+import { FEEDBACK } from '@/const/index';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { useUserStore } from '@/store/user';
 import { authSelectors } from '@/store/user/selectors';
+
+const ENTERPRISE_MANUAL_PATH = '/docs/usage/enterprise/start';
 
 export const useCategory = () => {
   const navigate = useNavigate();
@@ -80,7 +82,7 @@ export const useCategory = () => {
       icon: Book,
       key: 'docs',
       label: t('document'),
-      onClick: () => window.open(DOCUMENTS, '__blank'),
+      onClick: () => window.location.assign(ENTERPRISE_MANUAL_PATH),
     },
     {
       icon: Feather,

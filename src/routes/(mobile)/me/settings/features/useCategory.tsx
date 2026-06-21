@@ -10,7 +10,6 @@ import {
   Gift,
   Info,
   KeyIcon,
-  KeyRound,
   Map,
   PaletteIcon,
   Sparkles,
@@ -111,7 +110,6 @@ export const useCategory = (): CategoryGroup[] => {
       }),
       makeItem({ icon: SkillsIcon, key: SettingsTabs.Skill, label: t('setting:tab.skill') }),
       makeItem({ icon: BrainCircuit, key: SettingsTabs.Memory, label: t('setting:tab.memory') }),
-      makeItem({ icon: KeyRound, key: SettingsTabs.Creds, label: t('setting:tab.creds') }),
       showApiKeyManage &&
         makeItem({ icon: KeyIcon, key: SettingsTabs.APIKey, label: t('auth:tab.apikey') }),
     ].filter((item): item is CategoryItem => Boolean(item));

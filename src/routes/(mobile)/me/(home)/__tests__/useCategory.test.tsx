@@ -71,4 +71,16 @@ describe('useCategory', () => {
       expect(items.some((item) => item.key === 'changelog')).toBe(true);
     });
   });
+
+  it('should navigate the docs entry to the enterprise manual route', () => {
+    const assignSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => {});
+    const { result } = renderHook(() => useCategory(), { wrapper });
+
+    act(() => {
+      const docsItem = result.current.find((item) => item.key === 'docs');
+      docsItem?.onClick?.();
+    });
+
+    expect(assignSpy).toHaveBeenCalledWith('/docs/usage/enterprise/start');
+  });
 });

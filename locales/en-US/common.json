@@ -252,6 +252,7 @@
   "feedback.fields.title.maxLength": "Title must be 200 characters or less",
   "feedback.fields.title.placeholder": "Brief summary of your question or feedback",
   "feedback.fields.title.required": "Please enter a title",
+  "feedback.mailtoOpened": "Your email client is ready. Send the email to finish submitting.",
   "feedback.screenshotUploaded": "Screenshot uploaded",
   "feedback.submit": "Submit Feedback",
   "feedback.success": "Thank you! Your feedback has been submitted.",

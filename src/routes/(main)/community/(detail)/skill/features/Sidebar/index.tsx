@@ -17,6 +17,10 @@ const Sidebar = memo<{ activeTab?: SkillNavKey; mobile?: boolean }>(
     const { t } = useTranslation('common');
     const showInstallationConfig = activeTab !== SkillNavKey.Installation;
     const showFileTree = activeTab !== SkillNavKey.Resources;
+    const shareUrl =
+      typeof window === 'undefined'
+        ? urlJoin('/community/skill', identifier || '')
+        : urlJoin(window.location.origin, 'community/skill', identifier || '');
 
     const shareButton = (
       <ShareButton
@@ -27,7 +31,7 @@ const Sidebar = memo<{ activeTab?: SkillNavKey; mobile?: boolean }>(
           desc: description,
           hashtags: tags,
           title: name,
-          url: urlJoin('https://lobehub.com/skills', identifier || ''),
+          url: shareUrl,
         }}
       >
         {t('share')}

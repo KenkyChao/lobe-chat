@@ -1,3 +1,4 @@
+import { BRANDING_EMAIL } from '@lobechat/business-const';
 import { type LobeToolManifest } from '@lobechat/context-engine';
 import { MarketSDK, type OrgRef, orgRefToPathSegment } from '@lobehub/market-sdk';
 import debug from 'debug';
@@ -9,6 +10,70 @@ import { generateTrustedClientToken, getTrustedClientTokenForSession } from '@/l
 const log = debug('lobe-server:market-service');
 
 const MARKET_BASE_URL = process.env.MARKET_BASE_URL || 'https://market.lobehub.com';
+const FEEDBACK_CHANNELS = ['mailto', 'internal', 'market'] as const;
+
+type FeedbackChannel = (typeof FEEDBACK_CHANNELS)[number];
+
+interface FeedbackSubmitParams {
+  clientInfo?: {
+    language?: string;
+    timezone?: string;
+    url?: string;
+    userAgent?: string;
+  };
+  email?: string;
+  message: string;
+  screenshotUrl?: string;
+  title: string;
+}
+
+export interface FeedbackSubmitResult {
+  channel: FeedbackChannel;
+  issueUrl?: string;
+  mailtoUrl?: string;
+}
+
+const getFeedbackChannel = (): FeedbackChannel => {
+  const channel = process.env.FEEDBACK_CHANNEL as FeedbackChannel | undefined;
+
+  return channel && FEEDBACK_CHANNELS.includes(channel) ? channel : 'mailto';
+};
+
+const getFeedbackEmail = () => process.env.FEEDBACK_EMAIL || BRANDING_EMAIL.business;
+
+const appendScreenshot = (message: string, screenshotUrl?: string) => {
+  if (!screenshotUrl) return message;
+
+  return `${message}\n\n**Screenshot**: ${screenshotUrl}`;
+};
+
+const formatClientInfo = (clientInfo?: FeedbackSubmitParams['clientInfo']) => {
+  if (!clientInfo) return;
+
+  const entries = Object.entries(clientInfo).filter(([, value]) => !!value);
+  if (entries.length === 0) return;
+
+  return ['Client Info:', ...entries.map(([key, value]) => `- ${key}: ${value}`)].join('\n');
+};
+
+const buildMailtoUrl = ({
+  clientInfo,
+  email,
+  message,
+  screenshotUrl,
+  title,
+}: FeedbackSubmitParams) => {
+  const body = [
+    appendScreenshot(message, screenshotUrl),
+    email ? `Contact Email: ${email}` : undefined,
+    formatClientInfo(clientInfo),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  const params = new URLSearchParams({ body, subject: title });
+
+  return `mailto:${getFeedbackEmail()}?${params.toString()}`;
+};
 
 // ============================== Helper Functions ==============================
 
@@ -137,32 +202,57 @@ export class MarketService {
   /**
    * Submit feedback to LobeHub
    */
-  async submitFeedback(params: {
-    clientInfo?: {
-      language?: string;
-      timezone?: string;
-      url?: string;
-      userAgent?: string;
-    };
-    email?: string;
-    message: string;
-    screenshotUrl?: string;
-    title: string;
-  }) {
+  async submitFeedback(params: FeedbackSubmitParams): Promise<FeedbackSubmitResult> {
     const { title, message, email, screenshotUrl, clientInfo } = params;
+    const channel = getFeedbackChannel();
 
-    // Build message with screenshot if available
-    let feedbackMessage = message;
-    if (screenshotUrl) {
-      feedbackMessage += `\n\n**Screenshot**: ${screenshotUrl}`;
+    if (channel === 'mailto') {
+      return {
+        channel,
+        mailtoUrl: buildMailtoUrl(params),
+      };
     }
 
-    return this.market.feedback.submitFeedback({
+    const feedbackMessage = appendScreenshot(message, screenshotUrl);
+
+    if (channel === 'internal') {
+      const endpoint = process.env.FEEDBACK_INTERNAL_ENDPOINT;
+      if (!endpoint) {
+        throw new Error('FEEDBACK_INTERNAL_ENDPOINT is required when FEEDBACK_CHANNEL=internal');
+      }
+
+      const response = await fetch(endpoint, {
+        body: JSON.stringify({
+          clientInfo,
+          email: email || '',
+          message: feedbackMessage,
+          screenshotUrl,
+          title,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(process.env.FEEDBACK_INTERNAL_TOKEN
+            ? { Authorization: `Bearer ${process.env.FEEDBACK_INTERNAL_TOKEN}` }
+            : undefined),
+        },
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Internal feedback endpoint failed with status ${response.status}`);
+      }
+
+      return { channel };
+    }
+
+    const result = await this.market.feedback.submitFeedback({
       clientInfo,
       email: email || '',
       message: feedbackMessage,
       title,
     });
+
+    return { channel, issueUrl: result?.issueUrl };
   }
 
   // ============================== Auth Methods ==============================

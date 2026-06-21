@@ -1,6 +1,7 @@
 import { type LobeChatDatabase } from '@lobechat/database';
 import { type UserGeneralConfig } from '@lobechat/types';
 
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { UserModel } from '@/database/models/user';
 import { appEnv } from '@/envs/app';
 
@@ -19,14 +20,14 @@ export interface TelemetryResult {
  * Check if telemetry is enabled for the current user
  *
  * Priority:
- * 1. Environment variable TELEMETRY_DISABLED=1 → telemetryEnabled: false (highest priority)
+ * 1. Global analytics kill switch or TELEMETRY_DISABLED=1 → telemetryEnabled: false
  * 2. User settings from database user_settings.general.telemetry (new location)
  * 3. User preference from database users.preference.telemetry (old location, deprecated)
  * 4. Default to true if not explicitly set
  */
 export const checkTelemetryEnabled = async (ctx: TelemetryContext): Promise<TelemetryResult> => {
   // Priority 1: Check environment variable (highest priority)
-  if (appEnv.TELEMETRY_DISABLED) {
+  if (ANALYTICS_DISABLED || appEnv.TELEMETRY_DISABLED) {
     return { telemetryEnabled: false };
   }
 

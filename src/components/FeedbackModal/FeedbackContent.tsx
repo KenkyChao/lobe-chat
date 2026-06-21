@@ -25,6 +25,16 @@ interface FormValues {
   title: string;
 }
 
+const openMailto = (mailtoUrl: string) => {
+  const link = document.createElement('a');
+  link.href = mailtoUrl;
+  link.rel = 'noopener noreferrer';
+  link.target = '_blank';
+  document.body.append(link);
+  link.click();
+  link.remove();
+};
+
 const FeedbackContent = memo<FeedbackContentProps>(({ initialValues }) => {
   const { t } = useTranslation('common');
   const { message } = App.useApp();
@@ -72,7 +82,7 @@ const FeedbackContent = memo<FeedbackContentProps>(({ initialValues }) => {
       const values = await form.validateFields();
       setLoading(true);
 
-      await lambdaClient.market.submitFeedback.mutate({
+      const result = await lambdaClient.market.submitFeedback.mutate({
         clientInfo: {
           language: navigator.language,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -85,7 +95,12 @@ const FeedbackContent = memo<FeedbackContentProps>(({ initialValues }) => {
         title: values.title,
       });
 
-      message.success(t('feedback.success'));
+      if (result.channel === 'mailto' && result.mailtoUrl) {
+        openMailto(result.mailtoUrl);
+        message.success(t('feedback.mailtoOpened'));
+      } else {
+        message.success(t('feedback.success'));
+      }
       form.resetFields();
       setScreenshotUrl(null);
       close();

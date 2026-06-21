@@ -2,10 +2,8 @@ import { Flexbox } from '@lobehub/ui';
 import { cssVar, useTheme } from 'antd-style';
 import { memo, useMemo } from 'react';
 
-import { isCustomBranding } from '@/const/version';
 import NavHeader from '@/features/NavHeader';
 
-import CreateButton from '../features/CreateButton';
 import StoreSearchBar from '../features/Search';
 import UserAvatar from '../features/UserAvatar';
 import { styles } from './Header/style';
@@ -26,7 +24,6 @@ const Header = memo(() => {
       style={cssVariables}
       right={
         <Flexbox horizontal align="center" gap={8}>
-          {!isCustomBranding && <CreateButton />}
           <UserAvatar />
         </Flexbox>
       }

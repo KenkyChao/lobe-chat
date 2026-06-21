@@ -100,6 +100,11 @@ describe('extractAccessToken', () => {
 describe('MarketService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllGlobals();
+    delete process.env.FEEDBACK_CHANNEL;
+    delete process.env.FEEDBACK_EMAIL;
+    delete process.env.FEEDBACK_INTERNAL_ENDPOINT;
+    delete process.env.FEEDBACK_INTERNAL_TOKEN;
   });
 
   describe('constructor', () => {
@@ -191,16 +196,35 @@ describe('MarketService', () => {
   });
 
   describe('submitFeedback', () => {
-    it('should pass params to market SDK without screenshot', async () => {
+    it('should default to mailto without calling market SDK', async () => {
       const service = new MarketService();
       const mockSubmitFeedback = vi.fn().mockResolvedValue({ success: true });
       (service as any).market.feedback.submitFeedback = mockSubmitFeedback;
 
-      await service.submitFeedback({
+      const result = await service.submitFeedback({
         message: 'Great app!',
         title: 'Feedback',
       });
 
+      expect(result.channel).toBe('mailto');
+      expect(result.mailtoUrl).toContain('mailto:service@naiyun.com');
+      expect(result.mailtoUrl).toContain('subject=Feedback');
+      expect(result.mailtoUrl).toContain('body=Great+app%21');
+      expect(mockSubmitFeedback).not.toHaveBeenCalled();
+    });
+
+    it('should pass params to market SDK when explicitly configured', async () => {
+      process.env.FEEDBACK_CHANNEL = 'market';
+      const service = new MarketService();
+      const mockSubmitFeedback = vi.fn().mockResolvedValue({ issueUrl: 'https://issue.example' });
+      (service as any).market.feedback.submitFeedback = mockSubmitFeedback;
+
+      const result = await service.submitFeedback({
+        message: 'Great app!',
+        title: 'Feedback',
+      });
+
+      expect(result).toEqual({ channel: 'market', issueUrl: 'https://issue.example' });
       expect(mockSubmitFeedback).toHaveBeenCalledWith({
         clientInfo: undefined,
         email: '',
@@ -210,6 +234,7 @@ describe('MarketService', () => {
     });
 
     it('should append screenshot URL to message when provided', async () => {
+      process.env.FEEDBACK_CHANNEL = 'market';
       const service = new MarketService();
       const mockSubmitFeedback = vi.fn().mockResolvedValue({ success: true });
       (service as any).market.feedback.submitFeedback = mockSubmitFeedback;
@@ -228,6 +253,7 @@ describe('MarketService', () => {
     });
 
     it('should pass email and clientInfo when provided', async () => {
+      process.env.FEEDBACK_CHANNEL = 'market';
       const service = new MarketService();
       const mockSubmitFeedback = vi.fn().mockResolvedValue({ success: true });
       (service as any).market.feedback.submitFeedback = mockSubmitFeedback;
@@ -245,6 +271,51 @@ describe('MarketService', () => {
         message: 'Hello',
         title: 'Test',
       });
+    });
+
+    it('should submit to internal endpoint when configured', async () => {
+      process.env.FEEDBACK_CHANNEL = 'internal';
+      process.env.FEEDBACK_INTERNAL_ENDPOINT = 'https://internal.example.com/feedback';
+      process.env.FEEDBACK_INTERNAL_TOKEN = 'internal-token';
+      const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal('fetch', fetchMock);
+
+      const service = new MarketService();
+      const result = await service.submitFeedback({
+        clientInfo: { language: 'zh-CN', url: 'https://app.example.com' },
+        email: 'user@example.com',
+        message: 'Need a skill',
+        screenshotUrl: 'https://files.example.com/screenshot.png',
+        title: 'Skill request',
+      });
+
+      expect(result).toEqual({ channel: 'internal' });
+      expect(fetchMock).toHaveBeenCalledWith('https://internal.example.com/feedback', {
+        body: JSON.stringify({
+          clientInfo: { language: 'zh-CN', url: 'https://app.example.com' },
+          email: 'user@example.com',
+          message: 'Need a skill\n\n**Screenshot**: https://files.example.com/screenshot.png',
+          screenshotUrl: 'https://files.example.com/screenshot.png',
+          title: 'Skill request',
+        }),
+        headers: {
+          Authorization: 'Bearer internal-token',
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      });
+    });
+
+    it('should fail when internal channel has no endpoint', async () => {
+      process.env.FEEDBACK_CHANNEL = 'internal';
+      const service = new MarketService();
+
+      await expect(
+        service.submitFeedback({
+          message: 'Need a skill',
+          title: 'Skill request',
+        }),
+      ).rejects.toThrow('FEEDBACK_INTERNAL_ENDPOINT is required');
     });
   });
 

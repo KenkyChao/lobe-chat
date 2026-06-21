@@ -13,6 +13,49 @@ import type { AgentForkBatchResult, AgentForkResponse } from '@/types/discover';
 
 const MARKET_BASE_URL = process.env.MARKET_BASE_URL || 'https://market.lobehub.com';
 
+const LOCAL_ONBOARDING_AGENT_TEMPLATES: Record<
+  string,
+  Array<{
+    avatar: string;
+    description: string;
+    identifier: string;
+    name: string;
+  }>
+> = {
+  'business-strategy': [
+    {
+      avatar: '📊',
+      description: '梳理行业动态、竞品变化和业务机会。',
+      identifier: 'naiyun-industry-research-weekly',
+      name: '行业研究周报',
+    },
+  ],
+  'learning-research': [
+    {
+      avatar: '🎓',
+      description: '把文章、视频和资料整理成每天可完成的学习材料。',
+      identifier: 'naiyun-daily-learning',
+      name: '每日学习料',
+    },
+  ],
+  'operations': [
+    {
+      avatar: '✅',
+      description: '汇总任务、提醒风险，并给出下一步执行建议。',
+      identifier: 'naiyun-operations-assistant',
+      name: '运营执行助手',
+    },
+  ],
+  'product-management': [
+    {
+      avatar: '🧭',
+      description: '整理需求、用户反馈和版本计划。',
+      identifier: 'naiyun-product-planner',
+      name: '产品规划助手',
+    },
+  ],
+};
+
 interface MarketUserInfo {
   accountId: number;
   sub: string;
@@ -549,11 +592,7 @@ export const agentRouter = router({
         return (await response.json()) as Record<string, unknown[]>;
       } catch (error) {
         log('Error getting onboarding full: %O', error);
-        throw new TRPCError({
-          cause: error,
-          code: 'INTERNAL_SERVER_ERROR',
-          message: error instanceof Error ? error.message : 'Failed to get onboarding full',
-        });
+        return LOCAL_ONBOARDING_AGENT_TEMPLATES;
       }
     }),
 

@@ -12,9 +12,8 @@ import {
   EllipsisIcon,
   EthernetPort,
   Gift,
-  KeyIcon,
-  KeyRound,
   KeyboardIcon,
+  KeyIcon,
   Map,
   MessageCircleIcon,
   MonitorSmartphoneIcon,
@@ -164,11 +163,6 @@ export const useCategory = () => {
         icon: BrainCircuit,
         key: SettingsTabs.Memory,
         label: t('tab.memory'),
-      },
-      {
-        icon: KeyRound,
-        key: SettingsTabs.Creds,
-        label: t('tab.creds'),
       },
       showApiKeyManage && {
         icon: KeyIcon,

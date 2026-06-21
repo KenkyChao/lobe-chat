@@ -1,8 +1,8 @@
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { isDesktop } from '@/const/version';
 import { analyticsEnv } from '@/envs/analytics';
 import dynamic from '@/libs/next/dynamic';
 
-import Desktop from './Desktop';
 import Google from './Google';
 import Vercel from './Vercel';
 import X from './X';
@@ -13,6 +13,8 @@ const Clarity = dynamic(() => import('./Clarity'));
 const ReactScan = dynamic(() => import('./ReactScan'));
 
 const Analytics = () => {
+  if (ANALYTICS_DISABLED || isDesktop) return null;
+
   return (
     <>
       {analyticsEnv.ENABLE_VERCEL_ANALYTICS && (
@@ -49,7 +51,6 @@ const Analytics = () => {
       {!!analyticsEnv.REACT_SCAN_MONITOR_API_KEY && (
         <ReactScan apiKey={analyticsEnv.REACT_SCAN_MONITOR_API_KEY} />
       )}
-      {isDesktop && <Desktop />}
     </>
   );
 };

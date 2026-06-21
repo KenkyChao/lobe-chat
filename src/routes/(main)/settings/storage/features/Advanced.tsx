@@ -11,7 +11,9 @@ import { useTranslation } from 'react-i18next';
 
 import AccountDeletion from '@/business/client/features/AccountDeletion';
 import { useTransferAgentsFormItem } from '@/business/client/hooks/useTransferAgentsFormItem';
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { FORM_STYLE } from '@/const/layoutTokens';
+import { isDesktop } from '@/const/version';
 import DataImporter from '@/features/DataImporter';
 import { configService } from '@/services/config';
 import { useChatStore } from '@/store/chat';
@@ -153,7 +155,10 @@ const AdvancedActions = () => {
         children: (
           <Switch
             checked={!!checked}
+            disabled={ANALYTICS_DISABLED || isDesktop}
             onChange={(value) => {
+              if (ANALYTICS_DISABLED || isDesktop) return;
+
               updateGeneralConfig({ telemetry: value });
             }}
           />
