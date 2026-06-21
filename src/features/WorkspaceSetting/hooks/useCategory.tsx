@@ -7,7 +7,6 @@ import {
   CreditCard,
   Database,
   KeyIcon,
-  KeyRound,
   Map,
   Sparkles,
   Users,
@@ -107,11 +106,6 @@ export const useWorkspaceSettingCategory = (): WorkspaceSettingCategoryGroup[] =
             icon: SkillsIcon,
             key: WorkspaceSettingsTabs.Skill,
             label: t('workspaceSetting.tab.skill'),
-          },
-          {
-            icon: KeyRound,
-            key: WorkspaceSettingsTabs.Creds,
-            label: t('tab.creds'),
           },
           // Messenger (聊天平台) is intentionally omitted from workspace
           // settings: the System Bot binding is a per-user/personal identity
