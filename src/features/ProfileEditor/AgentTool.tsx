@@ -99,7 +99,7 @@ const AgentTool = memo<AgentToolProps>(
     const allKlavisServers = useToolStore(klavisStoreSelectors.getServers, isEqual);
     const isKlavisEnabledInEnv = useServerConfigStore(serverConfigSelectors.enableKlavis);
 
-    // LobeHub Skill-related state
+    // NaiYun AI Skill-related state
     const allLobehubSkillServers = useToolStore(lobehubSkillStoreSelectors.getServers, isEqual);
     const isLobehubSkillEnabled = useServerConfigStore(serverConfigSelectors.enableLobehubSkill);
 
@@ -134,7 +134,7 @@ const AgentTool = memo<AgentToolProps>(
     // Load user's Klavis integrations via SWR (from database)
     useFetchUserKlavisServers(isKlavisEnabledInEnv);
 
-    // Load user's LobeHub Skill connections via SWR
+    // Load user's NaiYun AI Skill connections via SWR
     useFetchLobehubSkillConnections(isLobehubSkillEnabled);
 
     // Toggle web browsing via searchMode - use byId action
@@ -277,7 +277,7 @@ const AgentTool = memo<AgentToolProps>(
       [isKlavisEnabledInEnv, allKlavisServers, effectiveAgentId, t],
     );
 
-    // LobeHub Skill Provider list items
+    // NaiYun AI Skill Provider list items
     const lobehubSkillItems = useMemo(
       () =>
         isLobehubSkillEnabled
@@ -332,52 +332,60 @@ const AgentTool = memo<AgentToolProps>(
         }
       };
 
-    // Builtin Agent Skills list items (grouped under LobeHub)
+    // Builtin Agent Skills list items (grouped under NaiYun AI)
     const builtinAgentSkillItems = useMemo(
       () =>
-        installedBuiltinSkills.map((skill) => ({
-          icon: skill.avatar ? (
-            <Avatar avatar={skill.avatar} size={SKILL_ICON_SIZE} style={{ marginInlineEnd: 0 }} />
-          ) : (
-            <Icon icon={SkillsIcon} size={SKILL_ICON_SIZE} />
-          ),
-          key: skill.identifier,
-          label: (
-            <ToolItem
-              checked={isToolEnabled(skill.identifier)}
-              id={skill.identifier}
-              label={skill.name}
-              onUpdate={async () => {
-                setUpdating(true);
-                await handleToggleTool(skill.identifier);
-                setUpdating(false);
-              }}
-            />
-          ),
-          popoverContent: (
-            <ToolItemDetailPopover
-              identifier={skill.identifier}
-              sourceLabel={t('skillStore.tabs.lobehub')}
-              description={t(`tools.builtins.${skill.identifier}.description` as any, {
-                defaultValue: skill.description,
-              })}
-              icon={
-                skill.avatar ? (
-                  <Avatar
-                    avatar={skill.avatar}
-                    size={36}
-                    style={{ flex: 'none', marginInlineEnd: 0 }}
-                  />
-                ) : (
-                  <Icon icon={SkillsIcon} size={36} />
-                )
-              }
-              title={t(`tools.builtins.${skill.identifier}.title` as any, {
-                defaultValue: skill.name,
-              })}
-            />
-          ),
-        })),
+        installedBuiltinSkills.map((skill) => {
+          const title = t(`tools.builtins.${skill.identifier}.title` as any, {
+            defaultValue: skill.name,
+          });
+
+          return {
+            icon: skill.avatar ? (
+              <Avatar
+                avatar={skill.avatar}
+                size={SKILL_ICON_SIZE}
+                style={{ marginInlineEnd: 0 }}
+              />
+            ) : (
+              <Icon icon={SkillsIcon} size={SKILL_ICON_SIZE} />
+            ),
+            key: skill.identifier,
+            label: (
+              <ToolItem
+                checked={isToolEnabled(skill.identifier)}
+                id={skill.identifier}
+                label={title}
+                onUpdate={async () => {
+                  setUpdating(true);
+                  await handleToggleTool(skill.identifier);
+                  setUpdating(false);
+                }}
+              />
+            ),
+            popoverContent: (
+              <ToolItemDetailPopover
+                identifier={skill.identifier}
+                sourceLabel={t('skillStore.tabs.lobehub')}
+                title={title}
+                description={t(`tools.builtins.${skill.identifier}.description` as any, {
+                  defaultValue: skill.description,
+                })}
+                icon={
+                  skill.avatar ? (
+                    <Avatar
+                      avatar={skill.avatar}
+                      size={36}
+                      style={{ flex: 'none', marginInlineEnd: 0 }}
+                    />
+                  ) : (
+                    <Icon icon={SkillsIcon} size={36} />
+                  )
+                }
+              />
+            ),
+          };
+        }),
       [installedBuiltinSkills, isToolEnabled, handleToggleTool, t],
     );
 
@@ -448,7 +456,7 @@ const AgentTool = memo<AgentToolProps>(
       [userAgentSkills, isToolEnabled, handleToggleTool, t],
     );
 
-    // Merge Builtin Agent Skills, builtin tools, LobeHub Skill Providers, and Klavis servers
+    // Merge Builtin Agent Skills, builtin tools, NaiYun AI Skill Providers, and Klavis servers
     const builtinItems = useMemo(
       () => [
         // 1. Builtin Agent Skills
@@ -495,7 +503,7 @@ const AgentTool = memo<AgentToolProps>(
             />
           ),
         })),
-        // 3. LobeHub Skill Providers
+        // 3. NaiYun AI Skill Providers
         ...lobehubSkillItems,
         // 4. Klavis servers
         ...klavisServerItems,
@@ -591,7 +599,7 @@ const AgentTool = memo<AgentToolProps>(
     // All tab items (marketplace tab)
     const allTabItems: ItemType[] = useMemo(
       () => [
-        // LobeHub group
+        // NaiYun AI group
         ...(builtinItems.length > 0
           ? [
               {
@@ -659,7 +667,7 @@ const AgentTool = memo<AgentToolProps>(
         for (const type of KLAVIS_SERVER_TYPES) all.add(type.identifier);
       }
 
-      // 4. LobeHub Skill providers (if enabled)
+      // 4. NaiYun AI Skill providers (if enabled)
       if (isLobehubSkillEnabled) {
         for (const provider of LOBEHUB_SKILL_PROVIDERS) all.add(provider.id);
       }

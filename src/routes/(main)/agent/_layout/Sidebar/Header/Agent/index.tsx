@@ -7,7 +7,7 @@ import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DESKTOP_HEADER_ICON_SMALL_SIZE } from '@/const/layoutTokens';
-import { DEFAULT_AVATAR, DEFAULT_INBOX_AVATAR } from '@/const/meta';
+import { DEFAULT_AVATAR, resolveDefaultInboxAvatar, resolveDefaultInboxTitle } from '@/const/meta';
 import { SkeletonItem } from '@/features/NavPanel/components/SkeletonList';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors, builtinAgentSelectors } from '@/store/agent/selectors';
@@ -26,7 +26,7 @@ const Agent = memo<PropsWithChildren>(() => {
   ]);
 
   const displayTitle = isInbox
-    ? title || 'Lobe AI'
+    ? resolveDefaultInboxTitle(title)
     : title || t('defaultSession', { ns: 'common' });
 
   if (isLoading) return <SkeletonItem height={32} padding={0} />;
@@ -46,7 +46,7 @@ const Agent = memo<PropsWithChildren>(() => {
         }}
       >
         <Avatar
-          avatar={isInbox ? avatar || DEFAULT_INBOX_AVATAR : avatar || DEFAULT_AVATAR}
+          avatar={isInbox ? resolveDefaultInboxAvatar(avatar) : avatar || DEFAULT_AVATAR}
           background={backgroundColor || undefined}
           shape={'square'}
           size={28}

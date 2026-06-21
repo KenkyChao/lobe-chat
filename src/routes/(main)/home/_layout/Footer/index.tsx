@@ -1,11 +1,10 @@
 'use client';
 
-import { SOCIAL_URL } from '@lobechat/business-const';
 import { isDesktop } from '@lobechat/const';
 import { useAnalytics } from '@lobehub/analytics/react';
 import { type MenuProps } from '@lobehub/ui';
 import { ActionIcon, DropdownMenu, Flexbox, Icon } from '@lobehub/ui';
-import { DiscordIcon, GithubIcon } from '@lobehub/ui/icons';
+import { WeChat } from '@lobehub/ui/icons';
 import {
   Book,
   CircleHelp,
@@ -22,10 +21,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { openChangelogModal } from '@/components/ChangelogModal';
-import { openFeedbackModal } from '@/components/FeedbackModal';
 import HighlightNotification from '@/components/HighlightNotification';
-import { DOCUMENTS_REFER_URL, GITHUB } from '@/const/url';
 import Billboard from '@/features/Billboard';
 import { useBillboardMenuItems } from '@/features/Billboard/MenuItems';
 import { useActiveNavKey } from '@/features/NavPanel';
@@ -41,6 +37,7 @@ import { userGeneralSettingsSelectors } from '@/store/user/slices/settings/selec
 import { resolveFooterPromotionState } from './promotionPipeline';
 
 const AGENT_ONBOARDING_PROMO_SLUG = 'agent-onboarding-promo-v1';
+const ENTERPRISE_MANUAL_PATH = '/docs/usage/enterprise/start';
 
 const PRODUCT_HUNT_NOTIFICATION = {
   actionHref: 'https://www.producthunt.com/products/lobehub?launch=lobehub',
@@ -168,14 +165,6 @@ const Footer = memo(() => {
     });
   }, [isWithinTimeWindow, shouldAutoShowProductHuntCard, trackPromotionEvent]);
 
-  const handleOpenChangelogModal = useCallback(() => {
-    openChangelogModal();
-  }, []);
-
-  const handleOpenFeedbackModal = useCallback(() => {
-    openFeedbackModal();
-  }, []);
-
   const handleCloseAgentOnboardingCard = useCallback(() => {
     setIsAgentOnboardingCardOpen(false);
     markNotificationRead(AGENT_ONBOARDING_PROMO_SLUG);
@@ -267,49 +256,30 @@ const Footer = memo(() => {
       {
         icon: <Icon icon={Book} />,
         key: 'docs',
-        label: (
-          <a href={DOCUMENTS_REFER_URL} rel="noopener noreferrer" target="_blank">
-            {t('userPanel.docs')}
-          </a>
-        ),
+        label: t('userPanel.docs'),
+        onClick: () => window.location.assign(ENTERPRISE_MANUAL_PATH),
       },
       {
+        disabled: true,
         icon: <Icon icon={Feather} />,
         key: 'feedback',
         label: t('userPanel.feedback'),
-        onClick: handleOpenFeedbackModal,
       },
       {
-        icon: <Icon icon={DiscordIcon} />,
-        key: 'discord',
-        label: (
-          <a href={SOCIAL_URL.discord} rel="noopener noreferrer" target="_blank">
-            {t('userPanel.discord')}
-          </a>
-        ),
+        disabled: true,
+        icon: <WeChat.Color size={16} />,
+        key: 'wechat',
+        label: t('userPanel.wechat'),
       },
       {
         type: 'divider',
       },
       {
+        disabled: true,
         icon: <Icon icon={FileClockIcon} />,
         key: 'changelog',
         label: t('changelog'),
-        onClick: handleOpenChangelogModal,
       },
-      ...(footer.layout === 'compact' && !footer.hideGitHub
-        ? [
-            {
-              icon: <Icon icon={GithubIcon} />,
-              key: 'github',
-              label: (
-                <a href={GITHUB} rel="noopener noreferrer" target="_blank">
-                  GitHub
-                </a>
-              ),
-            },
-          ]
-        : []),
       ...(footer.showEvalEntry && footer.layout === 'compact'
         ? [
             {
@@ -336,10 +306,7 @@ const Footer = memo(() => {
     [
       footer.showSettingsEntry,
       footer.layout,
-      footer.hideGitHub,
       footer.showEvalEntry,
-      handleOpenChangelogModal,
-      handleOpenFeedbackModal,
       handleOpenProductHuntCard,
       isDevMode,
       shouldShowProductHuntMenuEntry,
@@ -362,11 +329,6 @@ const Footer = memo(() => {
                 size={16}
               />
             </DropdownMenu>
-            {!footer.hideGitHub && (
-              <a aria-label={'GitHub'} href={GITHUB} rel="noopener noreferrer" target={'_blank'}>
-                <ActionIcon icon={GithubIcon} size={16} title={'GitHub'} />
-              </a>
-            )}
             <WorkspaceLink to="/eval">
               <ActionIcon icon={FlaskConical} size={16} title="Evaluation Lab" />
             </WorkspaceLink>

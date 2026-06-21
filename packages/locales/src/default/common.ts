@@ -9,7 +9,7 @@ export default {
   'alert.cloud.title': '{{name}} beta is live',
   'agentOnboardingPromo.actionLabel': 'Try it now',
   'agentOnboardingPromo.description':
-    'Set up your agent teams in a quick chat with Lobe AI. Your existing agents remain unchanged.',
+    'Set up your agent teams in a quick chat with NaiYun AI. Your existing agents remain unchanged.',
   'agentOnboardingPromo.title': 'Quick Wizard',
   'appLoading.appIdle': 'Ready to start',
   'appLoading.appInitializing': 'Application is starting...',
@@ -34,7 +34,7 @@ export default {
   'botIntegrationBanner.dismiss': 'Dismiss',
   'botIntegrationBanner.title': 'Create your own Bot Channel',
   'messengerBanner.dismiss': 'Dismiss',
-  'messengerBanner.title': 'Talk to Lobe AI on your favorite messaging apps',
+  'messengerBanner.title': 'Talk to NaiYun AI on your favorite messaging apps',
   'branching': 'Create Subtopic',
   'branchingDisable':
     'The "Sub-topic" feature is unavailable in the current mode. To use this feature, please switch to Postgres/Pglite DB mode or use LobeHub Cloud.',
@@ -127,7 +127,7 @@ export default {
   'cmdk.askAIHeadingEmpty': 'Choose an AI feature',
   'cmdk.askAgentHeading': 'Ask Agent',
   'cmdk.askAgentPlaceholder': 'Ask {{agent}} something...',
-  'cmdk.askLobeAI': 'Ask Lobe AI',
+  'cmdk.askLobeAI': 'Ask NaiYun AI',
   'cmdk.community': 'Community',
   'cmdk.communitySupport': 'Community Support',
   'cmdk.contactUs': 'Contact Us',
@@ -335,6 +335,7 @@ export default {
   'feedback.fields.title.maxLength': 'Title must be 200 characters or less',
   'feedback.fields.title.placeholder': 'Brief summary of your question or feedback',
   'feedback.fields.title.required': 'Please enter a title',
+  'feedback.mailtoOpened': 'Your email client is ready. Send the email to finish submitting.',
   'feedback.screenshotUploaded': 'Screenshot uploaded',
   'feedback.submit': 'Submit Feedback',
   'feedback.success': 'Thank you! Your feedback has been submitted.',
@@ -562,6 +563,7 @@ export default {
   'userPanel.setting': 'Settings',
   'userPanel.upgradePlan': 'Upgrade Plan',
   'userPanel.usages': 'Usage',
+  'userPanel.wechat': 'WeChat',
   'version': 'Version',
   'zoom': 'Zoom',
 };

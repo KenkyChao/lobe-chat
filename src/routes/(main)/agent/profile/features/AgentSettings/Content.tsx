@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { shallow } from 'zustand/shallow';
 
 import Menu from '@/components/Menu';
-import { DEFAULT_AVATAR, DEFAULT_INBOX_AVATAR } from '@/const/meta';
+import { DEFAULT_AVATAR, resolveDefaultInboxAvatar, resolveDefaultInboxTitle } from '@/const/meta';
 import { AgentSettings as Settings } from '@/features/AgentSetting';
 import { usePermission } from '@/hooks/usePermission';
 import { useAgentStore } from '@/store/agent';
@@ -86,7 +86,9 @@ const Content = memo(() => {
     [availableTabs, t],
   );
 
-  const displayTitle = isInbox ? 'Lobe AI' : meta.title || t('defaultSession', { ns: 'common' });
+  const displayTitle = isInbox
+    ? resolveDefaultInboxTitle(meta.title)
+    : meta.title || t('defaultSession', { ns: 'common' });
 
   return (
     <Flexbox

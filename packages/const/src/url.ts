@@ -1,6 +1,6 @@
 import urlJoin from 'url-join';
 
-export const OFFICIAL_URL = 'https://app.lobehub.com';
+export const OFFICIAL_URL = 'http://127.0.0.1:3010';
 export const OFFICIAL_SITE = 'https://lobehub.com';
 export const OFFICIAL_DOMAIN = 'lobehub.com';
 

@@ -5,7 +5,6 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const analyticsTrack = vi.fn();
-
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     i18n: { language: 'en-US' },
@@ -13,7 +12,7 @@ vi.mock('react-i18next', () => ({
       ({
         'agentOnboardingPromo.actionLabel': 'Try it now',
         'agentOnboardingPromo.description':
-          'Set up your agent teams in a quick chat with Lobe AI. Your existing agents remain unchanged.',
+          'Set up your agent teams in a quick chat with NaiYun AI. Your existing agents remain unchanged.',
         'agentOnboardingPromo.title': 'Quick Wizard',
         'changelog': 'Changelog',
         'productHunt.actionLabel': 'Support us',
@@ -295,5 +294,18 @@ describe('Footer agent onboarding promotion', () => {
     await renderFooter({ desktop: true });
 
     expect(screen.queryByTestId('highlight-notification')).not.toBeInTheDocument();
+  });
+});
+
+describe('Footer help menu', () => {
+  it('navigates the desktop help menu docs entry to the enterprise manual route', async () => {
+    const user = userEvent.setup();
+    const assignSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => {});
+    await renderFooter({ desktop: true });
+
+    await user.click(screen.getByLabelText('Help'));
+    await user.click(await screen.findByText('Docs'));
+
+    expect(assignSpy).toHaveBeenCalledWith('/docs/usage/enterprise/start');
   });
 });

@@ -6,7 +6,7 @@ import { ChevronsUpDownIcon } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DEFAULT_AVATAR, DEFAULT_INBOX_AVATAR } from '@/const/meta';
+import { DEFAULT_AVATAR, resolveDefaultInboxAvatar, resolveDefaultInboxTitle } from '@/const/meta';
 import { useFetchAgentList } from '@/hooks/useFetchAgentList';
 import { agentService } from '@/services/agent';
 import { useAgentStore } from '@/store/agent';
@@ -58,11 +58,17 @@ const AgentSelect = memo(() => {
 
   const displayMeta = isInboxDisplay ? inboxMeta : (sidebarItem ?? agentMapMeta);
 
-  const fallbackTitle = isInboxDisplay ? 'Lobe AI' : t('defaultSession', { ns: 'common' });
-  const displayTitle = displayMeta?.title || fallbackTitle;
-  const displayAvatar =
-    (typeof displayMeta?.avatar === 'string' ? displayMeta.avatar : undefined) ||
-    (isInboxDisplay ? DEFAULT_INBOX_AVATAR : DEFAULT_AVATAR);
+  const fallbackTitle = isInboxDisplay
+    ? resolveDefaultInboxTitle(displayMeta?.title)
+    : t('defaultSession', { ns: 'common' });
+  const displayTitle = isInboxDisplay
+    ? resolveDefaultInboxTitle(displayMeta?.title)
+    : displayMeta?.title || fallbackTitle;
+  const displayAvatar = isInboxDisplay
+    ? resolveDefaultInboxAvatar(
+        typeof displayMeta?.avatar === 'string' ? displayMeta.avatar : undefined,
+      )
+    : (typeof displayMeta?.avatar === 'string' ? displayMeta.avatar : undefined) || DEFAULT_AVATAR;
   const displayBackground = displayMeta?.backgroundColor || undefined;
 
   const handleSelect = (agentId: string) => {

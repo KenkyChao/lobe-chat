@@ -1,3 +1,4 @@
+import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { analyticsEnv } from '@/envs/analytics';
 import { serializeForHtml } from '@/server/utils/serializeForHtml';
 import { type AnalyticsConfig } from '@/types/spaServerConfig';
@@ -65,6 +66,8 @@ export async function fetchViteDevTemplate(
 }
 
 export function buildAnalyticsConfig(options: { desktop?: boolean } = {}): AnalyticsConfig {
+  if (ANALYTICS_DISABLED || options.desktop) return {};
+
   const config: AnalyticsConfig = {};
 
   if (analyticsEnv.ENABLE_GOOGLE_ANALYTICS && analyticsEnv.GOOGLE_ANALYTICS_MEASUREMENT_ID) {
@@ -116,17 +119,6 @@ export function buildAnalyticsConfig(options: { desktop?: boolean } = {}): Analy
     config.vercel = {
       debug: analyticsEnv.DEBUG_VERCEL_ANALYTICS,
       enabled: true,
-    };
-  }
-
-  if (
-    options.desktop &&
-    process.env.NEXT_PUBLIC_DESKTOP_PROJECT_ID &&
-    process.env.NEXT_PUBLIC_DESKTOP_UMAMI_BASE_URL
-  ) {
-    config.desktop = {
-      baseUrl: process.env.NEXT_PUBLIC_DESKTOP_UMAMI_BASE_URL,
-      projectId: process.env.NEXT_PUBLIC_DESKTOP_PROJECT_ID,
     };
   }
 

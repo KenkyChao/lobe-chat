@@ -5,7 +5,7 @@ import isEqual from 'fast-deep-equal';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DEFAULT_AVATAR, DEFAULT_INBOX_AVATAR } from '@/const/meta';
+import { DEFAULT_AVATAR, resolveDefaultInboxAvatar, resolveDefaultInboxTitle } from '@/const/meta';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors, builtinAgentSelectors } from '@/store/agent/selectors';
 import { useUserStore } from '@/store/user';
@@ -20,7 +20,7 @@ const AgentInfo = memo(() => {
   const fontSize = useUserStore(userGeneralSettingsSelectors.fontSize);
 
   const displayTitle = isInbox
-    ? meta.title || 'Lobe AI'
+    ? resolveDefaultInboxTitle(meta.title)
     : meta.title || t('defaultSession', { ns: 'common' });
 
   const message = useMemo(() => {
@@ -45,7 +45,7 @@ const AgentInfo = memo(() => {
   return (
     <Flexbox gap={12}>
       <Avatar
-        avatar={isInbox ? meta.avatar || DEFAULT_INBOX_AVATAR : meta.avatar || DEFAULT_AVATAR}
+        avatar={isInbox ? resolveDefaultInboxAvatar(meta.avatar) : meta.avatar || DEFAULT_AVATAR}
         background={meta.backgroundColor}
         shape={'square'}
         size={64}

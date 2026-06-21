@@ -1,6 +1,7 @@
 'use client';
 
 import { Flexbox, Markdown, Text } from '@lobehub/ui';
+import { DEFAULT_INBOX_TITLE } from '@lobechat/const';
 import isEqual from 'fast-deep-equal';
 import React, { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -68,7 +69,9 @@ const InboxWelcome = memo(() => {
         </Text>
         <Flexbox width={'min(100%, 640px)'}>
           <Markdown fontSize={fontSize} variant={'chat'}>
-            {isInbox ? t('guide.defaultMessageWithoutCreate', { appName: 'Lobe AI' }) : message}
+            {isInbox
+              ? t('guide.defaultMessageWithoutCreate', { appName: DEFAULT_INBOX_TITLE })
+              : message}
           </Markdown>
         </Flexbox>
         {openingQuestions.length > 0 && (

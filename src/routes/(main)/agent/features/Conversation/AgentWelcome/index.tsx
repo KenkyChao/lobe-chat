@@ -5,7 +5,7 @@ import isEqual from 'fast-deep-equal';
 import React, { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DEFAULT_AVATAR, DEFAULT_INBOX_AVATAR } from '@/const/meta';
+import { DEFAULT_AVATAR, resolveDefaultInboxAvatar, resolveDefaultInboxTitle } from '@/const/meta';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors, builtinAgentSelectors } from '@/store/agent/selectors';
@@ -34,8 +34,9 @@ const InboxWelcome = memo(() => {
     return agentSystemRoleMsg;
   }, [openingMessage, agentSystemRoleMsg, meta.description]);
 
-  const inboxTitle = meta.title || 'Lobe AI';
+  const inboxTitle = resolveDefaultInboxTitle(meta.title);
   const displayTitle = isInbox ? inboxTitle : meta.title || t('defaultSession', { ns: 'common' });
+  const inboxAvatar = resolveDefaultInboxAvatar(meta.avatar);
 
   return (
     <>
@@ -48,7 +49,7 @@ const InboxWelcome = memo(() => {
         }}
       >
         <Avatar
-          avatar={isInbox ? meta.avatar || DEFAULT_INBOX_AVATAR : meta.avatar || DEFAULT_AVATAR}
+          avatar={isInbox ? inboxAvatar : meta.avatar || DEFAULT_AVATAR}
           background={meta.backgroundColor}
           shape={'square'}
           size={78}

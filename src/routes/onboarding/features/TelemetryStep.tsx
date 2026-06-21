@@ -12,6 +12,7 @@ import { memo, useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { ProductLogo } from '@/components/Branding';
+import { DEFAULT_INBOX_TITLE } from '@/const/meta';
 import { PRIVACY_URL, TERMS_URL } from '@/const/url';
 import { useUserStore } from '@/store/user';
 
@@ -70,7 +71,7 @@ const TelemetryStep = memo<TelemetryStepProps>(({ onNext }) => {
             pauseDuration={16_000}
             typingSpeed={64}
             sentences={[
-              t('telemetry.title', { name: 'Lobe AI' }),
+              t('telemetry.title', { name: DEFAULT_INBOX_TITLE }),
               t('telemetry.title2'),
               t('telemetry.title3'),
             ]}

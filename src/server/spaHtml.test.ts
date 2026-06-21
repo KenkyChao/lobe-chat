@@ -43,14 +43,11 @@ describe('buildAnalyticsConfig', () => {
     delete process.env.NEXT_PUBLIC_DESKTOP_UMAMI_BASE_URL;
   });
 
-  it('includes desktop analytics only when opted in', () => {
+  it('omits analytics config for desktop SPA', () => {
     process.env.NEXT_PUBLIC_DESKTOP_PROJECT_ID = 'pid';
     process.env.NEXT_PUBLIC_DESKTOP_UMAMI_BASE_URL = 'https://umami.example.com';
 
     expect(buildAnalyticsConfig().desktop).toBeUndefined();
-    expect(buildAnalyticsConfig({ desktop: true }).desktop).toEqual({
-      baseUrl: 'https://umami.example.com',
-      projectId: 'pid',
-    });
+    expect(buildAnalyticsConfig({ desktop: true })).toEqual({});
   });
 });

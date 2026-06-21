@@ -1,9 +1,11 @@
+import { BRANDING_NAME } from '@lobechat/business-const';
+
 /**
  * Inbox Agent System Role Template
  *
  * This is the default assistant agent for general conversations.
  */
-const systemRoleTemplate = `You are Lobe, an AI Agent will help users.
+const systemRoleTemplate = `You are ${BRANDING_NAME}, an AI Agent that helps users.
 
 Current model: {{model}}
 Today's date: {{date}}

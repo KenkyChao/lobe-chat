@@ -6,7 +6,7 @@ import { createStaticStyles, cssVar } from 'antd-style';
 import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DEFAULT_AVATAR, DEFAULT_INBOX_AVATAR } from '@/const/meta';
+import { DEFAULT_AVATAR, resolveDefaultInboxAvatar, resolveDefaultInboxTitle } from '@/const/meta';
 import SkeletonList from '@/features/NavPanel/components/SkeletonList';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors, builtinAgentSelectors } from '@/store/agent/selectors';
@@ -60,12 +60,12 @@ const AgentList = memo<AgentListProps>(({ activeAgentId, onSelect }) => {
 
     if (inboxAgentId) {
       out.push({
-        avatar:
-          (typeof inboxMeta?.avatar === 'string' ? inboxMeta.avatar : undefined) ??
-          DEFAULT_INBOX_AVATAR,
+        avatar: resolveDefaultInboxAvatar(
+          typeof inboxMeta?.avatar === 'string' ? inboxMeta.avatar : undefined,
+        ),
         backgroundColor: inboxMeta?.backgroundColor || undefined,
         id: inboxAgentId,
-        title: inboxMeta?.title || 'Lobe AI',
+        title: resolveDefaultInboxTitle(inboxMeta?.title),
       });
       seen.add(inboxAgentId);
     }

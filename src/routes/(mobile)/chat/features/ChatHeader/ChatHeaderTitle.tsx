@@ -9,6 +9,7 @@ import { useAgentStore } from '@/store/agent';
 import { agentSelectors, builtinAgentSelectors } from '@/store/agent/selectors';
 import { useChatStore } from '@/store/chat';
 import { topicSelectors } from '@/store/chat/selectors';
+import { DEFAULT_INBOX_TITLE } from '@/const/meta';
 import { useGlobalStore } from '@/store/global';
 
 const ChatHeaderTitle = memo(() => {
@@ -21,7 +22,7 @@ const ChatHeaderTitle = memo(() => {
   const isInbox = useAgentStore(builtinAgentSelectors.isInboxAgent);
   const title = useAgentStore(agentSelectors.currentAgentTitle);
 
-  const displayTitle = isInbox ? 'Lobe AI' : title;
+  const displayTitle = isInbox ? DEFAULT_INBOX_TITLE : title;
 
   return (
     <ChatHeader.Title
