@@ -10,6 +10,28 @@ const memoryServiceModelKeys = new Set([
   'userMemoryPersonaWriter',
 ]);
 const defaultModelAssignmentKeys = protectedKeys.filter((key) => !memoryServiceModelKeys.has(key));
+const defaultProviderForBareModel = 'openrouter';
+
+const parseProviderModelValue = (value: string, allowBareModel = false) => {
+  const [provider, ...modelParts] = value.split('/');
+  const model = modelParts.join('/');
+
+  if (allowBareModel && !value.includes('/') && provider) {
+    return {
+      model: provider.trim(),
+      provider: defaultProviderForBareModel,
+    };
+  }
+
+  if (!provider || !model) {
+    throw new Error('Missing model or provider value');
+  }
+
+  return {
+    model: model.trim(),
+    provider: provider.trim(),
+  };
+};
 
 export const parseSystemAgent = (envString: string = ''): Partial<UserServiceModelConfig> => {
   if (!envString) return {};
@@ -28,27 +50,19 @@ export const parseSystemAgent = (envString: string = ''): Partial<UserServiceMod
     const [key, value] = pair.split('=').map((s) => s.trim());
 
     if (key && value) {
-      const [provider, ...modelParts] = value.split('/');
-      const model = modelParts.join('/');
-
-      if (!provider || !model) {
-        throw new Error('Missing model or provider value');
-      }
+      const parsedValue = parseProviderModelValue(value, key === 'userMemoryEmbedding');
 
       // If it's the default key, save the default settings
       if (key === 'default') {
-        defaultSetting = {
-          model: model.trim(),
-          provider: provider.trim(),
-        };
+        defaultSetting = parsedValue;
         continue;
       }
 
       if (protectedKeys.includes(key)) {
         config[key as keyof UserServiceModelConfig] = {
           enabled: defaultTrueLey.has(key) ? true : undefined,
-          model: model.trim(),
-          provider: provider.trim(),
+          model: parsedValue.model,
+          provider: parsedValue.provider,
         } as any;
       }
     } else {

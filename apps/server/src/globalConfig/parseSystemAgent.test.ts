@@ -124,6 +124,23 @@ describe('parseSystemAgent', () => {
     });
   });
 
+  it('should use OpenRouter as provider for bare memory embedding model name', () => {
+    const envValue = 'userMemoryEmbedding=bge-m3';
+
+    const result = parseSystemAgent(envValue);
+
+    expect(result.userMemoryEmbedding).toEqual({
+      provider: 'openrouter',
+      model: 'bge-m3',
+    });
+  });
+
+  it('should still reject bare model names for non-memory embedding assignments', () => {
+    const envValue = 'topic=gpt-4';
+
+    expect(() => parseSystemAgent(envValue)).toThrowError(/Missing model or provider/);
+  });
+
   it('should override default setting with specific settings', () => {
     const envValue = 'default=ollama/deepseek-v3,topic=openai/gpt-4';
 

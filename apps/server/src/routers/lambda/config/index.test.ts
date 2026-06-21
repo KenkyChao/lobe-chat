@@ -147,9 +147,34 @@ describe('configRouter', () => {
         });
       });
 
-      it('should enable the default DeepSeek provider without a server API key', async () => {
+      it('should disable DeepSeek by default without a server API key', async () => {
         const originalApiKey = process.env.DEEPSEEK_API_KEY;
+        const originalEnabled = process.env.ENABLED_DEEPSEEK;
         delete process.env.DEEPSEEK_API_KEY;
+        delete process.env.ENABLED_DEEPSEEK;
+
+        const response = await router.getGlobalConfig();
+
+        expect(response.serverConfig.aiProvider?.deepseek?.enabled).toBe(false);
+
+        if (originalApiKey === undefined) {
+          delete process.env.DEEPSEEK_API_KEY;
+        } else {
+          process.env.DEEPSEEK_API_KEY = originalApiKey;
+        }
+
+        if (originalEnabled === undefined) {
+          delete process.env.ENABLED_DEEPSEEK;
+        } else {
+          process.env.ENABLED_DEEPSEEK = originalEnabled;
+        }
+      });
+
+      it('should allow explicitly enabling DeepSeek', async () => {
+        const originalApiKey = process.env.DEEPSEEK_API_KEY;
+        const originalEnabled = process.env.ENABLED_DEEPSEEK;
+        delete process.env.DEEPSEEK_API_KEY;
+        process.env.ENABLED_DEEPSEEK = '1';
 
         const response = await router.getGlobalConfig();
 
@@ -159,6 +184,12 @@ describe('configRouter', () => {
           delete process.env.DEEPSEEK_API_KEY;
         } else {
           process.env.DEEPSEEK_API_KEY = originalApiKey;
+        }
+
+        if (originalEnabled === undefined) {
+          delete process.env.ENABLED_DEEPSEEK;
+        } else {
+          process.env.ENABLED_DEEPSEEK = originalEnabled;
         }
       });
     });

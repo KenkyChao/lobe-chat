@@ -67,6 +67,17 @@ describe('parseFilesConfig', () => {
     expect(parseFilesConfig(envStr)).toEqual(expected);
   });
 
+  it('uses OpenRouter as provider for bare embedding and reranker model names', () => {
+    const envStr = 'embedding_model=bge-m3,reranker_model=bge-reranker,query_mode=full_text';
+    const expected = {
+      embeddingModel: { provider: 'openrouter', model: 'bge-m3' },
+      rerankerModel: { provider: 'openrouter', model: 'bge-reranker' },
+      queryMode: 'full_text',
+    };
+
+    expect(parseFilesConfig(envStr)).toEqual(expected);
+  });
+
   it('should throw an error for invalid embedding_model format', () => {
     const envStr =
       'reranker_model=cohere/rerank-english-v3.0,embedding_model=/embedding-text-3-small';
@@ -74,18 +85,7 @@ describe('parseFilesConfig', () => {
       parseFilesConfig(envStr);
     }).toThrow(
       new Error(
-        'Invalid environment variable format.  expected of the form embedding_model=provider/model',
-      ),
-    );
-  });
-
-  it('should throw an error for invalid embedding_model format', () => {
-    const envStr = 'reranker_model=cohere/rerank-english-v3.0,embedding_model=openai';
-    expect(() => {
-      parseFilesConfig(envStr);
-    }).toThrow(
-      new Error(
-        'Invalid environment variable format.  expected of the form embedding_model=provider/model',
+        'Invalid environment variable format. expected embedding_model=provider/model or embedding_model=model',
       ),
     );
   });
@@ -104,7 +104,7 @@ describe('parseFilesConfig', () => {
       parseFilesConfig(envStr);
     }).toThrow(
       new Error(
-        'Invalid environment variable format.  expected of the form reranker_model=provider/model',
+        'Invalid environment variable format. expected reranker_model=provider/model or reranker_model=model',
       ),
     );
   });
@@ -115,7 +115,7 @@ describe('parseFilesConfig', () => {
       parseFilesConfig(envStr);
     }).toThrow(
       new Error(
-        'Invalid environment variable format.  expected of the form reranker_model=provider/model',
+        'Invalid environment variable format. expected reranker_model=provider/model or reranker_model=model',
       ),
     );
   });

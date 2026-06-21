@@ -7,6 +7,22 @@ const protectedKeys = Object.keys({
   query_mode: null,
   reranker_model: null,
 });
+const defaultProviderForBareModel = 'openrouter';
+
+const parseProviderModelValue = (value: string) => {
+  const [provider, ...modelParts] = value.split('/');
+  const model = modelParts.join('/');
+
+  if (!value.includes('/') && provider) {
+    return { model: provider.trim(), provider: defaultProviderForBareModel };
+  }
+
+  if (!provider || !model) {
+    return;
+  }
+
+  return { model: model.trim(), provider: provider.trim() };
+};
 
 export const parseFilesConfig = (envString: string = ''): SystemEmbeddingConfig => {
   if (!envString) return DEFAULT_FILES_CONFIG;
@@ -21,27 +37,30 @@ export const parseFilesConfig = (envString: string = ''): SystemEmbeddingConfig 
     const [key, value] = pair.split('=').map((s) => s.trim());
 
     if (key && value) {
-      const [provider, ...modelParts] = value.split('/');
-      const model = modelParts.join('/');
-
       if (protectedKeys.includes(key)) {
         switch (key) {
           case 'embedding_model': {
-            if (!provider || !model) {
+            const parsedValue = parseProviderModelValue(value);
+
+            if (!parsedValue) {
               throw new Error(
-                'Invalid environment variable format.  expected of the form embedding_model=provider/model',
+                'Invalid environment variable format. expected embedding_model=provider/model or embedding_model=model',
               );
             }
-            config.embeddingModel = { model: model.trim(), provider: provider.trim() };
+
+            config.embeddingModel = parsedValue;
             break;
           }
           case 'reranker_model': {
-            if (!provider || !model) {
+            const parsedValue = parseProviderModelValue(value);
+
+            if (!parsedValue) {
               throw new Error(
-                'Invalid environment variable format.  expected of the form reranker_model=provider/model',
+                'Invalid environment variable format. expected reranker_model=provider/model or reranker_model=model',
               );
             }
-            config.rerankerModel = { model: model.trim(), provider: provider.trim() };
+
+            config.rerankerModel = parsedValue;
             break;
           }
           case 'query_mode': {
