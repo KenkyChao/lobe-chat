@@ -34,27 +34,13 @@ export const useFaviconSetters = () => {
   return context;
 };
 
-const stateToFileName: Record<FaviconState, string> = {
-  default: '',
-  done: '-done',
-  error: '-error',
-  progress: '-progress',
-};
-
 const defaultFaviconPath = '/icons/naiyunhub-logo.png';
 
-const getFaviconPath = (state: FaviconState, isDev: boolean, size?: '32x32'): string => {
-  if (state === 'default') return defaultFaviconPath;
-
-  const devSuffix = isDev ? '-dev' : '';
-  const stateSuffix = stateToFileName[state];
-  const sizeSuffix = size ? `-${size}` : '';
-  return `/favicon${sizeSuffix}${stateSuffix}${devSuffix}.ico`;
-};
+const getFaviconPath = () => defaultFaviconPath;
 
 const getFaviconType = (path: string) => (path.endsWith('.png') ? 'image/png' : 'image/x-icon');
 
-const updateFaviconDOM = (state: FaviconState, isDev: boolean) => {
+const updateFaviconDOM = () => {
   if (typeof document === 'undefined') return;
 
   const timestamp = Date.now();
@@ -66,14 +52,14 @@ const updateFaviconDOM = (state: FaviconState, isDev: boolean) => {
   if (existingLinks.length === 0) {
     // No favicon links found — create them
     const iconLink = document.createElement('link');
-    const iconPath = getFaviconPath(state, isDev);
+    const iconPath = getFaviconPath();
     iconLink.rel = 'icon';
     iconLink.type = getFaviconType(iconPath);
     iconLink.href = `${iconPath}?v=${timestamp}`;
     head.append(iconLink);
 
     const shortcutLink = document.createElement('link');
-    const shortcutPath = getFaviconPath(state, isDev, '32x32');
+    const shortcutPath = getFaviconPath();
     shortcutLink.rel = 'shortcut icon';
     shortcutLink.type = getFaviconType(shortcutPath);
     shortcutLink.href = `${shortcutPath}?v=${timestamp}`;
@@ -83,8 +69,6 @@ const updateFaviconDOM = (state: FaviconState, isDev: boolean) => {
 
   // Remove existing favicon links and create new ones to bust cache
   existingLinks.forEach((link) => {
-    const oldHref = link.href;
-    const is32 = oldHref.includes('32x32');
     const rel = link.rel;
 
     // Remove old link
@@ -92,7 +76,7 @@ const updateFaviconDOM = (state: FaviconState, isDev: boolean) => {
 
     // Create new link with cache-busting query param
     const newLink = document.createElement('link');
-    const faviconPath = getFaviconPath(state, isDev, is32 ? '32x32' : undefined);
+    const faviconPath = getFaviconPath();
     newLink.rel = rel;
     newLink.type = getFaviconType(faviconPath);
     newLink.href = `${faviconPath}?v=${timestamp}`;
@@ -107,7 +91,7 @@ export const FaviconProvider = memo<{ children: ReactNode }>(({ children }) => {
   const setFavicon = useCallback((state: FaviconState) => {
     setCurrentState(state);
     setIsDevModeState((isDev) => {
-      updateFaviconDOM(state, isDev);
+      updateFaviconDOM();
       return isDev;
     });
   }, []);
@@ -115,7 +99,7 @@ export const FaviconProvider = memo<{ children: ReactNode }>(({ children }) => {
   const setIsDevMode = useCallback((isDev: boolean) => {
     setIsDevModeState(isDev);
     setCurrentState((state) => {
-      updateFaviconDOM(state, isDev);
+      updateFaviconDOM();
       return state;
     });
   }, []);

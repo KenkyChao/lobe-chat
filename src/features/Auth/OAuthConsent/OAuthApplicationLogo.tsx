@@ -5,6 +5,8 @@ import React, { memo } from 'react';
 
 import { ProductLogo } from '@/components/Branding';
 
+const defaultFirstPartyLogo = '/icons/naiyunhub-logo.png';
+
 const styles = createStaticStyles(({ css, cssVar }) => ({
   connector: css`
     width: 40px;
@@ -36,7 +38,12 @@ interface OAuthApplicationLogoProps {
 const OAuthApplicationLogo = memo<OAuthApplicationLogoProps>(
   ({ isFirstParty, clientDisplayName, logoUrl, size = 72 }) => {
     return isFirstParty ? (
-      <Avatar alt={clientDisplayName} avatar={logoUrl!} shape={'square'} size={size} />
+      <Avatar
+        alt={clientDisplayName}
+        avatar={logoUrl || defaultFirstPartyLogo}
+        shape={'square'}
+        size={size}
+      />
     ) : (
       <Flexbox horizontal align={'center'} gap={8}>
         {logoUrl ? (

@@ -8,7 +8,7 @@ import { translation } from '@/server/translation';
 import { type DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
-const faviconVersion = 3;
+const faviconVersion = 4;
 const naiyunhubIcon = `/icons/naiyunhub-logo.png?v=${faviconVersion}`;
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
