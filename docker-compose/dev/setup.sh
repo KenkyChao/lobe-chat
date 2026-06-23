@@ -29,7 +29,7 @@ fail() {
 }
 
 usage() {
-  cat <<'EOF'
+  cat << 'EOF'
 Usage:
   docker-compose/dev/setup.sh [action] [options]
 
@@ -56,6 +56,7 @@ Options:
 
 Examples:
   docker-compose/dev/setup.sh
+  docker-compose/dev/setup.sh build --env test
   docker-compose/dev/setup.sh restart --env test --no-build
   docker-compose/dev/setup.sh restart --env prod --no-build
   docker-compose/dev/setup.sh up --pull-base --logs
@@ -66,7 +67,7 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    up|start|build|pull|config|status|ps|logs|restart|down|stop)
+    up | start | build | pull | config | status | ps | logs | restart | down | stop)
       ACTION="$1"
       shift
       ;;
@@ -95,7 +96,7 @@ while [[ $# -gt 0 ]]; do
       DETACH=0
       shift
       ;;
-    -d|--detach)
+    -d | --detach)
       DETACH=1
       shift
       ;;
@@ -107,7 +108,7 @@ while [[ $# -gt 0 ]]; do
       USE_CN_MIRROR=true
       shift
       ;;
-    -h|--help)
+    -h | --help)
       usage
       exit 0
       ;;
@@ -118,7 +119,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "${ENV_NAME}" in
-  development|test|prod) ;;
+  development | test | prod) ;;
   *)
     fail "Unsupported env: ${ENV_NAME}. Expected one of: development, test, prod."
     ;;
@@ -128,7 +129,7 @@ ENV_FILE="${ROOT_DIR}/.env.${ENV_NAME}"
 NAIYUN_ENV_FILE="../../.env.${ENV_NAME}"
 
 command_exists() {
-  command -v "$1" >/dev/null 2>&1
+  command -v "$1" > /dev/null 2>&1
 }
 
 read_package_version() {
@@ -145,14 +146,27 @@ env_has_key() {
 }
 
 read_env_value() {
-  sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*//p" "${ENV_FILE}" \
-    | tail -n 1 \
-    | sed "s/^[\"']//;s/[\"']$//"
+  local value
+  value="$(
+    sed -n -E "s/^[[:space:]]*(export[[:space:]]+)?$1[[:space:]]*=[[:space:]]*//p" "${ENV_FILE}" \
+      | tail -n 1
+  )"
+  value="${value%$'\r'}"
+
+  if [[ "${value}" == \"*\" && "${value}" == *\" ]]; then
+    value="${value#\"}"
+    value="${value%\"}"
+  elif [[ "${value}" == \'*\' && "${value}" == *\' ]]; then
+    value="${value#\'}"
+    value="${value%\'}"
+  fi
+
+  printf '%s' "${value}"
 }
 
 require_docker() {
   command_exists docker || fail "Docker is not installed or not in PATH."
-  docker compose version >/dev/null 2>&1 || fail "Docker Compose v2 is required. Please make sure 'docker compose' works."
+  docker compose version > /dev/null 2>&1 || fail "Docker Compose v2 is required. Please make sure 'docker compose' works."
 }
 
 check_env_file() {
@@ -213,6 +227,8 @@ build_image() {
     NEXT_PUBLIC_UMAMI_SCRIPT_URL
     NEXT_PUBLIC_UMAMI_WEBSITE_ID
     NEXT_PUBLIC_CHANGELOG_URL
+    NEXT_PUBLIC_OFFICIAL_URL
+    NEXT_PUBLIC_MARKET_BASE_URL
     NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL
     FEATURE_FLAGS
   )
@@ -226,12 +242,19 @@ build_image() {
   fi
 
   for arg in "${passthrough_args[@]}"; do
-    if [[ -n "${!arg:-}" ]]; then
-      build_args+=(--build-arg "${arg}=${!arg}")
+    local value="${!arg:-}"
+
+    if [[ -z "${value}" ]] && env_has_key "${arg}"; then
+      value="$(read_env_value "${arg}" || true)"
+    fi
+
+    if [[ -n "${value}" ]]; then
+      build_args+=(--build-arg "${arg}=${value}")
     fi
   done
 
   log "Building local app image: ${image}"
+  log "Build env file: ${ENV_FILE}"
   docker build "${build_args[@]}" "${ROOT_DIR}"
 }
 
@@ -276,7 +299,7 @@ main() {
       check_env_file
       validate_config
       ;;
-    status|ps)
+    status | ps)
       check_env_file
       compose ps
       ;;
@@ -284,7 +307,7 @@ main() {
       check_env_file
       compose logs -f lobe
       ;;
-    down|stop)
+    down | stop)
       check_env_file
       log "Stopping dev deployment"
       compose down
@@ -299,7 +322,7 @@ main() {
       compose up -d --force-recreate
       print_access_info
       ;;
-    up|start)
+    up | start)
       check_env_file
       if [[ "${BUILD_IMAGE}" == "1" ]]; then
         build_image
