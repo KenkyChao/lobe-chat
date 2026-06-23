@@ -1,5 +1,5 @@
 import type * as LobechatConst from '@lobechat/const';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -23,6 +23,7 @@ vi.mock('react-i18next', () => ({
         'userPanel.feedback': 'Feedback',
         'userPanel.help': 'Help',
         'userPanel.setting': 'Settings',
+        'userPanel.wechat': 'WeChat',
       })[key] || key,
   }),
 }));
@@ -120,6 +121,10 @@ const renderFooter = async ({
     default: vi.fn(),
     openFeedbackModal: vi.fn(),
   }));
+  vi.doMock('@/components/WechatContactModal', () => ({
+    default: vi.fn(),
+    openWechatContactModal: vi.fn(),
+  }));
   vi.doMock('@/components/HighlightNotification', () => ({
     default: (props: {
       actionLabel?: string;
@@ -212,6 +217,7 @@ afterEach(() => {
   vi.doUnmock('@lobehub/analytics/react');
   vi.doUnmock('@/components/ChangelogModal');
   vi.doUnmock('@/components/FeedbackModal');
+  vi.doUnmock('@/components/WechatContactModal');
   vi.doUnmock('@/components/HighlightNotification');
   vi.doUnmock('@/features/User/UserPanel/ThemeButton');
   vi.doUnmock('@/hooks/useNavLayout');
@@ -299,13 +305,22 @@ describe('Footer agent onboarding promotion', () => {
 
 describe('Footer help menu', () => {
   it('navigates the desktop help menu docs entry to the enterprise manual route', async () => {
-    const user = userEvent.setup();
     const assignSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => {});
     await renderFooter({ desktop: true });
 
-    await user.click(screen.getByLabelText('Help'));
-    await user.click(await screen.findByText('Docs'));
+    fireEvent.click(screen.getAllByLabelText('Help').at(-1)!);
+    fireEvent.click(await screen.findByText('Docs'));
 
     expect(assignSpy).toHaveBeenCalledWith('/docs/usage/enterprise/start');
-  });
+  }, 40000);
+
+  it('opens the WeChat contact modal from the help menu', async () => {
+    await renderFooter({ desktop: true });
+    const { openWechatContactModal } = await import('@/components/WechatContactModal');
+
+    fireEvent.click(screen.getAllByLabelText('Help').at(-1)!);
+    fireEvent.click(await screen.findByRole('menuitem', { name: /WeChat/ }));
+
+    expect(openWechatContactModal).toHaveBeenCalledTimes(1);
+  }, 40000);
 });

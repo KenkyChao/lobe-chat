@@ -564,6 +564,10 @@ export default {
   'userPanel.upgradePlan': 'Upgrade Plan',
   'userPanel.usages': 'Usage',
   'userPanel.wechat': 'WeChat',
+  'userPanel.wechatModal.description': 'Scan the QR code with WeChat to contact NaiYunHub support.',
+  'userPanel.wechatModal.openWechat': 'Open WeChat',
+  'userPanel.wechatModal.qrAlt': 'NaiYunHub WeChat contact QR code',
+  'userPanel.wechatModal.title': 'Contact Us on WeChat',
   'version': 'Version',
   'zoom': 'Zoom',
 };

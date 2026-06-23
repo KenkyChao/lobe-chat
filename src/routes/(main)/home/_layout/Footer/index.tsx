@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import HighlightNotification from '@/components/HighlightNotification';
+import { openWechatContactModal } from '@/components/WechatContactModal';
 import Billboard from '@/features/Billboard';
 import { useBillboardMenuItems } from '@/features/Billboard/MenuItems';
 import { useActiveNavKey } from '@/features/NavPanel';
@@ -266,19 +267,19 @@ const Footer = memo(() => {
         label: t('userPanel.feedback'),
       },
       {
-        disabled: true,
         icon: <WeChat.Color size={16} />,
         key: 'wechat',
         label: t('userPanel.wechat'),
+        onClick: () => openWechatContactModal(),
       },
       {
         type: 'divider',
       },
       {
-        disabled: true,
         icon: <Icon icon={FileClockIcon} />,
         key: 'changelog',
         label: t('changelog'),
+        onClick: () => window.location.assign('/changelog'),
       },
       ...(footer.showEvalEntry && footer.layout === 'compact'
         ? [
