@@ -53,6 +53,7 @@ const envNumber = (defaultValue: number) =>
 const getRuntimeEnv = () => ({
   ...process.env,
   DESKTOP_EXTERNAL_NAVIGATION_HOSTS: process.env.DESKTOP_EXTERNAL_NAVIGATION_HOSTS,
+  OFFICIAL_CLOUD_SERVER: process.env.OFFICIAL_CLOUD_SERVER,
   UPDATE_CHANNEL: process.env.UPDATE_CHANNEL,
   UPDATE_SERVER_URL: process.env.UPDATE_SERVER_URL,
 });

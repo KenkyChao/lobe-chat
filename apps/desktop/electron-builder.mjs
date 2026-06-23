@@ -275,7 +275,7 @@ const config = {
   npmRebuild: true,
   nsis: {
     allowToChangeInstallationDirectory: true,
-    artifactName: '${productName}-${version}-setup.${ext}',
+    artifactName: '${productName}-${version}-${arch}-setup.${ext}',
     createDesktopShortcut: 'always',
     installerHeader: './build/nsis-header.bmp',
     installerSidebar: './build/nsis-sidebar.bmp',
