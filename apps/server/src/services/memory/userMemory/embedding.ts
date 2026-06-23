@@ -3,6 +3,7 @@ import type { ModelRuntime } from '@lobechat/model-runtime';
 import { RequestTrigger } from '@lobechat/types';
 
 import { parseMemoryExtractionConfig } from '@/server/globalConfig/parseMemoryExtractionConfig';
+import { createEmbeddingPayload } from '@/server/services/embedding/createEmbeddingPayload';
 import { trimBasedOnBatchProbe } from '@/utils/chunkers';
 import { encodeAsync } from '@/utils/tokenizer';
 
@@ -103,11 +104,11 @@ export const embedUserMemoryTexts = async (
   if (requests.length === 0) return outputs;
 
   const embeddings = await params.runtime.embeddings(
-    {
+    createEmbeddingPayload({
       dimensions: params.dimensions ?? DEFAULT_USER_MEMORY_EMBEDDING_DIMENSIONS,
       input: requests.map((item) => item.text),
       model: params.model,
-    },
+    }),
     { metadata: { trigger: RequestTrigger.Memory }, user: params.userId },
   );
 

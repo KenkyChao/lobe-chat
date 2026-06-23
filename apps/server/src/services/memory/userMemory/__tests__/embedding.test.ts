@@ -102,4 +102,28 @@ describe('embedUserMemoryTexts', () => {
     );
     expect(result).toEqual([[1, 2, 3]]);
   });
+
+  it('omits dimensions for embedding models that do not support dimension overrides', async () => {
+    mocks.contextLimit = undefined;
+    const runtime = {
+      embeddings: vi.fn(async () => [[1, 2, 3]]),
+    } satisfies UserMemoryEmbeddingRuntime;
+
+    const result = await embedUserMemoryTexts({
+      input: ['memory query'],
+      model: 'bge-m3',
+      runtime,
+      source: 'test:bge',
+      userId: 'user-test',
+    });
+
+    expect(runtime.embeddings).toHaveBeenCalledWith(
+      {
+        input: ['memory query'],
+        model: 'bge-m3',
+      },
+      { metadata: { trigger: 'memory' }, user: 'user-test' },
+    );
+    expect(result).toEqual([[1, 2, 3]]);
+  });
 });

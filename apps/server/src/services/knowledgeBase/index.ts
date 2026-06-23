@@ -17,6 +17,7 @@ import { knowledgeBaseFiles } from '@/database/schemas';
 import { getServerDefaultFilesConfig } from '@/server/globalConfig';
 import { initModelRuntimeFromDB } from '@/server/modules/ModelRuntime';
 import { DocumentService } from '@/server/services/document';
+import { createEmbeddingPayload } from '@/server/services/embedding/createEmbeddingPayload';
 
 export interface FileContentResult {
   content: string;
@@ -131,7 +132,7 @@ export class KnowledgeBaseSearchService {
       const query = input.query.length > 8000 ? input.query.slice(0, 8000) : input.query;
 
       const embeddings = await modelRuntime.embeddings(
-        { dimensions: 1024, input: query, model },
+        createEmbeddingPayload({ dimensions: 1024, input: query, model }),
         { metadata: { trigger: RequestTrigger.SemanticSearch }, user: this.userId },
       );
 

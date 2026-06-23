@@ -72,6 +72,7 @@ import { type MemoryAgentConfig } from '@/server/globalConfig/parseMemoryExtract
 import { parseMemoryExtractionConfig } from '@/server/globalConfig/parseMemoryExtractionConfig';
 import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
 import { S3 } from '@/server/modules/S3';
+import { createEmbeddingPayload } from '@/server/services/embedding/createEmbeddingPayload';
 import {
   AsyncTaskError,
   type AsyncTaskErrorBody,
@@ -894,11 +895,11 @@ export class MemoryExtractionExecutor {
 
       try {
         const response = await runtimes.embeddings(
-          {
+          createEmbeddingPayload({
             dimensions: DEFAULT_USER_MEMORY_EMBEDDING_DIMENSIONS,
             input: requests.map((item) => item.text),
             model,
-          },
+          }),
           { metadata: { trigger: RequestTrigger.Memory }, user: userId },
         );
 
@@ -1391,11 +1392,11 @@ export class MemoryExtractionExecutor {
     );
 
     const embeddings = await runtime.embeddings(
-      {
+      createEmbeddingPayload({
         dimensions: DEFAULT_USER_MEMORY_EMBEDDING_DIMENSIONS,
         input: [aggregatedContent],
         model: embeddingModel,
-      },
+      }),
       { metadata: { trigger: RequestTrigger.Memory }, user: userId },
     );
 
