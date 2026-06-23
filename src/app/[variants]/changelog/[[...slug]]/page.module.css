@@ -99,7 +99,6 @@
   background: #f9fafb;
 }
 
-.cardLink,
 .backLink {
   color: #0f766e;
   font-size: 14px;
@@ -108,7 +107,6 @@
   white-space: nowrap;
 }
 
-.cardLink:hover,
 .backLink:hover,
 .link:hover {
   color: #0b5f59;

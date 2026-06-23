@@ -15,7 +15,6 @@ import { useNavigate } from 'react-router-dom';
 
 import useBusinessMeCells from '@/business/client/features/User/useBusinessMeCells';
 import { type CellProps } from '@/components/Cell';
-import { openChangelogModal } from '@/components/ChangelogModal';
 import { FEEDBACK } from '@/const/index';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
@@ -94,7 +93,7 @@ export const useCategory = () => {
       icon: FileClockIcon,
       key: 'changelog',
       label: t('changelog'),
-      onClick: () => openChangelogModal(),
+      onClick: () => window.location.assign('/changelog'),
     },
   ].filter(Boolean) as CellProps[];
 

@@ -43,7 +43,6 @@ const copy = {
       'Track NaiYunHub product updates, desktop releases, deployment changes, and fixes.',
     empty: 'No changelog entries are available yet.',
     eyebrow: 'NaiYunHub Changelog',
-    readDetails: 'Read details',
     title: 'Changelog',
     versionLabel: 'Version',
   },
@@ -53,7 +52,6 @@ const copy = {
     description: '追踪 NaiYunHub 的产品更新、桌面端发布、部署调整与问题修复。',
     empty: '暂时还没有更新日志。',
     eyebrow: 'NaiYunHub 更新日志',
-    readDetails: '查看详情',
     title: '更新日志',
     versionLabel: '版本',
   },
@@ -249,9 +247,6 @@ const ChangelogPage = async (props: PageProps) => {
                   <h2>{doc.title}</h2>
                   {doc.description && <p>{doc.description}</p>}
                 </div>
-                <NextLink className={styles.cardLink} href={`/changelog/${doc.id}`}>
-                  {text.readDetails}
-                </NextLink>
               </article>
             ))}
           </div>
