@@ -3,6 +3,57 @@ import { type Generation, type GenerationBatch } from '@/types/generation';
 // Default maximum width for image items
 export const DEFAULT_MAX_ITEM_WIDTH = 256;
 
+const toTimestamp = (value?: Date | string | null): number | null => {
+  if (!value) return null;
+
+  const timestamp = value instanceof Date ? value.getTime() : new Date(value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
+
+export const formatElapsedDuration = (durationMs: number): string => {
+  const safeDuration = Math.max(0, Math.round(durationMs));
+  const totalSeconds = Math.round(safeDuration / 1000);
+
+  if (totalSeconds < 60) {
+    return `${Math.max(1, totalSeconds)}s`;
+  }
+
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (totalMinutes < 60) {
+    return seconds > 0 ? `${totalMinutes}m ${seconds}s` : `${totalMinutes}m`;
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+};
+
+export const getGenerationElapsedTimeMs = (generation?: Generation | null): number | null => {
+  if (!generation) return null;
+
+  const { duration, createdAt, updatedAt } = generation.task;
+  if (typeof duration === 'number' && Number.isFinite(duration) && duration >= 0) {
+    return duration;
+  }
+
+  const startedAt = toTimestamp(createdAt ?? generation.createdAt);
+  const endedAt = toTimestamp(updatedAt);
+
+  if (startedAt === null || endedAt === null || endedAt < startedAt) return null;
+
+  return endedAt - startedAt;
+};
+
+export const getBatchElapsedTimeMs = (generations: Generation[]): number | null => {
+  const durations = generations
+    .map((generation) => getGenerationElapsedTimeMs(generation))
+    .filter((duration): duration is number => duration !== null);
+
+  return durations.length > 0 ? Math.max(...durations) : null;
+};
+
 /**
  * Get image dimensions from various sources
  * Returns width, height and aspect ratio when available

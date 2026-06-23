@@ -1,3 +1,4 @@
+import { GENERATION_ASYNC_TASK_TIMEOUT } from '@lobechat/business-config/server';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
@@ -59,7 +60,10 @@ export const generationRouter = router({
     .input(z.object({ asyncTaskId: z.string(), generationId: z.string() }))
     .query(async ({ ctx, input }) => {
       // Check for timeout tasks before querying
-      await ctx.asyncTaskModel.checkTimeoutTasks([input.asyncTaskId]);
+      await ctx.asyncTaskModel.checkTimeoutTasks(
+        [input.asyncTaskId],
+        GENERATION_ASYNC_TASK_TIMEOUT,
+      );
 
       const asyncTask = await ctx.asyncTaskModel.findById(input.asyncTaskId);
       if (!asyncTask) {

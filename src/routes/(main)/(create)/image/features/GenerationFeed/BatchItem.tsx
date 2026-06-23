@@ -19,6 +19,7 @@ import { AsyncTaskErrorType } from '@/types/asyncTask';
 import { type GenerationBatch } from '@/types/generation';
 
 import { GenerationItem } from './GenerationItem';
+import { formatElapsedDuration, getBatchElapsedTimeMs } from './GenerationItem/utils';
 import { ReferenceImages } from './ReferenceImages';
 
 const styles = createStaticStyles(({ css, cssVar, cx }) => ({
@@ -71,6 +72,11 @@ export const GenerationBatchItem = memo<GenerationBatchItemProps>(({ batch }) =>
   const time = useMemo(() => {
     return dayjs(batch.createdAt).format('YYYY-MM-DD HH:mm:ss');
   }, [batch.createdAt]);
+
+  const elapsedTime = useMemo(() => {
+    const duration = getBatchElapsedTimeMs(batch.generations);
+    return duration === null ? null : formatElapsedDuration(duration);
+  }, [batch.generations]);
 
   const handleCopyPrompt = async () => {
     try {
@@ -182,9 +188,16 @@ export const GenerationBatchItem = memo<GenerationBatchItemProps>(({ batch }) =>
             },
           ]}
         />
-        <Text as={'time'} fontSize={12} type={'secondary'}>
-          {time}
-        </Text>
+        <Flexbox horizontal align={'center'} gap={8}>
+          {elapsedTime && (
+            <Text fontSize={12} type={'secondary'}>
+              {t('generation.metadata.elapsedTime', { time: elapsedTime })}
+            </Text>
+          )}
+          <Text as={'time'} fontSize={12} type={'secondary'}>
+            {time}
+          </Text>
+        </Flexbox>
       </Flexbox>
     </Block>
   );

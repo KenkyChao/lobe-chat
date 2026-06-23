@@ -217,11 +217,14 @@ export class GenerationModel {
       id: generation.id,
       seed: generation.seed,
       task: {
+        createdAt: generation.asyncTask?.createdAt,
+        duration: generation.asyncTask?.duration,
         error: generation.asyncTask?.error
           ? (generation.asyncTask.error as AsyncTaskError)
           : undefined,
         id: generation.asyncTaskId || '',
         status: (generation.asyncTask?.status as AsyncTaskStatus) || 'pending',
+        updatedAt: generation.asyncTask?.updatedAt,
       },
     };
     return result;

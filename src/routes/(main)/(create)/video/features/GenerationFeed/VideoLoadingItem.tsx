@@ -78,7 +78,13 @@ const VideoLoadingItem = memo<VideoLoadingItemProps>(
           ) : (
             <Spin indicator={<LoadingOutlined spin />} />
           )}
-          {progress === 99 && <ElapsedTime generationId={generation.id} isActive={isGenerating} />}
+          {progress === 99 && (
+            <ElapsedTime
+              generationId={generation.id}
+              isActive={isGenerating}
+              startAt={generation.task.createdAt ?? generation.createdAt}
+            />
+          )}
         </Center>
       </Block>
     );

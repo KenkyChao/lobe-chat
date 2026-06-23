@@ -49,6 +49,7 @@ export default {
   'generation.actions.seedCopied': 'Seed Copied to Clipboard',
   'generation.actions.seedCopyFailed': 'Failed to Copy Seed',
   'generation.metadata.count': '{{count}} Images',
+  'generation.metadata.elapsedTime': 'Elapsed {{time}}',
   'generation.status.failed': 'Generation hit a problem. Adjust the prompt and try again',
   'generation.status.generating': 'Generating...',
   'notSupportGuide.desc':

@@ -62,9 +62,12 @@ export interface GenerationConfig {
 }
 
 export interface GenerationAsyncTask {
+  createdAt?: Date;
+  duration?: number | null;
   error?: AsyncTaskError;
   id: string;
   status: AsyncTaskStatus;
+  updatedAt?: Date;
 }
 
 export interface Generation {

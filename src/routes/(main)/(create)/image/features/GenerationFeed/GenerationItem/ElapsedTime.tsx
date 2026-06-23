@@ -3,20 +3,28 @@
 import { Text } from '@lobehub/ui';
 import { useEffect, useRef, useState } from 'react';
 
+import { formatElapsedDuration } from './utils';
+
 interface ElapsedTimeProps {
   generationId: string;
   isActive: boolean;
+  startAt?: Date | string | null;
 }
 
 const getSessionStorageKey = (generationId: string) => `generation_start_time_${generationId}`;
 
+const toTimestamp = (value?: Date | string | null) => {
+  if (!value) return null;
+
+  const timestamp = value instanceof Date ? value.getTime() : new Date(value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
+
 /**
  * Display elapsed time for image generation
- * - Less than 1 minute: show seconds with 0.1s precision
- * - 1 minute or more: show minutes with 1 decimal precision
  * - Uses sessionStorage to maintain accurate timing across page refreshes
  */
-export function ElapsedTime({ generationId, isActive }: ElapsedTimeProps) {
+export function ElapsedTime({ generationId, isActive, startAt }: ElapsedTimeProps) {
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
   const frameRef = useRef<number | null>(null);
   const lastUpdateRef = useRef<number>(0);
@@ -40,6 +48,12 @@ export function ElapsedTime({ generationId, isActive }: ElapsedTimeProps) {
 
     // Only set start time when the component mounts
     const clientStartTime = (() => {
+      const explicitStartAt = toTimestamp(startAt);
+      if (explicitStartAt !== null) {
+        sessionStorage.setItem(storageKey, explicitStartAt.toString());
+        return explicitStartAt;
+      }
+
       const stored = sessionStorage.getItem(storageKey);
       if (stored) return Number(stored);
 
@@ -50,7 +64,7 @@ export function ElapsedTime({ generationId, isActive }: ElapsedTimeProps) {
 
     const update = (timestamp: number) => {
       if (timestamp - lastUpdateRef.current >= 100) {
-        const elapsed = (Date.now() - clientStartTime) / 100;
+        const elapsed = Date.now() - clientStartTime;
         setElapsedTime(Math.max(0, elapsed));
         lastUpdateRef.current = timestamp;
       }
@@ -64,23 +78,10 @@ export function ElapsedTime({ generationId, isActive }: ElapsedTimeProps) {
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [generationId, isActive]);
+  }, [generationId, isActive, startAt]);
 
   // Format elapsed time display
-  const formattedTime = (() => {
-    if (elapsedTime === null) return '';
-
-    const totalSeconds = elapsedTime / 10;
-
-    // Less than 60 seconds: show seconds with 0.1s precision
-    if (totalSeconds < 60) {
-      return `${totalSeconds.toFixed(1)}s`;
-    }
-
-    // 60 seconds or more: show minutes with 1 decimal precision
-    const minutes = totalSeconds / 60;
-    return `${minutes.toFixed(1)}min`;
-  })();
+  const formattedTime = elapsedTime === null ? '' : formatElapsedDuration(elapsedTime);
 
   return (
     <Text code fontSize={10} type={'secondary'}>

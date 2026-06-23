@@ -12,6 +12,10 @@ import { useTranslation } from 'react-i18next';
 
 import useRenderBusinessVideoBatchItem from '@/business/client/hooks/useRenderBusinessVideoBatchItem';
 import { GenerationInvalidAPIKey } from '@/routes/(main)/(create)/features/GenerationInput';
+import {
+  formatElapsedDuration,
+  getGenerationElapsedTimeMs,
+} from '@/routes/(main)/(create)/image/features/GenerationFeed/GenerationItem/utils';
 import { useVideoStore } from '@/store/video';
 import { AsyncTaskErrorType, AsyncTaskStatus } from '@/types/asyncTask';
 import type { GenerationBatch } from '@/types/generation';
@@ -60,6 +64,11 @@ export const VideoGenerationBatchItem = memo<VideoGenerationBatchItemProps>(({ b
   }, [batch.createdAt]);
 
   const generation = batch.generations[0];
+
+  const elapsedTime = useMemo(() => {
+    const duration = getGenerationElapsedTimeMs(generation);
+    return duration === null ? null : formatElapsedDuration(duration);
+  }, [generation]);
 
   const isFinalized =
     generation?.task.status === AsyncTaskStatus.Success ||
@@ -265,9 +274,16 @@ export const VideoGenerationBatchItem = memo<VideoGenerationBatchItemProps>(({ b
             },
           ]}
         />
-        <Text as={'time'} fontSize={12} type={'secondary'}>
-          {time}
-        </Text>
+        <Flexbox horizontal align={'center'} gap={8}>
+          {elapsedTime && (
+            <Text fontSize={12} type={'secondary'}>
+              {t('generation.metadata.elapsedTime', { ns: 'image', time: elapsedTime })}
+            </Text>
+          )}
+          <Text as={'time'} fontSize={12} type={'secondary'}>
+            {time}
+          </Text>
+        </Flexbox>
       </Flexbox>
     </Block>
   );

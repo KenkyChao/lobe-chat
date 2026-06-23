@@ -1,3 +1,4 @@
+import { GENERATION_ASYNC_TASK_TIMEOUT } from '@lobechat/business-config/server';
 import { TRPCError } from '@trpc/server';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -56,7 +57,10 @@ describe('generationRouter', () => {
       expect(result.status).toBe(AsyncTaskStatus.Success);
       expect(result.generation).toEqual(mockGeneration);
       expect(result.error).toBeNull();
-      expect(mockCheckTimeoutTasks).toHaveBeenCalledWith(['task-1']);
+      expect(mockCheckTimeoutTasks).toHaveBeenCalledWith(
+        ['task-1'],
+        GENERATION_ASYNC_TASK_TIMEOUT,
+      );
       expect(mockFindById).toHaveBeenCalledWith('task-1');
       expect(mockFindByIdAndTransform).toHaveBeenCalledWith('gen-1');
     });

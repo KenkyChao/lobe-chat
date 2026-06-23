@@ -7,6 +7,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { promisify } from 'node:util';
 
+import { GENERATION_ASYNC_TASK_TIMEOUT } from '@lobechat/business-config/server';
 import { type LobeChatDatabase } from '@lobechat/database';
 import debug from 'debug';
 import { nanoid } from 'nanoid';
@@ -164,8 +165,8 @@ export class VideoGenerationService {
 
   /** Max video file size: 500 MB */
   private static MAX_VIDEO_SIZE = 500 * 1024 * 1024;
-  /** Download timeout: 5 minutes */
-  private static DOWNLOAD_TIMEOUT_MS = 5 * 60 * 1000;
+  /** Download timeout: 10 minutes */
+  private static DOWNLOAD_TIMEOUT_MS = GENERATION_ASYNC_TASK_TIMEOUT;
 
   private async downloadVideo(
     url: string,

@@ -5,7 +5,10 @@ import { type Generation, type GenerationBatch } from '@/types/generation';
 // Import functions for testing
 import {
   DEFAULT_MAX_ITEM_WIDTH,
+  formatElapsedDuration,
   getAspectRatio,
+  getBatchElapsedTimeMs,
+  getGenerationElapsedTimeMs,
   getImageDimensions,
   getThumbnailMaxWidth,
 } from './utils';
@@ -596,5 +599,65 @@ describe('getThumbnailMaxWidth (isolated unit testing)', () => {
     // min(205, 400) = 205
     const result = getThumbnailMaxWidth(mockGen);
     expect(result).toBe(205);
+  });
+});
+
+describe('elapsed duration helpers', () => {
+  it('should format elapsed duration compactly', () => {
+    expect(formatElapsedDuration(500)).toBe('1s');
+    expect(formatElapsedDuration(12_400)).toBe('12s');
+    expect(formatElapsedDuration(80_000)).toBe('1m 20s');
+    expect(formatElapsedDuration(120_000)).toBe('2m');
+    expect(formatElapsedDuration(3_900_000)).toBe('1h 5m');
+  });
+
+  it('should prefer task duration when available', () => {
+    const generation: Generation = {
+      asyncTaskId: 'task-id',
+      createdAt: new Date('2026-06-23T00:00:00.000Z'),
+      id: 'generation-id',
+      task: {
+        duration: 42_000,
+        id: 'task-id',
+        status: 'success' as any,
+      },
+    };
+
+    expect(getGenerationElapsedTimeMs(generation)).toBe(42_000);
+  });
+
+  it('should fall back to task timestamps', () => {
+    const generation: Generation = {
+      asyncTaskId: 'task-id',
+      createdAt: new Date('2026-06-23T00:00:00.000Z'),
+      id: 'generation-id',
+      task: {
+        createdAt: new Date('2026-06-23T00:00:10.000Z'),
+        id: 'task-id',
+        status: 'success' as any,
+        updatedAt: new Date('2026-06-23T00:01:25.000Z'),
+      },
+    };
+
+    expect(getGenerationElapsedTimeMs(generation)).toBe(75_000);
+  });
+
+  it('should return the longest generation duration for a batch', () => {
+    const generations: Generation[] = [
+      {
+        asyncTaskId: 'task-1',
+        createdAt: new Date(),
+        id: 'generation-1',
+        task: { duration: 10_000, id: 'task-1', status: 'success' as any },
+      },
+      {
+        asyncTaskId: 'task-2',
+        createdAt: new Date(),
+        id: 'generation-2',
+        task: { duration: 35_000, id: 'task-2', status: 'success' as any },
+      },
+    ];
+
+    expect(getBatchElapsedTimeMs(generations)).toBe(35_000);
   });
 });

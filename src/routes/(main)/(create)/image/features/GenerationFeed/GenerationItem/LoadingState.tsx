@@ -33,7 +33,11 @@ export const LoadingState = memo<LoadingStateProps>(
         <div className={`${styles.placeholderContainer} ${styles.placeholderContainerLoading}`} />
         <Center gap={8} style={{ zIndex: 2 }}>
           <NeuralNetworkLoading size={48} />
-          <ElapsedTime generationId={generation.id} isActive={isGenerating} />
+          <ElapsedTime
+            generationId={generation.id}
+            isActive={isGenerating}
+            startAt={generation.task.createdAt ?? generation.createdAt}
+          />
         </Center>
         <ActionButtons onDelete={onDelete} />
       </Block>

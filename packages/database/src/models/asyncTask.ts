@@ -140,9 +140,9 @@ export class AsyncTaskModel {
   };
 
   /**
-   * make the task status to be `error` if the task is not finished in 20 seconds
+   * make the task status to be `error` if the task is not finished within timeout
    */
-  checkTimeoutTasks = async (ids: string[]) => {
+  checkTimeoutTasks = async (ids: string[], timeout = ASYNC_TASK_TIMEOUT) => {
     const tasks = await this.db
       .select({ id: asyncTasks.id })
       .from(asyncTasks)
@@ -154,7 +154,7 @@ export class AsyncTaskModel {
             eq(asyncTasks.status, AsyncTaskStatus.Pending),
             eq(asyncTasks.status, AsyncTaskStatus.Processing),
           ),
-          lt(asyncTasks.createdAt, new Date(Date.now() - ASYNC_TASK_TIMEOUT)),
+          lt(asyncTasks.createdAt, new Date(Date.now() - timeout)),
         ),
       );
 
