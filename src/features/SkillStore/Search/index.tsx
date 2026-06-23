@@ -11,7 +11,7 @@ import { SkillStoreTab } from '../SkillStoreContent';
 interface SearchProps {
   activeTab: SkillStoreTab;
   onLobeHubSearch: (keywords: string) => void;
-  onSkillSearch: (keywords: string) => void;
+  onSkillSearch?: (keywords: string) => void;
 }
 
 export const Search = memo<SearchProps>(({ activeTab, onLobeHubSearch, onSkillSearch }) => {
@@ -32,7 +32,7 @@ export const Search = memo<SearchProps>(({ activeTab, onLobeHubSearch, onSkillSe
             if (activeTab === SkillStoreTab.MCP) {
               useToolStore.setState({ mcpSearchKeywords: keywords, searchLoading: true });
             } else if (activeTab === SkillStoreTab.Skills) {
-              onSkillSearch(keywords);
+              onSkillSearch?.(keywords);
             } else {
               onLobeHubSearch(keywords);
             }

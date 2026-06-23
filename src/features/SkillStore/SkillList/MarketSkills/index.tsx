@@ -1,22 +1,23 @@
 'use client';
 
-import { Center, Icon, Text } from '@lobehub/ui';
+import { type SkillListItem } from '@lobechat/types';
 import { uniqBy } from 'es-toolkit/compat';
-import { ServerCrash } from 'lucide-react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import isEqual from 'fast-deep-equal';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { VirtuosoGrid } from 'react-virtuoso';
 
 import { useClientDataSWR } from '@/libs/swr';
 import { discoverService } from '@/services/discover';
 import { globalHelpers } from '@/store/global/helpers';
 import { useToolStore } from '@/store/tool';
+import { agentSkillsSelectors } from '@/store/tool/selectors';
 import { type DiscoverSkillItem, SkillSorts } from '@/types/discover';
 
+import AgentSkillItem from '../AgentSkillItem';
 import MarketSkillItem from '../Community/MarketSkillItem';
 import Empty from '../Empty';
 import Loading from '../Loading';
-import { virtuosoGridStyles } from '../style';
+import { gridStyles, virtuosoGridStyles } from '../style';
 import VirtuosoLoading from '../VirtuosoLoading';
 import WantMoreSkills from '../WantMoreSkills';
 
@@ -25,10 +26,9 @@ interface MarketSkillListProps {
 }
 
 const MarketSkillList = memo<MarketSkillListProps>(({ keywords }) => {
-  const { t } = useTranslation('setting');
-
   // Ensure agent skills are fetched so install status is available
   const useFetchAgentSkills = useToolStore((s) => s.useFetchAgentSkills);
+  const localAgentSkills = useToolStore(agentSkillsSelectors.getAgentSkills, isEqual);
   useFetchAgentSkills(true);
 
   // Market skills pagination state
@@ -72,6 +72,23 @@ const MarketSkillList = memo<MarketSkillListProps>(({ keywords }) => {
     }
   }, [keywords]);
 
+  const filteredLocalAgentSkills = useMemo<SkillListItem[]>(() => {
+    const lowerKeywords = (keywords || '').toLowerCase().trim();
+    if (!lowerKeywords) return localAgentSkills;
+
+    return localAgentSkills.filter((skill) => {
+      const name = skill.name?.toLowerCase() || '';
+      const identifier = skill.identifier?.toLowerCase() || '';
+      const description = skill.description?.toLowerCase() || '';
+
+      return (
+        name.includes(lowerKeywords) ||
+        identifier.includes(lowerKeywords) ||
+        description.includes(lowerKeywords)
+      );
+    });
+  }, [localAgentSkills, keywords]);
+
   const loadMore = useCallback(() => {
     if (totalPages === undefined || page < totalPages) {
       setPage((p) => p + 1);
@@ -80,16 +97,17 @@ const MarketSkillList = memo<MarketSkillListProps>(({ keywords }) => {
 
   if (isLoading && items.length === 0) return <Loading />;
 
-  if (error) {
+  if (error && filteredLocalAgentSkills.length > 0) {
     return (
-      <Center gap={12} padding={40}>
-        <Icon icon={ServerCrash} size={80} />
-        <Text type={'secondary'}>{t('skillStore.networkError')}</Text>
-      </Center>
+      <div className={gridStyles.grid}>
+        {filteredLocalAgentSkills.map((skill) => (
+          <AgentSkillItem key={skill.id} skill={skill} />
+        ))}
+      </div>
     );
   }
 
-  if (items.length === 0) return <Empty search={Boolean(keywords?.trim())} />;
+  if (error || items.length === 0) return <Empty search={Boolean(keywords?.trim())} />;
 
   const hasReachedEnd = totalPages !== undefined && page >= totalPages;
 

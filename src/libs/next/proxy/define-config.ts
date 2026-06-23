@@ -213,6 +213,7 @@ export function defineConfig() {
     '/market-auth-callback',
     // public share pages
     '/share(.*)',
+    '/changelog(.*)',
     // messenger verify-im — page itself handles unauth (in-page sign-in CTA)
     // and the random_id token is the actual capability check; no need for
     // session-protected access at the middleware layer.

@@ -46,6 +46,15 @@ class DiscoverService {
   private _isRetrying = false;
   private _tokenRefreshPromise: Promise<void> | null = null;
 
+  private createEmptyListResponse = <T>(params: { page?: number; pageSize?: number } = {}): T =>
+    ({
+      currentPage: params.page ? Number(params.page) : 1,
+      items: [],
+      pageSize: params.pageSize ? Number(params.pageSize) : 20,
+      totalCount: 0,
+      totalPages: 0,
+    }) as T;
+
   private isMarketTrustedClientEnabled = (): boolean => {
     if (typeof window === 'undefined' || !window.global_serverConfigStore) return false;
     try {
@@ -56,10 +65,10 @@ class DiscoverService {
     }
   };
 
-  safeInjectMPToken = async () => {
-    // If trusted client is enabled, authentication is handled by backend
-    // No need to inject M2M token from client side
-    if (this.isMarketTrustedClientEnabled()) return;
+  safeInjectMPToken = async (options: { force?: boolean } = {}) => {
+    // Trusted-client auth is handled by backend. Some public Market surfaces still
+    // need M2M as a fallback when local user context is unavailable.
+    if (this.isMarketTrustedClientEnabled() && !options.force) return;
 
     try {
       await this.injectMPToken();
@@ -73,13 +82,8 @@ class DiscoverService {
   getAssistantCategories = async (
     params: CategoryListQuery & { source?: AssistantMarketSource } = {},
   ): Promise<CategoryItem[]> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    const { source, ...rest } = params;
-    return lambdaClient.market.getAssistantCategories.query({
-      ...rest,
-      locale,
-      source,
-    });
+    void params;
+    return [];
   };
 
   getAssistantDetail = async (params: {
@@ -88,34 +92,19 @@ class DiscoverService {
     source?: AssistantMarketSource;
     version?: string;
   }): Promise<DiscoverAssistantDetail | undefined> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getAssistantDetail.query({
-      identifier: params.identifier,
-      locale,
-      source: params.source,
-      version: params.version,
-    });
+    void params;
+    return;
   };
 
   getAssistantIdentifiers = async (
     params: { source?: AssistantMarketSource } = {},
   ): Promise<IdentifiersResponse> => {
-    return lambdaClient.market.getAssistantIdentifiers.query(params);
+    void params;
+    return [];
   };
 
   getAssistantList = async (params: AssistantQueryParams = {}): Promise<AssistantListResponse> => {
-    await this.safeInjectMPToken();
-
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getAssistantList.query(
-      {
-        ...params,
-        locale,
-        page: params.page ? Number(params.page) : 1,
-        pageSize: params.pageSize ? Number(params.pageSize) : 20,
-      },
-      { context: { showNotification: false } },
-    );
+    return this.createEmptyListResponse<AssistantListResponse>(params);
   };
 
   getAgentsByPlugin = async (params: {
@@ -124,23 +113,14 @@ class DiscoverService {
     pageSize?: number;
     pluginId: string;
   }): Promise<AssistantListResponse> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getAgentsByPlugin.query({
-      ...params,
-      locale,
-      page: params.page ? Number(params.page) : 1,
-      pageSize: params.pageSize ? Number(params.pageSize) : 20,
-    });
+    return this.createEmptyListResponse<AssistantListResponse>(params);
   };
 
   // ============================== MCP Market ==============================
 
   getMcpCategories = async (params: CategoryListQuery = {}): Promise<CategoryItem[]> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getMcpCategories.query({
-      ...params,
-      locale,
-    });
+    void params;
+    return [];
   };
 
   getMcpDetail = async (params: {
@@ -148,57 +128,30 @@ class DiscoverService {
     locale?: string;
     version?: string;
   }): Promise<DiscoverMcpDetail> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getMcpDetail.query({
-      ...params,
-      locale,
-    });
+    void params;
+    return undefined as unknown as DiscoverMcpDetail;
   };
 
   getMcpList = async (params: McpQueryParams = {}): Promise<McpListResponse> => {
-    await this.safeInjectMPToken();
-
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getMcpList.query({
-      ...params,
-      locale,
-      page: params.page ? Number(params.page) : 1,
-      pageSize: params.pageSize ? Number(params.pageSize) : 20,
-    });
+    return this.createEmptyListResponse<McpListResponse>(params);
   };
 
   getMCPPluginList = async (params: MCPPluginListParams): Promise<McpListResponse> => {
-    await this.safeInjectMPToken();
-
-    const locale = globalHelpers.getCurrentLanguage();
-
-    return lambdaClient.market.getMcpList.query({
-      ...params,
-      locale,
-      page: params.page ? Number(params.page) : 1,
-      pageSize: params.pageSize ? Number(params.pageSize) : 21,
-    });
+    return this.createEmptyListResponse<McpListResponse>(params);
   };
 
   getMcpManifest = async (params: { identifier: string; locale?: string; version?: string }) => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.getMcpManifest.query({
-      ...params,
-      locale,
-    });
+    void params;
+    return undefined;
   };
 
   getMCPPluginManifest = async (
     identifier: string,
     options: { install?: boolean } = {},
   ): Promise<PluginManifest> => {
-    const locale = globalHelpers.getCurrentLanguage();
-
-    return lambdaClient.market.getMcpManifest.query({
-      identifier,
-      install: options.install,
-      locale,
-    });
+    void identifier;
+    void options;
+    return undefined as unknown as PluginManifest;
   };
 
   registerClient = () => {
@@ -219,21 +172,11 @@ class DiscoverService {
     const allow = userGeneralSettingsSelectors.telemetry(useUserStore.getState());
 
     if (!allow) return;
-    await this.safeInjectMPToken();
-
-    const reportData = {
-      errorCode: success ? undefined : errorCode,
-      errorMessage: success ? undefined : errorMessage,
-      manifest: success ? manifest : undefined,
-      success,
-      ...params,
-    };
-
-    lambdaClient.market.reportMcpInstallResult
-      .mutate(cleanObject(reportData))
-      .catch((reportError) => {
-        console.warn('Failed to report MCP installation result:', reportError);
-      });
+    void success;
+    void manifest;
+    void errorMessage;
+    void errorCode;
+    void params;
   };
 
   /**
@@ -245,27 +188,14 @@ class DiscoverService {
 
     if (!allow) return;
 
-    await this.safeInjectMPToken();
-
-    lambdaClient.market.reportCall.mutate(cleanObject(reportData)).catch((reportError) => {
-      console.warn('Failed to report call:', reportError);
-    });
+    void reportData;
   };
 
   reportMcpEvent = async (eventData: PluginEventRequest) => {
     const allow = userGeneralSettingsSelectors.telemetry(useUserStore.getState());
     if (!allow) return;
 
-    await this.safeInjectMPToken();
-
-    const payload = cleanObject({
-      ...eventData,
-      source: eventData.source ?? 'community/mcp',
-    });
-
-    lambdaClient.market.reportMcpEvent.mutate(payload).catch((error) => {
-      console.warn('Failed to report MCP event:', error);
-    });
+    void eventData;
   };
 
   /**
@@ -277,27 +207,14 @@ class DiscoverService {
 
     if (!allow) return;
 
-    await this.safeInjectMPToken();
-
-    lambdaClient.market.reportAgentInstall.mutate({ identifier }).catch((reportError) => {
-      console.warn('Failed to report agent installation:', reportError);
-    });
+    void identifier;
   };
 
   reportAgentEvent = async (eventData: AgentEventRequest) => {
     const allow = userGeneralSettingsSelectors.telemetry(useUserStore.getState());
     if (!allow) return;
 
-    await this.safeInjectMPToken();
-
-    const payload = cleanObject({
-      ...eventData,
-      source: eventData.source ?? 'community/agent',
-    });
-
-    lambdaClient.market.reportAgentEvent.mutate(payload).catch((error) => {
-      console.warn('Failed to report Agent event:', error);
-    });
+    void eventData;
   };
 
   // ============================== Models ==============================
@@ -413,9 +330,11 @@ class DiscoverService {
   async injectMPToken() {
     if (typeof localStorage === 'undefined') return;
 
+    const item = localStorage.getItem('_mpc');
+
     // Check server-set status flag cookie
     const tokenStatus = this.getTokenStatusFromCookie();
-    if (tokenStatus === 'active') return;
+    if (tokenStatus === 'active' && item) return;
 
     // If a token refresh is already in progress, wait for it to complete
     if (this._tokenRefreshPromise) {
@@ -535,11 +454,8 @@ class DiscoverService {
   // ============================== Skills Market ==============================
 
   getSkillCategories = async (params: CategoryListQuery = {}): Promise<SkillCategoryItem[]> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.skill.getSkillCategories.query({
-      ...params,
-      locale,
-    });
+    void params;
+    return [];
   };
 
   getSkillDetail = async (params: {
@@ -547,21 +463,12 @@ class DiscoverService {
     locale?: string;
     version?: string;
   }): Promise<DiscoverSkillDetail> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.skill.getSkillDetail.query({
-      ...params,
-      locale,
-    });
+    void params;
+    return undefined as unknown as DiscoverSkillDetail;
   };
 
   getSkillList = async (params: SkillQueryParams = {}): Promise<SkillListResponse> => {
-    const locale = globalHelpers.getCurrentLanguage();
-    return lambdaClient.market.skill.getSkillList.query({
-      ...params,
-      locale,
-      page: params.page ? Number(params.page) : 1,
-      pageSize: params.pageSize ? Number(params.pageSize) : 20,
-    });
+    return this.createEmptyListResponse<SkillListResponse>(params);
   };
 
   reportSkillEvent = async (eventData: { event: string; identifier: string; source?: string }) => {

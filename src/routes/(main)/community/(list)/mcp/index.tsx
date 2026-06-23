@@ -15,7 +15,7 @@ import Loading from './loading';
 const McpPage = memo(() => {
   const { q, page, category, sort, order } = useQuery() as McpQueryParams;
   const useMcpList = useDiscoverStore((s) => s.useFetchMcpList);
-  const { data, isLoading } = useMcpList({
+  const { data, error, isLoading } = useMcpList({
     category,
     order,
     page,
@@ -24,9 +24,9 @@ const McpPage = memo(() => {
     sort: sort ?? McpSorts.Recommended,
   });
 
-  if (isLoading || !data) return <Loading />;
+  if (isLoading && !data) return <Loading />;
 
-  const { items, currentPage, pageSize, totalCount } = data;
+  const { items = [], currentPage = 1, pageSize = 21, totalCount = 0 } = error ? {} : data || {};
 
   return (
     <Flexbox gap={32} width={'100%'}>

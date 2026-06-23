@@ -15,7 +15,7 @@ import Loading from './loading';
 const AssistantPage = memo(() => {
   const { q, page, category, sort, order, source } = useQuery() as AssistantQueryParams;
   const useAssistantList = useDiscoverStore((s) => s.useAssistantList);
-  const { data, isLoading } = useAssistantList({
+  const { data, error, isLoading } = useAssistantList({
     category,
     includeAgentGroup: true,
     order,
@@ -26,9 +26,9 @@ const AssistantPage = memo(() => {
     source,
   });
 
-  if (isLoading || !data) return <Loading />;
+  if (isLoading && !data) return <Loading />;
 
-  const { items, currentPage, pageSize, totalCount } = data;
+  const { items = [], currentPage = 1, pageSize = 21, totalCount = 0 } = error ? {} : data || {};
 
   return (
     <Flexbox gap={32} width={'100%'}>
