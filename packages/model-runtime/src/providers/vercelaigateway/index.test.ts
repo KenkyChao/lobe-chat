@@ -3,6 +3,7 @@ import { ModelProvider } from 'model-bank';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { testProvider } from '../../providerTestUtils';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 import type { VercelAIGatewayModelCard } from './index';
 import { formatPrice, LobeVercelAIGatewayAI, params } from './index';
 
@@ -39,10 +40,7 @@ describe('LobeVercelAIGatewayAI - custom features', () => {
 
     it('should have constructor options with default headers', () => {
       expect(params.constructorOptions).toBeDefined();
-      expect(params.constructorOptions?.defaultHeaders).toEqual({
-        'http-referer': 'https://lobehub.com',
-        'x-title': 'LobeHub',
-      });
+      expect(params.constructorOptions?.defaultHeaders).toEqual(BRANDING_REQUEST_HEADERS);
     });
   });
 

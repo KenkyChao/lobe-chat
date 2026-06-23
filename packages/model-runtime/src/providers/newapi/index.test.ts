@@ -4,6 +4,7 @@ import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChatStreamPayload } from '../../types/chat';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 import * as modelParseModule from '../../utils/modelParse';
 import type { NewAPIModelCard, NewAPIPricing } from './index';
 import { LobeNewAPIAI, params } from './index';
@@ -657,9 +658,7 @@ describe('NewAPI Runtime - 100% Branch Coverage', () => {
     });
 
     it('should export params with correct defaultHeaders', () => {
-      expect(params.defaultHeaders).toEqual({
-        'X-Client': 'LobeHub',
-      });
+      expect(params.defaultHeaders).toEqual(BRANDING_REQUEST_HEADERS);
     });
 
     it('should export params with debug configuration', () => {

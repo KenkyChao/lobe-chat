@@ -19,6 +19,7 @@ import { evaluationRecords } from '@/database/schemas';
 import { asyncAuthedProcedure, asyncRouter as router } from '@/libs/trpc/async';
 import { initModelRuntimeFromDB } from '@/server/modules/ModelRuntime';
 import { ChunkService } from '@/server/services/chunk';
+import { createEmbeddingPayload } from '@/server/services/embedding/createEmbeddingPayload';
 import { AsyncTaskError } from '@/types/asyncTask';
 
 const ragEvalProcedure = asyncAuthedProcedure.use(async (opts) => {
@@ -84,11 +85,11 @@ export const ragEvalRouter = router({
         // If questionEmbeddingId does not exist, perform an embedding
         if (!questionEmbeddingId) {
           const embeddings = await modelRuntime.embeddings(
-            {
+            createEmbeddingPayload({
               dimensions: 1024,
               input: question,
               model: !!embeddingModel ? embeddingModel : DEFAULT_EMBEDDING_MODEL,
-            },
+            }),
             { metadata: { trigger: RequestTrigger.Eval }, user: ctx.userId },
           );
 

@@ -34,6 +34,7 @@ import type {
   HandleCreateVideoWebhookResult,
   PollVideoStatusResult,
 } from '../../types/video';
+import { withBrandingRequestHeaders } from '../../utils/brandingRequestHeaders';
 import { AgentRuntimeError } from '../../utils/createError';
 import { debugResponse, debugStream } from '../../utils/debugStream';
 import { desensitizeUrl } from '../../utils/desensitizeUrl';
@@ -323,7 +324,16 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
 
       if (!apiKey) throw AgentRuntimeError.createError(ErrorType?.invalidAPIKey);
 
-      const initOptions = { apiKey, baseURL, ...constructorOptions, ...res };
+      const initOptions = {
+        apiKey,
+        baseURL,
+        ...constructorOptions,
+        ...res,
+        defaultHeaders: withBrandingRequestHeaders({
+          ...constructorOptions?.defaultHeaders,
+          ...res.defaultHeaders,
+        }),
+      };
 
       // if the custom client is provided, use it as client
       if (customClient?.createClient) {
@@ -644,7 +654,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
 
           response = (await this.client.chat.completions.create(finalPayload, {
             // https://github.com/lobehub/lobe-chat/pull/318
-            headers: { Accept: '*/*', ...options?.requestHeaders },
+            headers: withBrandingRequestHeaders({ Accept: '*/*', ...options?.requestHeaders }),
             signal: options?.signal,
           })) as unknown as Stream<OpenAI.Chat.Completions.ChatCompletionChunk>;
         }
@@ -882,7 +892,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
           tools: [tool],
           user: options?.user,
         }) as OpenAI.ChatCompletionCreateParamsNonStreaming,
-        { headers: options?.headers, signal: options?.signal },
+        { headers: withBrandingRequestHeaders(options?.headers), signal: options?.signal },
       );
 
       if (res.usage) {
@@ -981,7 +991,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
               // Responses API replaced `user` with `safety_identifier`; some endpoints reject `user`
               safety_identifier: options?.user,
             } as any,
-            { headers: options?.headers, signal: options?.signal },
+            { headers: withBrandingRequestHeaders(options?.headers), signal: options?.signal },
           );
 
           if (res.usage) {
@@ -1013,7 +1023,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
               ...this.resolvePromptCacheKeyParams(model, options?.user),
               user: options?.user,
             }) as OpenAI.ChatCompletionCreateParamsNonStreaming,
-            { headers: options?.headers, signal: options?.signal },
+            { headers: withBrandingRequestHeaders(options?.headers), signal: options?.signal },
           );
         } catch (error) {
           // Gateways can serve json_schema-incapable upstreams under arbitrary
@@ -1070,7 +1080,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
       try {
         const res = await this.client.embeddings.create(
           { ...payload, encoding_format: 'float', user: options?.user },
-          { headers: options?.headers, signal: options?.signal },
+          { headers: withBrandingRequestHeaders(options?.headers), signal: options?.signal },
         );
 
         if (res.usage && options?.onUsage) {
@@ -1101,7 +1111,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
 
       try {
         const mp3 = await this.client.audio.speech.create(payload as any, {
-          headers: options?.headers,
+          headers: withBrandingRequestHeaders(options?.headers),
           signal: options?.signal,
         });
         const buffer = await mp3.arrayBuffer();
@@ -1339,7 +1349,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
       log('sending responses.create request');
 
       const response = await this.client.responses.create(postPayload, {
-        headers: options?.requestHeaders,
+        headers: withBrandingRequestHeaders(options?.requestHeaders),
         signal: options?.signal,
       });
 
@@ -1450,7 +1460,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
             // Responses API replaced `user` with `safety_identifier`; some endpoints reject `user`
             safety_identifier: options?.user,
           } as any,
-          { headers: options?.headers, signal: options?.signal },
+          { headers: withBrandingRequestHeaders(options?.headers), signal: options?.signal },
         );
 
         if (res.usage) {
@@ -1492,7 +1502,7 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
           tools,
           user: options?.user,
         }) as OpenAI.ChatCompletionCreateParamsNonStreaming,
-        { headers: options?.headers, signal: options?.signal },
+        { headers: withBrandingRequestHeaders(options?.headers), signal: options?.signal },
       );
 
       if (res.usage) {

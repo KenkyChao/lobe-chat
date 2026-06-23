@@ -4,6 +4,7 @@ import urlJoin from 'url-join';
 import { responsesAPIModels } from '../../const/models';
 import { createRouterRuntime } from '../../core/RouterRuntime';
 import type { CreateRouterRuntimeOptions } from '../../core/RouterRuntime/createRuntime';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 import { detectModelProvider, processMultiProviderModelList } from '../../utils/modelParse';
 import { resolveProviderRouteModels } from '../utils/resolveProviderRouteModels';
 
@@ -52,9 +53,7 @@ export const params = {
   debug: {
     chatCompletion: () => process.env.DEBUG_NEWAPI_CHAT_COMPLETION === '1',
   },
-  defaultHeaders: {
-    'X-Client': 'LobeHub',
-  },
+  defaultHeaders: BRANDING_REQUEST_HEADERS,
   id: ModelProvider.NewAPI,
   models: async ({ client: openAIClient }) => {
     // Get base URL (remove trailing API version paths like /v1, /v1beta, etc.)

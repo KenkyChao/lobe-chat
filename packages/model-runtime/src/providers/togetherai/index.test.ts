@@ -3,6 +3,7 @@ import { ModelProvider } from 'model-bank';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { testProvider } from '../../providerTestUtils';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 import type { TogetherAIModel } from './index';
 import { LobeTogetherAI, params } from './index';
 
@@ -34,10 +35,7 @@ describe('LobeTogetherAI - custom features', () => {
     });
 
     it('should have custom defaultHeaders', () => {
-      expect(params.constructorOptions?.defaultHeaders).toEqual({
-        'HTTP-Referer': 'https://chat-preview.lobehub.com',
-        'X-Title': 'Lobe Chat',
-      });
+      expect(params.constructorOptions?.defaultHeaders).toEqual(BRANDING_REQUEST_HEADERS);
     });
 
     it('should have correct debug configuration', () => {

@@ -19,6 +19,7 @@ import { getServerDefaultFilesConfig } from '@/server/globalConfig';
 import { initModelRuntimeFromDB } from '@/server/modules/ModelRuntime';
 import { ChunkService } from '@/server/services/chunk';
 import { DocumentService } from '@/server/services/document';
+import { createEmbeddingPayload } from '@/server/services/embedding/createEmbeddingPayload';
 import { FileService } from '@/server/services/file';
 import { type IAsyncTaskError } from '@/types/asyncTask';
 import { AsyncTaskError, AsyncTaskErrorType, AsyncTaskStatus } from '@/types/asyncTask';
@@ -129,11 +130,11 @@ export const fileRouter = router({
                 );
 
                 const embeddings = await modelRuntime.embeddings(
-                  {
+                  createEmbeddingPayload({
                     dimensions: 1024,
                     input: chunks.map((c) => c.text),
                     model,
-                  },
+                  }),
                   { metadata: { trigger: RequestTrigger.FileEmbedding }, user: ctx.userId },
                 );
 

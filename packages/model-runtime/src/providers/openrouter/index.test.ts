@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { LobeOpenAICompatibleRuntime } from '../../core/BaseAI';
 import { testProvider } from '../../providerTestUtils';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 import { LobeOpenRouterAI, params } from './index';
 
 const loadModelsMock = vi.hoisted(() => vi.fn().mockResolvedValue([]));
@@ -60,8 +61,7 @@ describe('LobeOpenRouterAI - custom features', () => {
     it('should have constructorOptions with headers', () => {
       expect(params.constructorOptions).toBeDefined();
       expect(params.constructorOptions.defaultHeaders).toBeDefined();
-      expect(params.constructorOptions.defaultHeaders['HTTP-Referer']).toBe('https://lobehub.com');
-      expect(params.constructorOptions.defaultHeaders['X-Title']).toBe('LobeHub');
+      expect(params.constructorOptions.defaultHeaders).toEqual(BRANDING_REQUEST_HEADERS);
     });
 
     it('should have debug configuration', () => {

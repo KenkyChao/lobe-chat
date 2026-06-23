@@ -4,6 +4,7 @@ import { ModelProvider } from 'model-bank';
 
 import type { OpenAICompatibleFactoryOptions } from '../../core/openaiCompatibleFactory';
 import { createOpenAICompatibleRuntime } from '../../core/openaiCompatibleFactory';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 
 export interface HigressModelCard {
   context_length: number;
@@ -18,8 +19,7 @@ export interface HigressModelCard {
 export const params = {
   constructorOptions: {
     defaultHeaders: {
-      'HTTP-Referer': 'https://lobehub.com',
-      'X-Title': 'LobeHub',
+      ...BRANDING_REQUEST_HEADERS,
       'x-Request-Id': uniqueId('lobe-chat-'),
     },
   },

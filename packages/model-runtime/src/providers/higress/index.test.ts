@@ -25,7 +25,10 @@ describe('LobeHigressAI - params', () => {
   });
 
   it('should have constructorOptions with default headers', () => {
-    expect(params.constructorOptions?.defaultHeaders).toHaveProperty('HTTP-Referer');
+    expect(params.constructorOptions?.defaultHeaders).toHaveProperty(
+      'HTTP-Referer',
+      'https://naiyunchat.naiyun.com',
+    );
     expect(params.constructorOptions?.defaultHeaders).toHaveProperty('X-Title');
     expect(params.constructorOptions?.defaultHeaders).toHaveProperty('x-Request-Id');
   });

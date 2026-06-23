@@ -18,6 +18,7 @@ import { getServerDefaultFilesConfig } from '@/server/globalConfig';
 import { initModelRuntimeFromDB } from '@/server/modules/ModelRuntime';
 import { ChunkService } from '@/server/services/chunk';
 import { DocumentService } from '@/server/services/document';
+import { createEmbeddingPayload } from '@/server/services/embedding/createEmbeddingPayload';
 import { KnowledgeBaseSearchService } from '@/server/services/knowledgeBase';
 
 const chunkProcedure = wsCompatProcedure.use(serverDatabase).use(async (opts) => {
@@ -136,11 +137,11 @@ export const chunkRouter = router({
       );
 
       const embeddings = await agentRuntime.embeddings(
-        {
+        createEmbeddingPayload({
           dimensions: 1024,
           input: input.query,
           model,
-        },
+        }),
         { metadata: { trigger: RequestTrigger.SemanticSearch }, user: ctx.userId },
       );
 

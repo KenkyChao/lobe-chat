@@ -1,6 +1,6 @@
 import urlJoin from 'url-join';
 
-export const OFFICIAL_URL = 'http://127.0.0.1:3010';
+export const OFFICIAL_URL = process.env.NEXT_PUBLIC_OFFICIAL_URL || 'http://127.0.0.1:3010';
 export const OFFICIAL_SITE = 'https://lobehub.com';
 export const OFFICIAL_DOMAIN = 'lobehub.com';
 
@@ -8,7 +8,7 @@ export const OG_URL = '/og/og.webp?v=1';
 
 export const GITHUB = 'https://github.com/lobehub/lobe-chat';
 export const GITHUB_ISSUES = urlJoin(GITHUB, 'issues/new/choose');
-export const CHANGELOG = 'https://lobehub.com/changelog';
+export const CHANGELOG = process.env.NEXT_PUBLIC_CHANGELOG_URL || '/changelog';
 
 export const DOCUMENTS = urlJoin(OFFICIAL_SITE, '/docs');
 export const USAGE_DOCUMENTS = urlJoin(DOCUMENTS, '/usage');
@@ -71,10 +71,13 @@ export const mailTo = (email: string) => `mailto:${email}`;
 
 export const AES_GCM_URL = 'https://datatracker.ietf.org/doc/html/draft-ietf-avt-srtp-aes-gcm-01';
 export const BASE_PROVIDER_DOC_URL = 'https://lobehub.com/docs/usage/providers';
-export const CHANGELOG_URL = urlJoin(OFFICIAL_SITE, 'changelog');
+export const CHANGELOG_URL = process.env.NEXT_PUBLIC_CHANGELOG_URL || '/changelog';
+
+export const DESKTOP_APP_DOWNLOAD_URL =
+  process.env.NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL || '/downloads';
 
 export const DOWNLOAD_URL = {
   android: 'https://play.google.com/store/apps/details?id=com.lobehub.app',
-  default: urlJoin(OFFICIAL_SITE, '/downloads'),
+  default: DESKTOP_APP_DOWNLOAD_URL,
   ios: 'https://testflight.apple.com/join/2ZbjX4Qp',
 } as const;

@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LobeOpenAICompatibleRuntime } from '../../core/BaseAI';
 import type { ChatStreamCallbacks, ChatStreamPayload } from '../../types/chat';
 import { AgentRuntimeErrorType } from '../../types/error';
+import { BRANDING_REQUEST_HEADERS } from '../../utils/brandingRequestHeaders';
 import * as debugStreamModule from '../../utils/debugStream';
 import * as openaiHelpers from '../contextBuilders/openai';
 import { createOpenAICompatibleRuntime } from './index';
@@ -124,7 +125,7 @@ describe('LobeOpenAICompatibleFactory', () => {
           temperature: 0.7,
           top_p: 1,
         },
-        { headers: { Accept: '*/*' } },
+        { headers: { ...BRANDING_REQUEST_HEADERS, Accept: '*/*' } },
       );
       expect(result).toBeInstanceOf(Response);
     });
@@ -2028,7 +2029,7 @@ describe('LobeOpenAICompatibleFactory', () => {
           text: { format: { strict: true, type: 'json_schema', ...payload.schema } },
           safety_identifier: undefined,
         },
-        { headers: undefined, signal: undefined },
+        { headers: BRANDING_REQUEST_HEADERS, signal: undefined },
       );
 
       expect(result).toEqual({ age: 30, name: 'John' });
@@ -2130,7 +2131,7 @@ describe('LobeOpenAICompatibleFactory', () => {
           text: { format: { strict: true, type: 'json_schema', ...payload.schema } },
           safety_identifier: options.user,
         },
-        { headers: options.headers, signal: options.signal },
+        { headers: { ...BRANDING_REQUEST_HEADERS, ...options.headers }, signal: options.signal },
       );
 
       expect(result).toEqual({ status: 'success' });
@@ -2372,7 +2373,7 @@ describe('LobeOpenAICompatibleFactory', () => {
             response_format: { json_schema: payload.schema, type: 'json_schema' },
             user: undefined,
           },
-          { headers: undefined, signal: undefined },
+          { headers: BRANDING_REQUEST_HEADERS, signal: undefined },
         );
 
         expect(result).toEqual({ age: 25, name: 'Bob' });
@@ -2419,7 +2420,7 @@ describe('LobeOpenAICompatibleFactory', () => {
             response_format: { json_schema: payload.schema, type: 'json_schema' },
             user: options.user,
           },
-          { headers: options.headers, signal: options.signal },
+          { headers: { ...BRANDING_REQUEST_HEADERS, ...options.headers }, signal: options.signal },
         );
 
         expect(result).toEqual({ status: 'completed' });
@@ -2710,7 +2711,7 @@ describe('LobeOpenAICompatibleFactory', () => {
             ],
             user: undefined,
           },
-          { headers: undefined, signal: undefined },
+          { headers: BRANDING_REQUEST_HEADERS, signal: undefined },
         );
 
         expect(result).toEqual([
@@ -3170,7 +3171,7 @@ describe('LobeOpenAICompatibleFactory', () => {
             ],
             user: undefined,
           },
-          { headers: undefined, signal: undefined },
+          { headers: BRANDING_REQUEST_HEADERS, signal: undefined },
         );
 
         // The fallback returns the parsed schema object, same shape as the
@@ -3350,7 +3351,7 @@ describe('LobeOpenAICompatibleFactory', () => {
 
         expect(instanceWithToolCalling['client'].chat.completions.create).toHaveBeenCalledWith(
           expect.any(Object),
-          { headers: options.headers, signal: options.signal },
+          { headers: { ...BRANDING_REQUEST_HEADERS, ...options.headers }, signal: options.signal },
         );
 
         expect(result).toEqual({ data: 'test' });
