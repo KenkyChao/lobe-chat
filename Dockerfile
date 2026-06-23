@@ -38,10 +38,14 @@ ARG NEXT_PUBLIC_POSTHOG_KEY
 ARG NEXT_PUBLIC_ANALYTICS_UMAMI
 ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL
 ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
+ARG NEXT_PUBLIC_CHANGELOG_URL
+ARG NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL
 ARG FEATURE_FLAGS
 
 ENV NEXT_PUBLIC_BASE_PATH="${NEXT_PUBLIC_BASE_PATH}" \
-    FEATURE_FLAGS="${FEATURE_FLAGS}"
+    FEATURE_FLAGS="${FEATURE_FLAGS}" \
+    NEXT_PUBLIC_CHANGELOG_URL="${NEXT_PUBLIC_CHANGELOG_URL}" \
+    NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL="${NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL}"
 
 ENV APP_URL="http://app.com" \
     DATABASE_DRIVER="node" \
@@ -112,6 +116,9 @@ COPY --from=builder /app/.next/standalone /app/
 COPY --from=builder /app/.next/static /app/.next/static
 # Copy SPA assets (Vite build output)
 COPY --from=builder /app/public/_spa /app/public/_spa
+# Copy local changelog content used by the self-hosted changelog service
+COPY --from=builder /app/docs/changelog /app/docs/changelog
+COPY --from=builder /app/docs/.cdn.cache.json /app/docs/.cdn.cache.json
 # Copy database migrations
 COPY --from=builder /app/packages/database/migrations /app/migrations
 COPY --from=builder /app/scripts/migrateServerDB/docker.cjs /app/docker.cjs
@@ -157,7 +164,16 @@ ENV APP_URL="" \
     DEFAULT_AGENT_CONFIG="" \
     SYSTEM_AGENT="" \
     FEATURE_FLAGS="" \
-    PROXY_URL=""
+    PROXY_URL="" \
+    CHANGELOG_SOURCE="" \
+    NEXT_PUBLIC_CHANGELOG_URL="" \
+    NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL="" \
+    DESKTOP_APP_VERSION="" \
+    DESKTOP_DOWNLOAD_S3_PREFIX="" \
+    DESKTOP_DOWNLOAD_MAC_ARM64_URL="" \
+    DESKTOP_DOWNLOAD_MAC_X64_URL="" \
+    DESKTOP_DOWNLOAD_WINDOWS_X64_URL="" \
+    DESKTOP_DOWNLOAD_WINDOWS_ARM64_URL=""
 
 # Database
 ENV KEY_VAULTS_SECRET="" \

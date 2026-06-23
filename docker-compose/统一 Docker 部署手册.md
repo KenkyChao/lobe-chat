@@ -7,7 +7,7 @@
 | 目录 | 用途 | 业务镜像 | 依赖服务 | 适用场景 |
 | --- | --- | --- | --- | --- |
 | `dev/` | 本地源码镜像验证环境 | `naiyunchat-db:${package.json.version}` | 内置 PostgreSQL / Redis / SearXNG，外接 MinIO / Casdoor | 本地私有化联调、验证当前代码镜像 |
-| `production/grafana/` | 带观测组件的 NaiYunHub 生产模板 | `naiyunchat-db:${package.json.version}` | 内置 PostgreSQL / Redis / SearXNG / Grafana / Tempo / Prometheus / OTel，外接 MinIO / Casdoor | 后续生产观测链路验证 |
+| `production/grafana/` | 带观测组件的 naiyunhub 生产模板 | `naiyunchat-db:${package.json.version}` | 内置 PostgreSQL / Redis / SearXNG / Grafana / Tempo / Prometheus / OTel，外接 MinIO / Casdoor | 后续生产观测链路验证 |
 
 当前我们主要使用 `docker-compose/dev/` 做本地源码镜像验证。
 
@@ -220,11 +220,11 @@ docker compose --env-file .env.development -f docker-compose/dev/docker-compose.
 
 ## production/grafana 环境：生产观测模板
 
-`docker-compose/production/grafana/` 包含带观测组件的 NaiYunHub 生产模板。它不是当前主启动方式，主要用于后续验证生产观测链路。
+`docker-compose/production/grafana/` 包含带观测组件的 naiyunhub 生产模板。它不是当前主启动方式，主要用于后续验证生产观测链路。
 
 主要服务：
 
-- NaiYunHub
+- naiyunhub
 - PostgreSQL
 - Redis
 - SearXNG
@@ -301,20 +301,20 @@ INTERNAL_APP_URL=http://127.0.0.1:3210
 
 ```bash
 # 查看业务容器日志
-docker logs --tail 200 NaiYunHub
+docker logs --tail 200 naiyunhub
 
 # 查看 Redis 是否可用
-docker exec NaiYun-redis redis-cli ping
+docker exec naiyun-redis redis-cli ping
 
-# 查看 NaiYunHub 容器内 Redis 配置
-docker exec NaiYunHub printenv REDIS_URL
+# 查看 naiyunhub 容器内 Redis 配置
+docker exec naiyunhub printenv REDIS_URL
 
 # 查看微信 Gateway 运行状态
-docker exec NaiYun-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
-docker exec NaiYun-redis redis-cli get 'bot:runtime-status:wechat:<applicationId>'
+docker exec naiyun-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
+docker exec naiyun-redis redis-cli get 'bot:runtime-status:wechat:<applicationId>'
 
 # 容器内验证内部 Web 端口
-docker exec NaiYunHub node -e "fetch('http://127.0.0.1:3210').then(r=>console.log(r.status)).catch(e=>console.error(e.cause?.code||e.message))"
+docker exec naiyunhub node -e "fetch('http://127.0.0.1:3210').then(r=>console.log(r.status)).catch(e=>console.error(e.cause?.code||e.message))"
 ```
 
 正常状态示例：
@@ -328,12 +328,12 @@ Gateway Started successfully
 
 ## 常见问题
 
-### 1. `NaiYunHub` 一直 Restarting
+### 1. `naiyunhub` 一直 Restarting
 
 查看日志：
 
 ```bash
-docker logs --tail 200 NaiYunHub
+docker logs --tail 200 naiyunhub
 ```
 
 如果看到 deprecated env 报错，删除或注释：
@@ -350,9 +350,9 @@ NEXT_PUBLIC_SERVICE_MODE
 优先确认：
 
 ```bash
-docker exec NaiYun-redis redis-cli ping
-docker exec NaiYun-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
-docker logs --tail 300 NaiYunHub
+docker exec naiyun-redis redis-cli ping
+docker exec naiyun-redis redis-cli --scan --pattern 'bot:runtime-status:wechat:*'
+docker logs --tail 300 naiyunhub
 ```
 
 如果 Redis 正常且状态为 `connected`，重点检查：

@@ -9,6 +9,7 @@ ENV_NAME="${NAIYUN_ENV:-development}"
 
 ACTION="up"
 BUILD_IMAGE=1
+NO_CACHE=0
 PULL_BASE=0
 DETACH=1
 FOLLOW_LOGS=0
@@ -45,6 +46,7 @@ Actions:
 Options:
   --env <name>      Select env file: development, test, or prod (default: development)
   --no-build       Skip building naiyunchat-db:<package.version>
+  --no-cache       Build naiyunchat-db:<package.version> without Docker cache
   --pull-base      Pull alpine/postgresql/redis/searxng before starting
   --foreground     Run compose up in the foreground
   -d, --detach     Run compose up detached (default)
@@ -57,7 +59,7 @@ Examples:
   docker-compose/dev/setup.sh restart --env test --no-build
   docker-compose/dev/setup.sh restart --env prod --no-build
   docker-compose/dev/setup.sh up --pull-base --logs
-  docker-compose/dev/setup.sh build --use-cn-mirror
+  docker-compose/dev/setup.sh build --no-cache --use-cn-mirror
   docker-compose/dev/setup.sh down
 EOF
 }
@@ -79,6 +81,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-build)
       BUILD_IMAGE=0
+      shift
+      ;;
+    --no-cache)
+      NO_CACHE=1
       shift
       ;;
     --pull-base)
@@ -206,11 +212,17 @@ build_image() {
     NEXT_PUBLIC_ANALYTICS_UMAMI
     NEXT_PUBLIC_UMAMI_SCRIPT_URL
     NEXT_PUBLIC_UMAMI_WEBSITE_ID
+    NEXT_PUBLIC_CHANGELOG_URL
+    NEXT_PUBLIC_DESKTOP_APP_DOWNLOAD_URL
     FEATURE_FLAGS
   )
 
   if [[ "${USE_CN_MIRROR}" == "true" ]]; then
     build_args+=(--build-arg USE_CN_MIRROR=true)
+  fi
+
+  if [[ "${NO_CACHE}" == "1" ]]; then
+    build_args+=(--no-cache)
   fi
 
   for arg in "${passthrough_args[@]}"; do

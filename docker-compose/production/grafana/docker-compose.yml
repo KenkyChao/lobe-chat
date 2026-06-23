@@ -2,12 +2,11 @@ name: naiyunhub-observability
 
 services:
   network-service:
-    # image: 192.168.1.211:5001/naiyun-registry/alpine:latest
-    image: alpine
-    container_name: NaiYun-observability-network
+    image: 192.168.1.211:5001/naiyun-registry/library/alpine:latest
+    container_name: naiyun-observability-network
     restart: always
     ports:
-      - '${LOBE_PORT:-3010}:3210' # NaiYunHub Web
+      - '${LOBE_PORT:-3010}:3210' # naiyunhub Web
       - '${GRAFANA_PORT:-3000}:3000' # Grafana
       - '${OTEL_HTTP_PORT:-4318}:4318' # OpenTelemetry HTTP
       - '${OTEL_GRPC_PORT:-4317}:4317' # OpenTelemetry gRPC
@@ -18,7 +17,7 @@ services:
   lobe:
     image: naiyunchat-db:${NAIYUNCHAT_DB_VERSION:-2.2.4}
     pull_policy: never
-    container_name: NaiYunHub-observability
+    container_name: naiyunhub-observability
     restart: always
     network_mode: 'service:network-service'
     depends_on:
@@ -41,16 +40,15 @@ services:
       - 'REDIS_PREFIX=${REDIS_PREFIX:-lobechat}'
       - 'REDIS_TLS=0'
       - 'SEARXNG_URL=http://127.0.0.1:8080'
-      - 'OTEL_SERVICE_NAME=NaiYunHub'
+      - 'OTEL_SERVICE_NAME=naiyunhub'
       - 'OTEL_EXPORTER_OTLP_METRICS_PROTOCOL=http/protobuf'
       - 'OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://127.0.0.1:4318/v1/metrics'
       - 'OTEL_EXPORTER_OTLP_TRACES_PROTOCOL=http/protobuf'
       - 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://127.0.0.1:4318/v1/traces'
 
   postgresql:
-    # image: 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
-    image: paradedb/paradedb:latest-pg17
-    container_name: NaiYun-observability-postgres
+    image: 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+    container_name: naiyun-observability-postgres
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -65,9 +63,8 @@ services:
       retries: 5
 
   redis:
-    # image: 192.168.1.211:5001/naiyun-registry/redis:7-alpine
-    image: redis:7-alpine
-    container_name: NaiYun-observability-redis
+    image: 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+    container_name: naiyun-observability-redis
     restart: always
     network_mode: 'service:network-service'
     command: redis-server --save 60 1000 --appendonly yes
@@ -80,9 +77,8 @@ services:
       retries: 5
 
   searxng:
-    # image: 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
-    image: searxng/searxng
-    container_name: NaiYun-observability-searxng
+    image: 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
+    container_name: naiyun-observability-searxng
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -91,9 +87,8 @@ services:
       - 'SEARXNG_SETTINGS_FILE=/etc/searxng/settings.yml'
 
   grafana:
-    # image: 192.168.1.211:5001/naiyun-registry/grafana/grafana:12.2.0-17419259409
-    image: grafana/grafana:12.2.0-17419259409
-    container_name: NaiYun-observability-grafana
+    image: 192.168.1.211:5001/naiyun-registry/grafana/grafana:12.2.0-17419259409
+    container_name: naiyun-observability-grafana
     restart: always
     network_mode: 'service:network-service'
     environment:
@@ -108,9 +103,8 @@ services:
       - prometheus
 
   tempo:
-    # image: 192.168.1.211:5001/naiyun-registry/grafana/tempo:latest
-    image: grafana/tempo:latest
-    container_name: NaiYun-observability-tempo
+    image: 192.168.1.211:5001/naiyun-registry/grafana/tempo:latest
+    container_name: naiyun-observability-tempo
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -119,9 +113,8 @@ services:
     command: [ '-config.file=/etc/tempo.yaml' ]
 
   prometheus:
-    # image: 192.168.1.211:5001/naiyun-registry/prom/prometheus:latest
-    image: prom/prometheus:latest
-    container_name: NaiYun-observability-prometheus
+    image: 192.168.1.211:5001/naiyun-registry/prom/prometheus:latest
+    container_name: naiyun-observability-prometheus
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -134,9 +127,8 @@ services:
       - '--enable-feature=exemplar-storage'
 
   otel-collector:
-    # image: 192.168.1.211:5001/naiyun-registry/otel/opentelemetry-collector:latest
-    image: otel/opentelemetry-collector:latest
-    container_name: NaiYun-observability-otel-collector
+    image: 192.168.1.211:5001/naiyun-registry/otel/opentelemetry-collector:latest
+    container_name: naiyun-observability-otel-collector
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -149,9 +141,8 @@ services:
   otel-tracing-test:
     profiles:
       - otel-test
-    # image: 192.168.1.211:5001/naiyun-registry/grafana/xk6-client-tracing:v0.0.9
     image: ghcr.io/grafana/xk6-client-tracing:v0.0.9
-    container_name: NaiYun-observability-otel-tracing-test
+    container_name: naiyun-observability-otel-tracing-test
     restart: always
     network_mode: 'service:network-service'
     environment:

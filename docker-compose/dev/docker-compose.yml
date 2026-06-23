@@ -1,19 +1,19 @@
-name: lobehub
+name: naiyunhub
 services:
   network-service:
-    image: 192.168.1.211:5001/naiyun-registry/alpine:latest
-    container_name: NaiYun-network
+    image: 192.168.1.211:5001/naiyun-registry/library/alpine
+    container_name: naiyun-network
     restart: always
     ports:
       - '${LOBE_PORT:-3010}:3210' # LobeChat Web
     command: tail -f /dev/null
     networks:
-      - lobe-network
+      - naiyunhub-network
 
   lobe:
     image: naiyunchat-db:${NAIYUNCHAT_DB_VERSION:-2.2.4}
     pull_policy: never
-    container_name: NaiYunHub
+    container_name: naiyunhub
     restart: always
     network_mode: 'service:network-service'
     depends_on:
@@ -37,7 +37,7 @@ services:
 
   postgresql:
     image: 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
-    container_name: NaiYun-postgres
+    container_name: naiyun-postgres
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -46,28 +46,28 @@ services:
       - 'POSTGRES_DB=${LOBE_DB_NAME:-postgres}'
       - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}'
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
-    image: 192.168.1.211:5001/naiyun-registry/redis:7-alpine
-    container_name: NaiYun-redis
+    image: 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+    container_name: naiyun-redis
     restart: always
     network_mode: 'service:network-service'
     command: redis-server --save 60 1000 --appendonly yes
     volumes:
       - 'redis_data:/data'
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: [ 'CMD', 'redis-cli', 'ping' ]
       interval: 5s
       timeout: 3s
       retries: 5
 
   searxng:
     image: 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
-    container_name: NaiYun-searxng
+    container_name: naiyun-searxng
     restart: always
     network_mode: 'service:network-service'
     volumes:
@@ -80,5 +80,5 @@ volumes:
     driver: local
 
 networks:
-  lobe-network:
+  naiyunhub-network:
     driver: bridge
