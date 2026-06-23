@@ -1,13 +1,10 @@
 import { Typography } from '@lobehub/ui';
-import { Image } from '@lobehub/ui/mdx';
 import { Divider } from 'antd';
-import { Fragment, Suspense } from 'react';
+import { type ComponentPropsWithoutRef, Fragment, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
-import urlJoin from 'url-join';
 
 import { CustomMDX } from '@/components/mdx';
-import { OFFICIAL_SITE } from '@/const/url';
 import { lambdaClient } from '@/libs/trpc/client';
 import { type Locales } from '@/locales/resources';
 import { type ChangelogIndexItem } from '@/types/changelog';
@@ -23,6 +20,16 @@ interface PostItemProps extends ChangelogIndexItem {
   showDivider?: boolean;
 }
 
+const Link = ({ children, href, ...rest }: ComponentPropsWithoutRef<'a'> & { href?: string }) => {
+  if (!href || /^https?:\/\//.test(href)) return <span>{children}</span>;
+
+  return (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  );
+};
+
 const PostItem = ({ id, versionRange, locale, showDivider = true }: PostItemProps) => {
   const { data } = useSWR([`changelog-post-${id}`, locale], async () => {
     return await lambdaClient.changelog.getPostById.query({ id, locale });
@@ -34,26 +41,9 @@ const PostItem = ({ id, versionRange, locale, showDivider = true }: PostItemProp
     <>
       {showDivider && <Divider />}
       <Typography headerMultiple={0.2}>
-        <a
-          href={urlJoin(OFFICIAL_SITE, '/changelog', id)}
-          rel="noopener noreferrer"
-          style={{ color: 'inherit' }}
-          target="_blank"
-        >
-          <h2 id={id}>{data.rawTitle || data.title}</h2>
-        </a>
-        {data.image && (
-          <Image
-            alt={data.title}
-            src={
-              data.image.startsWith('/blog')
-                ? urlJoin('https://hub-apac-1.lobeobjects.space/', data.image)
-                : data.image
-            }
-          />
-        )}
+        <h2 id={id}>{data.rawTitle || data.title}</h2>
         <Suspense fallback={<div>Loading...</div>}>
-          <CustomMDX source={data.content} />
+          <CustomMDX components={{ a: Link }} source={data.content} />
         </Suspense>
         <VersionTag range={versionRange} />
       </Typography>

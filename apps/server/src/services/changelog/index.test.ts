@@ -52,6 +52,7 @@ describe('ChangelogService', () => {
 
   beforeEach(() => {
     service = new ChangelogService();
+    service.config.source = 'remote';
     // Mock fetch globally
     global.fetch = vi.fn();
   });
@@ -145,6 +146,7 @@ describe('ChangelogService', () => {
       } as ChangelogIndexItem);
 
       const mockResponse = {
+        ok: true,
         text: vi.fn().mockResolvedValue('# Post Title\nPost content'),
       };
       (global.fetch as any).mockResolvedValue(mockResponse);
@@ -180,6 +182,7 @@ describe('ChangelogService', () => {
       } as ChangelogIndexItem);
 
       const mockResponse = {
+        ok: true,
         text: vi.fn().mockResolvedValue('# Chinese Title\n中文内容'),
       };
       (global.fetch as any).mockResolvedValue(mockResponse);
@@ -210,6 +213,19 @@ describe('ChangelogService', () => {
         expect(result[1].id).toBe('cloud1');
       });
 
+      it('should sort four-part private deployment versions without changing display value', () => {
+        const cloud: ChangelogIndexItem[] = [];
+        const community = [
+          { id: 'private', date: '2026-06-22', versionRange: ['2.2.4.1'] },
+          { id: 'upstream', date: '2026-06-08', versionRange: ['2.2.2'] },
+        ] as ChangelogIndexItem[];
+
+        // @ts-ignore - accessing private method for testing
+        const result = service.mergeChangelogs(cloud, community);
+        expect(result[0].id).toBe('private');
+        expect(result[0].versionRange).toEqual(['2.2.4.1']);
+      });
+
       it('should override community items with cloud items when ids match', () => {
         const cloud = [{ id: 'item1', date: '2023-01-01', versionRange: ['1.0.0'], type: 'cloud' }];
         const community = [
@@ -235,6 +251,12 @@ describe('ChangelogService', () => {
         // @ts-ignore - accessing private method for testing
         const result = service.formatVersionRange(['1.0.0']);
         expect(result).toEqual(['1.0.0']);
+      });
+
+      it('should keep four-part version range as display value', () => {
+        // @ts-ignore - accessing private method for testing
+        const result = service.formatVersionRange(['2.2.4.1']);
+        expect(result).toEqual(['2.2.4.1']);
       });
     });
 
@@ -263,9 +285,11 @@ describe('ChangelogService', () => {
         // 重新导入模块以确保环境变量生效
         const { ChangelogService } = await import('./index');
         const service = new ChangelogService();
+        service.config.source = 'remote';
 
         const mockData = { 'https://example.com/image.jpg': 'image-hash.jpg' };
         const mockResponse = {
+          ok: true,
           json: vi.fn().mockResolvedValue(mockData),
         };
         global.fetch = vi.fn().mockResolvedValue(mockResponse);

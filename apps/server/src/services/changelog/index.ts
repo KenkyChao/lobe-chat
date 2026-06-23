@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import nodePath from 'node:path';
+
 import dayjs from 'dayjs';
 import { template } from 'es-toolkit/compat';
 import matter from 'gray-matter';
@@ -21,6 +24,7 @@ export interface ChangelogConfig {
   docsPath: string;
   majorVersion: number;
   repo: string;
+  source: 'local' | 'remote';
   type: 'cloud' | 'community';
   urlTemplate: string;
   user: string;
@@ -37,6 +41,7 @@ export class ChangelogService {
     docsPath: 'docs/changelog',
     majorVersion: 1,
     repo: 'lobe-chat',
+    source: process.env.CHANGELOG_SOURCE === 'remote' ? 'remote' : 'local',
     type: 'cloud',
     urlTemplate: process.env.CHANGELOG_URL_TEMPLATE || URL_TEMPLATE,
     user: 'lobehub',
@@ -47,24 +52,17 @@ export class ChangelogService {
     return index[0]?.id;
   }
 
-  async getChangelogIndex(): Promise<ChangelogIndexItem[]> {
+  async getChangelogIndex(limit = 5): Promise<ChangelogIndexItem[]> {
     try {
-      const url = this.genUrl(urlJoin(this.config.docsPath, 'index.json'));
+      const data = await this.getSourceJson<{
+        cloud: ChangelogIndexItem[];
+        community: ChangelogIndexItem[];
+      }>(urlJoin(this.config.docsPath, 'index.json'));
 
-      const res = await fetch(url, {
-        next: { revalidate: 3600, tags: [FetchCacheTag.Changelog] },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-
-        return this.mergeChangelogs(data.cloud, data.community).slice(0, 5);
-      }
-
-      return [];
+      return this.mergeChangelogs(data.cloud, data.community).slice(0, limit);
     } catch (e) {
       const cause = (e as Error).cause as { code: string };
-      if (cause?.code.includes('ETIMEDOUT')) {
+      if (cause?.code?.includes('ETIMEDOUT')) {
         console.warn(
           '[ChangelogFetchTimeout] fail to fetch changelog lists due to network timeout. Please check your network connection.',
         );
@@ -77,7 +75,7 @@ export class ChangelogService {
   }
 
   async getIndexItemById(id: string) {
-    const index = await this.getChangelogIndex();
+    const index = await this.getChangelogIndex(Number.POSITIVE_INFINITY);
     return index.find((item) => item.id === id);
   }
 
@@ -87,13 +85,7 @@ export class ChangelogService {
       const post = await this.getIndexItemById(id);
 
       const filename = options?.locale?.startsWith('zh') ? `${id}.zh-CN.mdx` : `${id}.mdx`;
-      const url = this.genUrl(urlJoin(this.config.docsPath, filename));
-
-      const response = await fetch(url, {
-        next: { revalidate: 3600, tags: [FetchCacheTag.Changelog] },
-      });
-
-      const text = await response.text();
+      const text = await this.getSourceText(urlJoin(this.config.docsPath, filename));
       const { data, content } = matter(text);
 
       const regex = /^#\s(.+)/;
@@ -168,7 +160,12 @@ export class ChangelogService {
         date: dayjs(item.date).format('YYYY-MM-DD'),
         versionRange: this.formatVersionRange(item.versionRange),
       }))
-      .sort((a, b) => semver.rcompare(a.versionRange[0], b.versionRange[0]));
+      .sort((a, b) =>
+        semver.rcompare(
+          this.toSortableVersion(a.versionRange[0]),
+          this.toSortableVersion(b.versionRange[0]),
+        ),
+      );
   }
 
   private formatVersionRange(range: string[]): string[] {
@@ -176,12 +173,27 @@ export class ChangelogService {
       return range;
     }
 
-    const [v1, v2]: any = range.map((v) => semver.parse(v)?.toString());
+    const [v1, v2] = range;
+    const sortableV1 = this.toSortableVersion(v1);
+    const sortableV2 = this.toSortableVersion(v2);
 
-    const minVersion = semver.lt(v1, v2) ? v1 : v2;
-    const maxVersion = semver.gt(v1, v2) ? v1 : v2;
+    const minVersion = semver.lt(sortableV1, sortableV2) ? v1 : v2;
+    const maxVersion = semver.gt(sortableV1, sortableV2) ? v1 : v2;
 
     return [minVersion, maxVersion];
+  }
+
+  private toSortableVersion(version: string) {
+    const validVersion = semver.valid(version);
+    if (validVersion) return validVersion;
+
+    const fourPartVersion = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(version);
+    if (fourPartVersion) {
+      const [, major, minor, patch, build] = fourPartVersion;
+      return `${major}.${minor}.${patch}-${build}`;
+    }
+
+    return semver.coerce(version)?.version || '0.0.0';
   }
 
   private genUrl(path: string) {
@@ -191,6 +203,43 @@ export class ChangelogService {
     });
 
     return compiledTemplate({ ...this.config, path });
+  }
+
+  private getLocalPath(path: string) {
+    return nodePath.join(process.cwd(), path);
+  }
+
+  private async getSourceText(path: string) {
+    if (this.config.source === 'local') {
+      return await readFile(this.getLocalPath(path), 'utf8');
+    }
+
+    const response = await fetch(this.genUrl(path), {
+      next: { revalidate: 3600, tags: [FetchCacheTag.Changelog] },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch changelog source: ${response.status}`);
+    }
+
+    return await response.text();
+  }
+
+  private async getSourceJson<T>(path: string): Promise<T> {
+    if (this.config.source === 'local') {
+      const text = await readFile(this.getLocalPath(path), 'utf8');
+      return JSON.parse(text) as T;
+    }
+
+    const response = await fetch(this.genUrl(path), {
+      next: { revalidate: 3600, tags: [FetchCacheTag.Changelog] },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch changelog source: ${response.status}`);
+    }
+
+    return (await response.json()) as T;
   }
 
   private extractHttpsLinks(text: string) {
@@ -203,9 +252,7 @@ export class ChangelogService {
     if (!docCdnPrefix) return;
     if (Object.keys(this.cdnUrls).length === 0) {
       try {
-        const url = this.genUrl(this.config.cdnPath);
-        const res = await fetch(url);
-        const data = await res.json();
+        const data = await this.getSourceJson<Record<string, string>>(this.config.cdnPath);
         if (data) {
           this.cdnUrls = data;
         }

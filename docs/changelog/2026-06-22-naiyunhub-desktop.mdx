@@ -1,0 +1,42 @@
+---
+title: NaiYunHub v2.2.4.1 private deployment customization
+description: NaiYunHub v2.2.4.1 is a private deployment build based on upstream v2.2.4.
+tags:
+  - Self-hosting
+  - Casdoor
+  - Model Service
+  - Message Channels
+---
+
+# NaiYunHub v2.2.4.1 private deployment customization
+
+This update customizes the upstream v2.2.4 codebase for NaiYunHub private deployment. The focus is not the upstream changelog history; it is moving branding, sign-in, model routing, message channels, desktop downloads, and deployment templates onto NaiYunHub-owned paths.
+
+## Branding, sign-in, and desktop entry points
+
+Web and desktop titles, icons, splash screens, and the default inbox agent now use NaiYunHub / NaiYun AI. The desktop OIDC client is renamed to NaiYunHub Desktop, with local `3010` and `3210` redirect URIs allowed for local development and desktop sign-in verification.
+
+The app now includes local `/downloads` and `/changelog` pages. Desktop installer links can be generated from environment variables or an S3 public URL, while changelogs read from repository-local content by default. Auto-update no longer falls back to an external GitHub feed when no update source is configured; update checks run only after `UPDATE_SERVER_URL` is set.
+
+## Private models, voice, and request identity
+
+Model and voice defaults are aligned with NaiYunHub private deployment. OpenAI-compatible models can use `OPENAI_PROXY_URL`; BGE-M3 embedding, Edge TTS, and Qwen3 ASR are added as defaults; and an OpenRouter STT endpoint is available. DeepSeek can also be explicitly enabled or disabled with `ENABLED_DEEPSEEK`.
+
+Requests sent to the model routing platform now carry NaiYunHub `X-Client`, `X-Title`, and `X-Logo` headers, and no longer send the upstream default `HTTP-Referer`. This lets the routing platform identify NaiYunHub traffic with the right name and logo.
+
+## Message channels and skill entry points
+
+Message channel registration and channel pages now expose only QQ, WeChat, Feishu, and Lark. Other upstream default or placeholder channels are no longer shown as available channels.
+
+The skill store keeps the NaiYun AI, Skills, and MCP entry points. The NaiYun AI tab focuses on built-in skills and built-in tools. When the external skill market is unavailable, the Skills tab falls back to locally installed or imported skills instead of showing a network error, while the MCP tab remains available for extension workflows.
+
+## Deployment and backend reliability
+
+Docker Compose templates are renamed and organized for NaiYunHub, with development and observability variants. Image sources, container names, MinIO, Casdoor, Redis, PostgreSQL, SearXNG, Grafana, Tempo, Prometheus, and OTel settings are aligned with the internal deployment path, with enterprise deployment documentation added alongside them.
+
+## Improvements and fixes
+
+- Image and video generation tasks use a longer generation timeout instead of the shorter general async-task timeout.
+- Embedding requests include `dimensions` only for models that support dimension overrides, keeping private BGE-M3 deployments compatible.
+- Anonymous analytics, external feedback/community support, and selected workspace setting entries were trimmed for private environments.
+- The home footer changelog entry opens the local changelog, so future release notes can be maintained in this repository.

@@ -1,0 +1,42 @@
+---
+title: NaiYunHub v2.2.4.1 私有部署定制
+description: 基于上游 v2.2.4，发布 NaiYunHub v2.2.4.1 私有部署定制版。
+tags:
+  - 私有部署
+  - Casdoor
+  - 模型服务
+  - 消息频道
+---
+
+# NaiYunHub v2.2.4.1 私有部署定制
+
+这次更新基于上游 v2.2.4 做 NaiYunHub 私有化改造。重点不是同步上游历史内容，而是把品牌、登录、模型路由、消息频道、桌面下载和部署模板切到 NaiYunHub 自有链路。
+
+## 品牌、登录与桌面入口
+
+Web 与桌面端的标题、图标、启动页、默认助手名统一为 NaiYunHub / NaiYun AI。桌面端 OIDC 客户端切换为 NaiYunHub Desktop，并补齐本地 `3010`、`3210` 的登录回调地址，方便本地开发和桌面应用登录验证。
+
+站内新增 `/downloads` 与 `/changelog`。桌面安装包地址可以通过环境变量或 S3 公共地址生成；更新日志默认读取仓库内的本地内容。自动更新不再在未配置更新源时回落到外部 GitHub，只有配置 `UPDATE_SERVER_URL` 后才会检查更新。
+
+## 私有模型、语音与请求标识
+
+模型与语音默认配置按 NaiYunHub 私有部署调整：OpenAI-compatible 模型可走 `OPENAI_PROXY_URL`，新增 BGE-M3 embedding、Edge TTS、Qwen3 ASR 默认配置，并提供 OpenRouter STT 入口。DeepSeek 也支持通过 `ENABLED_DEEPSEEK` 显式开关。
+
+发往模型路由平台的请求会统一携带 NaiYunHub 的 `X-Client`、`X-Title` 和 `X-Logo`，不再发送上游默认 `HTTP-Referer`。这样模型路由平台可以按 NaiYunHub 识别来源、名称和图标。
+
+## 消息频道与技能入口
+
+消息频道注册和页面列表只保留 QQ、微信、飞书、Lark。其他上游默认或占位入口不再作为可用频道展示。
+
+技能商店保留 NaiYun AI、技能、MCP 三个入口。NaiYun AI 入口聚焦内置技能和内置工具；技能市场在外部市场接口不可用时会回退展示本地已安装或导入的技能，避免私有环境直接出现网络错误；MCP 入口继续保留，方便按需扩展。
+
+## 部署与后台稳定性
+
+Docker Compose 模板整理为 NaiYunHub 命名，提供开发和观测版本；镜像源、容器名、MinIO、Casdoor、Redis、PostgreSQL、SearXNG、Grafana、Tempo、Prometheus、OTel 配置按内网部署方式调整，并补充企业部署文档。
+
+## 体验优化与修复
+
+- 图片和视频生成任务使用更长的生成超时，不再套用普通异步任务的短超时。
+- Embedding 请求只在模型支持时传入 `dimensions`，兼容 BGE-M3 这类私有 embedding 模型。
+- 匿名分析、外部反馈、社区支持和部分工作区设置入口已精简，减少内部环境对外部服务的依赖。
+- 首页底部更新日志入口改为打开站内更新日志，后续版本说明可直接维护在本仓库。
