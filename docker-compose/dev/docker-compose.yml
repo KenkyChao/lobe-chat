@@ -1,9 +1,19 @@
 name: naiyunhub
+
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '100m'
+    max-file: '3'
+
 services:
   network-service:
-    image: 192.168.1.211:5001/naiyun-registry/library/alpine
+    image: alpine
     container_name: naiyun-network
-    restart: always
+    restart: unless-stopped
+    logging: *default-logging
+    extra_hosts:
+      - 'chat.naiyun.com:192.168.1.69'
     ports:
       - '${LOBE_PORT:-3010}:3210' # LobeChat Web
     command: tail -f /dev/null
@@ -14,7 +24,12 @@ services:
     image: naiyunchat-db:${NAIYUNCHAT_DB_VERSION:-2.2.4}
     pull_policy: never
     container_name: naiyunhub
-    restart: always
+    restart: unless-stopped
+    mem_limit: 2g
+    cpus: 2
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
     network_mode: 'service:network-service'
     depends_on:
       postgresql:
@@ -36,9 +51,10 @@ services:
       - 'SEARXNG_URL=http://127.0.0.1:8080'
 
   postgresql:
-    image: 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+    image: paradedb/paradedb:latest-pg17
     container_name: naiyun-postgres
-    restart: always
+    restart: unless-stopped
+    logging: *default-logging
     network_mode: 'service:network-service'
     volumes:
       - './data:/var/lib/postgresql/data'
@@ -52,9 +68,10 @@ services:
       retries: 5
 
   redis:
-    image: 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+    image: redis:7-alpine
     container_name: naiyun-redis
-    restart: always
+    restart: unless-stopped
+    logging: *default-logging
     network_mode: 'service:network-service'
     command: redis-server --save 60 1000 --appendonly yes
     volumes:
@@ -66,9 +83,10 @@ services:
       retries: 5
 
   searxng:
-    image: 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
+    image: searxng/searxng:latest
     container_name: naiyun-searxng
-    restart: always
+    restart: unless-stopped
+    logging: *default-logging
     network_mode: 'service:network-service'
     volumes:
       - './searxng-settings.yml:/etc/searxng/settings.yml'

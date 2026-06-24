@@ -14,6 +14,7 @@ PULL_BASE=0
 DETACH=1
 FOLLOW_LOGS=0
 USE_CN_MIRROR="${USE_CN_MIRROR:-false}"
+BUILD_PLATFORM="${BUILD_PLATFORM:-}"
 
 log() {
   printf '\033[1;34m==>\033[0m %s\n' "$*"
@@ -48,6 +49,8 @@ Options:
   --no-build       Skip building naiyunchat-db:<package.version>
   --no-cache       Build naiyunchat-db:<package.version> without Docker cache
   --pull-base      Pull alpine/postgresql/redis/searxng before starting
+  --platform <arch>
+                  Build image for a specific platform, e.g. amd64, arm64, linux/amd64
   --foreground     Run compose up in the foreground
   -d, --detach     Run compose up detached (default)
   --logs           Follow lobe logs after detached startup
@@ -60,6 +63,7 @@ Examples:
   docker-compose/dev/setup.sh restart --env test --no-build
   docker-compose/dev/setup.sh restart --env prod --no-build
   docker-compose/dev/setup.sh up --pull-base --logs
+  docker-compose/dev/setup.sh build --env test --platform amd64
   docker-compose/dev/setup.sh build --no-cache --use-cn-mirror
   docker-compose/dev/setup.sh down
 EOF
@@ -90,6 +94,15 @@ while [[ $# -gt 0 ]]; do
       ;;
     --pull-base)
       PULL_BASE=1
+      shift
+      ;;
+    --platform)
+      [[ $# -ge 2 ]] || fail "--platform requires a value, for example: amd64, arm64, or linux/amd64"
+      BUILD_PLATFORM="$2"
+      shift 2
+      ;;
+    --platform=*)
+      BUILD_PLATFORM="${1#--platform=}"
       shift
       ;;
     --foreground)
@@ -132,10 +145,34 @@ command_exists() {
   command -v "$1" > /dev/null 2>&1
 }
 
+normalize_platform() {
+  local platform="$1"
+
+  case "${platform}" in
+    "")
+      printf ''
+      ;;
+    amd64 | arm64)
+      printf 'linux/%s' "${platform}"
+      ;;
+    linux/amd64 | linux/arm64)
+      printf '%s' "${platform}"
+      ;;
+    *)
+      fail "Unsupported platform: ${platform}. Expected amd64, arm64, linux/amd64, or linux/arm64."
+      ;;
+  esac
+}
+
 read_package_version() {
   if command_exists node; then
-    node -e "console.log(require(process.argv[1]).version)" "${ROOT_DIR}/package.json"
-    return
+    local version
+    if version="$(node -e "console.log(require(process.argv[1]).version)" "${ROOT_DIR}/package.json" 2> /dev/null)"; then
+      printf '%s\n' "${version}"
+      return
+    fi
+
+    warn "node exists but failed to read package version. Falling back to sed."
   fi
 
   sed -n 's/^[[:space:]]*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "${ROOT_DIR}/package.json" | head -n 1
@@ -217,6 +254,8 @@ compose() {
 build_image() {
   local image="naiyunchat-db:${APP_VERSION}"
   local build_args=(-t "${image}")
+  local normalized_platform
+  normalized_platform="$(normalize_platform "${BUILD_PLATFORM}")"
   local passthrough_args=(
     NEXT_PUBLIC_BASE_PATH
     NEXT_PUBLIC_SENTRY_DSN
@@ -241,6 +280,10 @@ build_image() {
     build_args+=(--no-cache)
   fi
 
+  if [[ -n "${normalized_platform}" ]]; then
+    build_args+=(--platform "${normalized_platform}")
+  fi
+
   for arg in "${passthrough_args[@]}"; do
     local value="${!arg:-}"
 
@@ -255,6 +298,11 @@ build_image() {
 
   log "Building local app image: ${image}"
   log "Build env file: ${ENV_FILE}"
+  if [[ -n "${normalized_platform}" ]]; then
+    log "Build platform: ${normalized_platform}"
+  else
+    log "Build platform: docker default"
+  fi
   docker build "${build_args[@]}" "${ROOT_DIR}"
 }
 
