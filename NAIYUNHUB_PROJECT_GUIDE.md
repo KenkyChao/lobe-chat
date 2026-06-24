@@ -250,22 +250,21 @@ OFFICIAL_CLOUD_SERVER=https://chat.naiyun.com:10085
 NEXT_PUBLIC_OFFICIAL_URL=https://chat.naiyun.com:10085
 ```
 
-打包前把生产变量加载到当前终端：
+桌面安装包会在构建时把这些地址写入主进程和渲染层。推荐使用根目录的渠道打包入口，并通过 `--env` 指定环境文件，不再手动 `source`：
 
 ```bash
-set -a
-source .env.prod
-set +a
+pnpm run desktop:build-channel -- <stable|beta|nightly|canary> [version] --env <development|test|prod>
 ```
 
-验证当前终端变量：
+环境文件对应关系：
 
-```bash
-echo $OFFICIAL_CLOUD_SERVER
-echo $NEXT_PUBLIC_OFFICIAL_URL
+```text
+--env development -> .env.development
+--env test        -> .env.test
+--env prod        -> .env.prod
 ```
 
-预期生产输出：
+生产环境变量示例：
 
 ```text
 https://chat.naiyun.com:10085
@@ -273,6 +272,8 @@ https://chat.naiyun.com:10085
 ```
 
 注意：只改 `.env.prod` 不会自动影响已经打好的桌面安装包。桌面客户端地址会在构建时写入安装包，所以修改地址后需要重新打包。
+
+注意：`.env.test` / `.env.prod` 里的 `DESKTOP_APP_VERSION` 不会被 `desktop:build-channel` 自动当作安装包版本号；不传版本时默认使用根目录 `package.json` 的版本。需要固定版本时，在渠道后面显式传版本号。
 
 ### 本机平台打包命令
 
@@ -286,7 +287,7 @@ https://chat.naiyun.com:10085
 
 ### 指定目标架构
 
-桌面端提供明确的架构脚本：
+桌面端提供明确的架构脚本，以下命令在 `apps/desktop` 目录执行：
 
 ```bash
 pnpm run package:win:x64
@@ -336,31 +337,52 @@ macOS 当前配置默认跟随构建机器架构：Apple Silicon 机器打 `arm6
 
 ### macOS 安装包
 
-Apple Silicon 当前机器本地测试包：
+测试环境 macOS 包从项目根目录执行：
 
 ```bash
-set -a
-source .env.prod
-set +a
+cd /Users/zhaojuanchao/Workspace/Projects/Work/github/lobe-chat
+rm -rf apps/desktop/release
 
-cd apps/desktop
-pnpm run package:mac:local
+pnpm run desktop:build-channel -- nightly --env test
 ```
 
-这个命令会跳过 notarization 和签名身份，适合内部测试。常见产物：
+如果要指定测试包版本号：
+
+```bash
+pnpm run desktop:build-channel -- nightly 2.2.4 --env test
+```
+
+正式 macOS 包从项目根目录执行：
+
+```bash
+cd /Users/zhaojuanchao/Workspace/Projects/Work/github/lobe-chat
+rm -rf apps/desktop/release
+
+pnpm run desktop:build-channel -- stable --env prod
+```
+
+如果要指定正式版本号：
+
+```bash
+pnpm run desktop:build-channel -- stable 2.2.4 --env prod
+```
+
+常见产物：
 
 ```text
-apps/desktop/release/NaiYunHub-0.0.0-arm64.dmg
-apps/desktop/release/NaiYunHub-0.0.0-arm64-mac.zip
+apps/desktop/release/
 ```
 
-正式 macOS 包：
+安装包文件名由当前渠道、版本号、目标架构和 `apps/desktop/package.json` 的 `productName` 共同决定，以 `apps/desktop/release` 实际输出为准。
+
+`pnpm run desktop:build-channel -- nightly --env test` 与 `pnpm run package:mac` 的区别：
+
+- `desktop:build-channel` 是根目录封装入口，会读取 `.env.test` / `.env.prod`，设置渠道、版本、包名和图标，打完后恢复本地 `apps/desktop/package.json` 和图标文件。
+- `package:mac` 是 `apps/desktop` 下的 Electron 底层打包命令，不会自动读取根目录 `.env.test`，也不会自动切换测试/正式渠道。
+
+如果只需要临时本机底层打包，可以进入 `apps/desktop` 执行：
 
 ```bash
-set -a
-source .env.prod
-set +a
-
 cd apps/desktop
 pnpm run package:mac
 ```
@@ -438,14 +460,10 @@ Linux 产物通常包含 AppImage 或对应平台包，具体取决于 `electron
 
 ### 自动按当前系统打包
 
-根目录提供了按当前操作系统选择打包命令的脚本：
+根目录提供了按当前操作系统选择打包命令的底层脚本：
 
 ```bash
-set -a
-source .env.prod
-set +a
-
-npm run desktop:package:app
+pnpm run desktop:package:app
 ```
 
 脚本会根据当前系统自动选择：
@@ -456,9 +474,16 @@ Windows -> apps/desktop package:win
 Linux   -> apps/desktop package:linux
 ```
 
+这个底层脚本不会自动选择 `.env.test` / `.env.prod`。测试环境和正式环境发布优先使用：
+
+```bash
+pnpm run desktop:build-channel -- nightly --env test
+pnpm run desktop:build-channel -- stable --env prod
+```
+
 ### 本地目录包
 
-只生成未压缩的 app 目录，适合调试打包结构：
+只生成未压缩的 app 目录，适合调试打包结构。这是底层调试命令，不支持 `--env test` / `--env prod`；如需指定环境，需要先把对应 `.env` 加载到当前终端。
 
 从项目根目录执行：
 
@@ -467,7 +492,7 @@ set -a
 source .env.prod
 set +a
 
-pnpm desktop:package:local
+pnpm run desktop:package:local
 ```
 
 如果已经进入 `apps/desktop`，使用桌面端自己的脚本：
@@ -483,7 +508,7 @@ pnpm run package:local
 如果只是复用上次 `build:main` 产物重新打目录包：
 
 ```bash
-pnpm desktop:package:local:reuse
+pnpm run desktop:package:local:reuse
 ```
 
 进入 `apps/desktop` 后对应命令是：
@@ -494,10 +519,13 @@ pnpm run package:local:reuse
 
 ### 版本号和渠道
 
-桌面端版本来自 `apps/desktop/package.json`。需要按渠道设置版本时，可以使用：
+推荐使用根目录封装脚本一次完成“加载环境变量 + 设置版本 + 设置渠道 + 打包”：
 
 ```bash
-npm run workflow:set-desktop-version 0.0.0 stable
+pnpm run desktop:build-channel -- nightly --env test
+pnpm run desktop:build-channel -- nightly 2.2.4 --env test
+pnpm run desktop:build-channel -- stable --env prod
+pnpm run desktop:build-channel -- stable 2.2.4 --env prod
 ```
 
 可用渠道：
@@ -509,13 +537,15 @@ nightly
 canary
 ```
 
-也可以用封装脚本打指定渠道：
+脚本完整语法：
 
 ```bash
-npm run desktop:build-channel -- stable 0.0.0 --keep-changes
+pnpm run desktop:build-channel -- <stable|beta|nightly|canary> [version] --env <development|test|prod> [--keep-changes]
 ```
 
 `--keep-changes` 会保留脚本改过的桌面版本号和图标文件；不加时脚本会在结束后恢复本地文件。
+
+如果出现 `Missing script: "desktop:build-channel"`，通常是因为当前目录在 `apps/desktop`。该脚本位于项目根目录，需要先回到仓库根目录再执行。
 
 ### 更新源
 
@@ -539,11 +569,7 @@ beta    -> $UPDATE_SERVER_URL/beta
 示例：
 
 ```bash
-export UPDATE_SERVER_URL=https://chat.naiyun.com:10085/naiyun-chat/desktop-updates
-export UPDATE_CHANNEL=stable
-
-cd apps/desktop
-pnpm run package:mac
+pnpm run desktop:build-channel -- stable 2.2.4 --env prod
 ```
 
 ### 打包后验证
@@ -569,11 +595,7 @@ http://127.0.0.1:3010
 说明打包时没有正确加载生产环境变量，需要重新执行：
 
 ```bash
-set -a
-source .env.prod
-set +a
-cd apps/desktop
-pnpm run package:mac:local
+pnpm run desktop:build-channel -- stable 2.2.4 --env prod
 ```
 
 ### OIDC 回调要求
@@ -598,26 +620,33 @@ https://chat.naiyun.com:10085/oidc/callback/desktop
 根目录入口：
 
 ```bash
-# 自动按当前系统打安装包
-set -a && source .env.prod && set +a
-npm run desktop:package:app
+# 测试环境安装包
+cd /Users/zhaojuanchao/Workspace/Projects/Work/github/lobe-chat
+rm -rf apps/desktop/release
+pnpm run desktop:build-channel -- nightly --env test
 
-# 本地目录包
-set -a && source .env.prod && set +a
-pnpm desktop:package:local
+# 测试环境安装包，指定版本号
+pnpm run desktop:build-channel -- nightly 2.2.4 --env test
+
+# 正式环境安装包
+rm -rf apps/desktop/release
+pnpm run desktop:build-channel -- stable --env prod
+
+# 正式环境安装包，指定版本号
+pnpm run desktop:build-channel -- stable 2.2.4 --env prod
+
+# 底层：自动按当前系统打安装包，不自动选择 .env.test / .env.prod
+pnpm run desktop:package:app
+
+# 底层：本地目录包，适合调试打包结构
+pnpm run desktop:package:local
 ```
 
 `apps/desktop` 目录入口：
 
 ```bash
-# macOS 内部测试包
+# macOS 底层打包命令，不自动读取根目录 .env.test / .env.prod
 cd apps/desktop
-set -a && source ../../.env.prod && set +a
-pnpm run package:mac:local
-
-# macOS 正式包
-cd apps/desktop
-set -a && source ../../.env.prod && set +a
 pnpm run package:mac
 
 # Windows 正式包，PowerShell
@@ -633,20 +662,15 @@ cd apps/desktop
 pnpm run package:linux:x64
 ```
 
-注意：`pnpm desktop:package:local` 是根目录脚本；如果当前目录已经是 `apps/desktop`，要执行 `pnpm run package:local`。
+注意：`pnpm run desktop:package:local` 是根目录脚本；如果当前目录已经是 `apps/desktop`，要执行 `pnpm run package:local`。
 
-局域网测试包示例，连接当前机器 Web 服务 `http://192.168.10.87:3010`，并打普通 Windows x64 安装包：
+局域网测试包如果是当前系统安装包，推荐把 `.env.development` 里的地址改为当前机器 Web 服务，例如 `http://192.168.10.87:3010`，然后从项目根目录执行：
 
 ```bash
-cd apps/desktop
-
-export OFFICIAL_CLOUD_SERVER=http://192.168.10.87:3010
-export NEXT_PUBLIC_OFFICIAL_URL=http://192.168.10.87:3010
-
-pnpm run package:win:x64
+pnpm run desktop:build-channel -- nightly --env development
 ```
 
-Windows PowerShell 写法：
+如果要打普通 Windows x64 局域网包，请在 Windows x64 环境执行底层命令，PowerShell 写法：
 
 ```powershell
 cd apps/desktop
