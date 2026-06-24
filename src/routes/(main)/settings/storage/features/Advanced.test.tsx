@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { type ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -134,7 +134,7 @@ describe('AdvancedActions', () => {
     expect(screen.getByText('storage.actions.title')).toBeDefined();
   });
 
-  it('shows telemetry as a fallback when About settings are hidden', () => {
+  it('does not show telemetry when About settings are hidden', () => {
     const updateGeneralConfig = vi.fn();
 
     useUserStore.setState({
@@ -144,12 +144,8 @@ describe('AdvancedActions', () => {
 
     render(<AdvancedActions />, { wrapper: createWrapper(true) });
 
-    expect(screen.getByText('analytics.title')).toBeDefined();
-    expect(screen.getByText('analytics.telemetry.title')).toBeDefined();
-    expect(screen.getByRole('switch')).toBeDisabled();
-
-    fireEvent.click(screen.getByRole('switch'));
-
+    expect(screen.queryByText('analytics.title')).toBeNull();
+    expect(screen.queryByText('analytics.telemetry.title')).toBeNull();
     expect(updateGeneralConfig).not.toHaveBeenCalled();
   });
 });

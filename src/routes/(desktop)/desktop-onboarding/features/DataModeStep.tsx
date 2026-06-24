@@ -1,21 +1,16 @@
 'use client';
 
-import { Block, Button, Checkbox, Empty, Flexbox, Text } from '@lobehub/ui';
+import { Block, Button, Checkbox, Flexbox, Text } from '@lobehub/ui';
 import { cssVar } from 'antd-style';
-import { HeartHandshake, Undo2Icon } from 'lucide-react';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { Undo2Icon } from 'lucide-react';
+import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ANALYTICS_DISABLED } from '@/const/analytics';
-import { isDesktop } from '@/const/version';
 import { useUserStore } from '@/store/user';
 import { userGeneralSettingsSelectors } from '@/store/user/selectors';
 
 import LobeMessage from '../components/LobeMessage';
 import OnboardingFooterActions from '../components/OnboardingFooterActions';
-
-type DataMode = 'share' | 'privacy';
-const DESKTOP_TELEMETRY_DISABLED = ANALYTICS_DISABLED || isDesktop;
 
 interface DataModeStepProps {
   onBack: () => void;
@@ -26,25 +21,12 @@ const DataModeStep = memo<DataModeStepProps>(({ onBack, onNext }) => {
   const { t } = useTranslation('desktop-onboarding');
   const telemetryEnabled = useUserStore(userGeneralSettingsSelectors.telemetry);
   const updateGeneralConfig = useUserStore((s) => s.updateGeneralConfig);
-  const [selectedMode, setSelectedMode] = useState<DataMode>('privacy');
 
   useEffect(() => {
     if (telemetryEnabled) {
       void updateGeneralConfig({ telemetry: false });
     }
   }, [telemetryEnabled, updateGeneralConfig]);
-
-  const setMode = useCallback(
-    (mode: DataMode) => {
-      const nextMode = DESKTOP_TELEMETRY_DISABLED ? 'privacy' : mode;
-      setSelectedMode(nextMode);
-      const nextTelemetry = !DESKTOP_TELEMETRY_DISABLED && nextMode === 'share';
-      if (telemetryEnabled !== nextTelemetry) {
-        void updateGeneralConfig({ telemetry: nextTelemetry });
-      }
-    },
-    [telemetryEnabled, updateGeneralConfig],
-  );
 
   const checkIcon = (
     <Checkbox
@@ -63,58 +45,14 @@ const DataModeStep = memo<DataModeStepProps>(({ onBack, onNext }) => {
         <Text as={'p'}>{t('screen4.description')}</Text>
       </Flexbox>
       <Flexbox gap={16} style={{ width: '100%' }}>
-        {/* Shared data option */}
         <Block
-          clickable={!DESKTOP_TELEMETRY_DISABLED}
-          flex={1}
-          gap={16}
-          padding={16}
-          style={{
-            borderColor: selectedMode === 'share' ? cssVar.colorSuccess : undefined,
-            opacity: DESKTOP_TELEMETRY_DISABLED ? 0.45 : undefined,
-            pointerEvents: DESKTOP_TELEMETRY_DISABLED ? 'none' : undefined,
-          }}
-          variant={'outlined'}
-          onClick={DESKTOP_TELEMETRY_DISABLED ? undefined : () => setMode('share')}
-        >
-          {selectedMode === 'share' && checkIcon}
-          <Empty
-            description={t('screen4.share.description')}
-            icon={HeartHandshake}
-            padding={0}
-            title={t('screen4.share.title')}
-            type={'page'}
-            descriptionProps={{
-              fontSize: 14,
-            }}
-            titleProps={{
-              fontSize: 18,
-            }}
-          />
-          <Flexbox as={'ul'} gap={4} style={{ listStyle: 'none', padding: 0 }}>
-            <li>
-              <Text>• {t('screen4.share.items.1')}</Text>
-            </li>
-            <li>
-              <Text>• {t('screen4.share.items.2')}</Text>
-            </li>
-            <li>
-              <Text>• {t('screen4.share.items.3')}</Text>
-            </li>
-          </Flexbox>
-        </Block>
-
-        {/* Privacy mode option */}
-        <Block
-          clickable
           flex={1}
           gap={6}
           padding={16}
-          style={{ borderColor: selectedMode === 'privacy' ? cssVar.colorSuccess : undefined }}
+          style={{ borderColor: cssVar.colorSuccess }}
           variant={'outlined'}
-          onClick={() => setMode('privacy')}
         >
-          {selectedMode === 'privacy' && checkIcon}
+          {checkIcon}
           <Text strong fontSize={18}>
             {t('screen4.privacy.title')}
           </Text>
@@ -123,9 +61,6 @@ const DataModeStep = memo<DataModeStepProps>(({ onBack, onNext }) => {
           </Text>
         </Block>
       </Flexbox>
-      <Text color={cssVar.colorTextSecondary} fontSize={12} style={{ marginTop: 16 }}>
-        {t('screen4.footerNote')}
-      </Text>
       <OnboardingFooterActions
         left={
           <Button

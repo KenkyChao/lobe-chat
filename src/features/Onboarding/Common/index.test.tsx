@@ -157,7 +157,7 @@ afterEach(() => {
 });
 
 describe('CommonOnboardingPage', () => {
-  it('renders TelemetryStep (welcome + privacy) when shared prefix is incomplete', async () => {
+  it('renders TelemetryStep welcome when shared prefix is incomplete', async () => {
     await renderCommon({ commonStepsCompleted: false });
     expect(screen.getByText('TelemetryStep')).toBeInTheDocument();
   });

@@ -1,6 +1,5 @@
 import { isDesktop } from '@lobechat/const';
 
-import { ANALYTICS_DISABLED } from '@/const/analytics';
 import { DEFAULT_LANG } from '@/const/locale';
 import { type Locales, normalizeLocale } from '@/locales/resources';
 import { isOnServerSide } from '@/utils/env';
@@ -31,11 +30,7 @@ const currentResponseLanguage = (s: UserStore): Locales => {
 
   return normalizeLocale(navigator.language);
 };
-const telemetry = (s: UserStore) => {
-  if (ANALYTICS_DISABLED || isDesktop) return false;
-
-  return generalConfig(s).telemetry;
-};
+const telemetry = () => false;
 const enableAutoScrollOnStreaming = (s: UserStore) =>
   generalConfig(s).enableAutoScrollOnStreaming ?? true;
 

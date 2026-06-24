@@ -296,9 +296,7 @@ describe('createCommonSlice', () => {
       await waitFor(() => expect(result.current.data).toBeUndefined());
     });
 
-    it('should return false when telemetry is already set', async () => {
-      vi.spyOn(userGeneralSettingsSelectors, 'telemetry').mockReturnValueOnce(true);
-
+    it('should return false when checking trace', async () => {
       const { result } = renderHook(() => useUserStore().useCheckTrace(true), {
         wrapper: withSWR,
       });
@@ -306,7 +304,7 @@ describe('createCommonSlice', () => {
       await waitFor(() => expect(result.current.data).toBe(false));
     });
 
-    it('should call messageService.messageCountToCheckTrace when needed', async () => {
+    it('should not enable trace when telemetry is unavailable', async () => {
       vi.spyOn(userGeneralSettingsSelectors, 'telemetry').mockReturnValueOnce(undefined as any);
 
       act(() => {
@@ -319,7 +317,7 @@ describe('createCommonSlice', () => {
         wrapper: withSWR,
       });
 
-      await waitFor(() => expect(result.current.data).toBe(true));
+      await waitFor(() => expect(result.current.data).toBe(false));
     });
   });
 });

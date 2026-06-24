@@ -24,7 +24,7 @@ describe('settingsSelectors', () => {
         isDevMode: false,
         isLiteMode: false,
         mermaidTheme: 'lobe-theme',
-        telemetry: true,
+        telemetry: false,
         transitionMode: 'fadeIn',
       });
     });
