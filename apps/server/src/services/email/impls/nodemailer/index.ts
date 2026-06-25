@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 
 import { emailEnv } from '@/envs/email';
 
+import { withBrandSender } from '../sender';
 import { type EmailPayload, type EmailResponse, type EmailServiceImpl } from '../type';
 import { type NodemailerConfig } from './type';
 
@@ -51,7 +52,7 @@ export class NodemailerImpl implements EmailServiceImpl {
 
   async sendMail(payload: EmailPayload): Promise<EmailResponse> {
     // Use SMTP_FROM as default sender, fallback to SMTP_USER for backward compatibility
-    const from = payload.from || emailEnv.SMTP_FROM || emailEnv.SMTP_USER!;
+    const from = withBrandSender(payload.from || emailEnv.SMTP_FROM || emailEnv.SMTP_USER!);
 
     log('Sending email with payload: %o', {
       from,

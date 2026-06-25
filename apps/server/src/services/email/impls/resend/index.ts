@@ -5,6 +5,7 @@ import { Resend } from 'resend';
 
 import { emailEnv } from '@/envs/email';
 
+import { withBrandSender } from '../sender';
 import { type EmailPayload, type EmailResponse, type EmailServiceImpl } from '../type';
 
 const log = debug('lobe-email:Resend');
@@ -28,7 +29,7 @@ export class ResendImpl implements EmailServiceImpl {
 
   async sendMail(payload: EmailPayload): Promise<EmailResponse> {
     // Note: Use || to handle empty string from Dockerfile defaults
-    const from = payload.from || emailEnv.RESEND_FROM;
+    const from = withBrandSender(payload.from || emailEnv.RESEND_FROM);
     const html = payload.html;
     const text = payload.text;
 
