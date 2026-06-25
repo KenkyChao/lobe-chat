@@ -1,6 +1,6 @@
 {
-  "name": "naiyunhub-desktop-dev",
-  "version": "0.0.0",
+  "name": "naiyunhub-desktop",
+  "version": "2.2.4",
   "private": true,
   "description": "NaiYunHub Desktop Application",
   "homepage": "http://127.0.0.1:3010",

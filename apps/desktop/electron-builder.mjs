@@ -25,7 +25,8 @@ const packageJSON = JSON.parse(await fs.readFile(path.join(__dirname, 'package.j
 
 const channel = process.env.UPDATE_CHANNEL;
 const arch = os.arch();
-const hasAppleCertificate = Boolean(process.env.CSC_LINK);
+const hasAppleCertificate = Boolean(process.env.CSC_LINK || process.env.CSC_NAME);
+const skipNotarize = ['1', 'true'].includes((process.env.SKIP_NOTARIZE || '').toLowerCase());
 
 // 自定义更新服务器 URL (用于 stable 频道)
 const updateServerUrl = process.env.UPDATE_SERVER_URL;
@@ -76,6 +77,8 @@ if (!hasAppleCertificate) {
   // Disable auto discovery to keep electron-builder from searching unavailable signing identities
   process.env.CSC_IDENTITY_AUTO_DISCOVERY = 'false';
   console.info('⚠️ Apple certificate link not found, macOS artifacts will be unsigned.');
+} else if (skipNotarize) {
+  console.info('⚠️ SKIP_NOTARIZE enabled, macOS artifacts will be signed but not notarized.');
 }
 
 // 根据版本类型确定协议 scheme
@@ -265,7 +268,7 @@ const config = {
     gatekeeperAssess: false,
     hardenedRuntime: hasAppleCertificate,
     icon: 'build/Icon.icns',
-    notarize: hasAppleCertificate,
+    notarize: hasAppleCertificate && !skipNotarize,
     ...(hasAppleCertificate ? {} : { identity: null }),
     target: [
       { arch: [arch === 'arm64' ? 'arm64' : 'x64'], target: 'dmg' },
