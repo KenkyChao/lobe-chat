@@ -12,11 +12,15 @@ services:
     container_name: naiyun-network
     restart: unless-stopped
     logging: *default-logging
-    extra_hosts:
-      - 'chat.naiyun.com:192.168.1.69'
     ports:
       - '${LOBE_PORT:-3010}:3210' # LobeChat Web
     command: tail -f /dev/null
+    extra_hosts:
+      # 把 chat.naiyun.com 固定到公网网关 112.80.133.252，容器可直接到达。
+      # 不要依赖宿主机 DNS：宿主走 Clash/Surge fake-ip(198.18.x.x)，容器拿到后无法路由。
+      # 注：Agent 的 "Premature close" 与此 IP 无关，根因是 OpenAI SDK 默认用 node-fetch，
+      #     已在 packages/model-runtime 改为 undici 修复(见该文件构造函数注释)。
+      - 'chat.naiyun.com:112.80.133.252'
     networks:
       - naiyunhub-network
 

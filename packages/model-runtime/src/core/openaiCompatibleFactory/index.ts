@@ -324,9 +324,24 @@ export const createOpenAICompatibleRuntime = <T extends Record<string, any> = an
 
       if (!apiKey) throw AgentRuntimeError.createError(ErrorType?.invalidAPIKey);
 
+      // Force the OpenAI SDK to use the runtime's native fetch (undici) instead of
+      // its bundled `node-fetch`. node-fetch throws `ERR_STREAM_PREMATURE_CLOSE`
+      // ("Premature close") when an upstream ends a streaming (SSE) response by
+      // closing the keep-alive connection right after the final usage chunk — even
+      // though the response itself (content + finish_reason + usage) already
+      // completed. undici tolerates this and reads through to `data: [DONE]`.
+      // This bites self-hosted OpenAI-compatible gateways reached directly (no
+      // re-framing proxy in between) from inside Docker.
+      const nativeFetch =
+        typeof globalThis !== 'undefined' && typeof globalThis.fetch === 'function'
+          ? globalThis.fetch.bind(globalThis)
+          : undefined;
+
       const initOptions = {
         apiKey,
         baseURL,
+        // Default to undici; still overridable by constructorOptions / caller options below.
+        ...(nativeFetch ? { fetch: nativeFetch } : {}),
         ...constructorOptions,
         ...res,
         defaultHeaders: withBrandingRequestHeaders({
