@@ -1,3 +1,5 @@
+import { CLOUD_SANDBOX_ENABLED, CLOUD_SANDBOX_UNAVAILABLE_MESSAGE } from '@lobechat/const';
+
 import { toolsClient } from '@/libs/trpc/client';
 import {
   type CallToolResult,
@@ -18,6 +20,8 @@ class CloudSandboxService {
     params: Record<string, any>,
     context: { topicId: string; userId?: string },
   ): Promise<CallToolResult> {
+    if (!CLOUD_SANDBOX_ENABLED) throw new Error(CLOUD_SANDBOX_UNAVAILABLE_MESSAGE);
+
     const input: ExecInSandboxInput = {
       params,
       toolName,
@@ -41,6 +45,8 @@ class CloudSandboxService {
     filename: string,
     topicId: string,
   ): Promise<ExportAndUploadFileResult> {
+    if (!CLOUD_SANDBOX_ENABLED) throw new Error(CLOUD_SANDBOX_UNAVAILABLE_MESSAGE);
+
     const input: ExportAndUploadFileInput = {
       filename,
       path,

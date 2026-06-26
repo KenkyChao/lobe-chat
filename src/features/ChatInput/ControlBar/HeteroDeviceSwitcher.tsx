@@ -1,11 +1,16 @@
 'use client';
 
 import { SiApple, SiLinux } from '@icons-pack/react-simple-icons';
-import { isDesktop } from '@lobechat/const';
+import {
+  CLOUD_SANDBOX_UNAVAILABLE_MESSAGE,
+  DESKTOP_APP_DOWNLOAD_URL,
+  isDesktop,
+} from '@lobechat/const';
 import { isRemoteHeterogeneousType } from '@lobechat/heterogeneous-agents';
 import type { DeviceExecutionTarget } from '@lobechat/types';
 import { Microsoft } from '@lobehub/icons';
 import { Flexbox, Icon, Popover, Tooltip } from '@lobehub/ui';
+import { App } from 'antd';
 import { createStaticStyles, cssVar, cx } from 'antd-style';
 import {
   BoxIcon,
@@ -240,33 +245,40 @@ interface OptionRowProps {
   icon: ReactNode;
   label: string;
   onClick: () => void;
+  onDisabledClick?: () => void;
   tag?: ReactNode;
 }
 
-const OptionRow = memo<OptionRowProps>(({ active, desc, disabled, icon, label, onClick, tag }) => {
-  return (
-    <div
-      className={cx(
-        styles.option,
-        active && styles.optionActive,
-        disabled && styles.optionDisabled,
-      )}
-      onClick={() => {
-        if (!disabled) onClick();
-      }}
-    >
-      <div className={styles.optionIcon}>{icon}</div>
-      <div className={styles.optionMeta}>
-        <Flexbox horizontal align={'center'} gap={6}>
-          <span className={styles.optionTitle}>{label}</span>
-          {tag ? <span className={styles.tag}>{tag}</span> : null}
-        </Flexbox>
-        {desc ? <div className={styles.desc}>{desc}</div> : null}
+const OptionRow = memo<OptionRowProps>(
+  ({ active, desc, disabled, icon, label, onClick, onDisabledClick, tag }) => {
+    return (
+      <div
+        className={cx(
+          styles.option,
+          active && styles.optionActive,
+          disabled && styles.optionDisabled,
+        )}
+        onClick={() => {
+          if (disabled) {
+            onDisabledClick?.();
+            return;
+          }
+          onClick();
+        }}
+      >
+        <div className={styles.optionIcon}>{icon}</div>
+        <div className={styles.optionMeta}>
+          <Flexbox horizontal align={'center'} gap={6}>
+            <span className={styles.optionTitle}>{label}</span>
+            {tag ? <span className={styles.tag}>{tag}</span> : null}
+          </Flexbox>
+          {desc ? <div className={styles.desc}>{desc}</div> : null}
+        </div>
+        {active ? <Icon className={styles.check} icon={CheckIcon} size={14} /> : null}
       </div>
-      {active ? <Icon className={styles.check} icon={CheckIcon} size={14} /> : null}
-    </div>
-  );
-});
+    );
+  },
+);
 
 OptionRow.displayName = 'HeteroDeviceSwitcher.OptionRow';
 
@@ -292,6 +304,7 @@ interface HeteroDeviceSwitcherProps {
 }
 
 const HeteroDeviceSwitcher = memo<HeteroDeviceSwitcherProps>(({ agentId }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation('chat');
   const [open, setOpen] = useState(false);
 
@@ -421,7 +434,7 @@ const HeteroDeviceSwitcher = memo<HeteroDeviceSwitcherProps>(({ agentId }) => {
         {isDesktop || showWebDownloadCard ? null : (
           <a
             className={styles.headerLink}
-            href="https://lobehub.com/downloads"
+            href={DESKTOP_APP_DOWNLOAD_URL}
             rel="noreferrer"
             target="_blank"
           >
@@ -449,11 +462,21 @@ const HeteroDeviceSwitcher = memo<HeteroDeviceSwitcherProps>(({ agentId }) => {
         />
       ) : null}
       <OptionRow
+        disabled
         active={isActive('sandbox')}
-        desc={t('heteroAgent.executionTarget.sandboxDesc')}
         icon={<Icon icon={BoxIcon} size={14} />}
         label={t('heteroAgent.executionTarget.sandbox')}
+        desc={t('heteroAgent.executionTarget.sandboxUnavailable', {
+          defaultValue: CLOUD_SANDBOX_UNAVAILABLE_MESSAGE,
+        })}
         onClick={() => void handleSelect('sandbox')}
+        onDisabledClick={() => {
+          void message.info(
+            t('heteroAgent.executionTarget.sandboxUnavailable', {
+              defaultValue: CLOUD_SANDBOX_UNAVAILABLE_MESSAGE,
+            }),
+          );
+        }}
       />
       {(devices ?? []).map((d) => renderDeviceRow(d))}
       {hasNoDevices && isLoading ? (
@@ -464,7 +487,7 @@ const HeteroDeviceSwitcher = memo<HeteroDeviceSwitcherProps>(({ agentId }) => {
       {showWebDownloadCard ? (
         <a
           className={styles.downloadCard}
-          href="https://lobehub.com/downloads"
+          href={DESKTOP_APP_DOWNLOAD_URL}
           rel="noreferrer"
           target="_blank"
         >

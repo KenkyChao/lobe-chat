@@ -12,12 +12,12 @@ import {
 const cfg = (over: Partial<LobeAgentAgencyConfig> = {}): LobeAgentAgencyConfig => ({ ...over });
 
 describe('resolveExecutionTarget', () => {
-  it('returns the stored target verbatim when set', () => {
+  it('returns the stored target when available', () => {
     expect(resolveExecutionTarget(cfg({ executionTarget: 'device' }), { isDesktop: true })).toBe(
       'device',
     );
     expect(resolveExecutionTarget(cfg({ executionTarget: 'sandbox' }), { isDesktop: true })).toBe(
-      'sandbox',
+      'none',
     );
   });
 
@@ -28,9 +28,9 @@ describe('resolveExecutionTarget', () => {
     expect(resolveExecutionTarget(cfg(), { isDesktop: false })).toBe('none');
   });
 
-  it('coerces a stored `local` to `sandbox` on web (no local filesystem)', () => {
+  it('coerces a stored `local` to none on web while cloud sandbox is unavailable', () => {
     expect(resolveExecutionTarget(cfg({ executionTarget: 'local' }), { isDesktop: false })).toBe(
-      'sandbox',
+      'none',
     );
     // …but keeps it on desktop
     expect(resolveExecutionTarget(cfg({ executionTarget: 'local' }), { isDesktop: true })).toBe(
@@ -50,7 +50,7 @@ describe('resolveExecutionTarget', () => {
       resolveExecutionTarget(cfg({ boundDeviceId: 'device-a', executionTarget: 'local' }), {
         isDesktop: false,
       }),
-    ).toBe('sandbox');
+    ).toBe('none');
   });
 
   it('keeps `device` on web (a bound device is reachable from anywhere)', () => {
@@ -69,7 +69,7 @@ describe('resolveExecutionTarget', () => {
   });
 
   it('coerces `none` for hetero agents — they must execute somewhere', () => {
-    // stored none → desktop local, web sandbox
+    // stored none → desktop local, web none while cloud sandbox is unavailable
     expect(
       resolveExecutionTarget(cfg({ executionTarget: 'none' }), { isDesktop: true, isHetero: true }),
     ).toBe('local');
@@ -78,17 +78,17 @@ describe('resolveExecutionTarget', () => {
         isDesktop: false,
         isHetero: true,
       }),
-    ).toBe('sandbox');
+    ).toBe('none');
     // unset → platform default, then the same coercion on web
     expect(resolveExecutionTarget(undefined, { isDesktop: true, isHetero: true })).toBe('local');
-    expect(resolveExecutionTarget(undefined, { isDesktop: false, isHetero: true })).toBe('sandbox');
+    expect(resolveExecutionTarget(undefined, { isDesktop: false, isHetero: true })).toBe('none');
   });
 });
 
 describe('executionTargetToRuntimeMode', () => {
   it('maps target → tool gate', () => {
     expect(executionTargetToRuntimeMode('local')).toBe('local');
-    expect(executionTargetToRuntimeMode('sandbox')).toBe('cloud');
+    expect(executionTargetToRuntimeMode('sandbox')).toBe('none');
     expect(executionTargetToRuntimeMode('device')).toBe('none');
     expect(executionTargetToRuntimeMode('none')).toBe('none');
   });
@@ -103,15 +103,15 @@ describe('resolveRuntimeMode', () => {
   });
 
   it('derives from an explicit executionTarget', () => {
-    expect(resolveRuntimeMode(cfg({ executionTarget: 'sandbox' }), true)).toBe('cloud');
+    expect(resolveRuntimeMode(cfg({ executionTarget: 'sandbox' }), true)).toBe('none');
     expect(resolveRuntimeMode(cfg({ executionTarget: 'device' }), true)).toBe('none');
     expect(resolveRuntimeMode(cfg({ executionTarget: 'local' }), true)).toBe('local');
     expect(resolveRuntimeMode(cfg({ executionTarget: 'none' }), true)).toBe('none');
   });
 
-  it('applies the web `local`→`sandbox` coercion before mapping to runtime mode', () => {
-    // executionTarget=local synced from desktop, resolved on web → sandbox → cloud
-    expect(resolveRuntimeMode(cfg({ executionTarget: 'local' }), false)).toBe('cloud');
+  it('applies the web `local` fallback before mapping to runtime mode', () => {
+    // executionTarget=local synced from desktop, resolved on web → none while sandbox is unavailable
+    expect(resolveRuntimeMode(cfg({ executionTarget: 'local' }), false)).toBe('none');
   });
 });
 
@@ -140,18 +140,18 @@ describe('resolveExecutionPlan', () => {
     });
   });
 
-  describe('sandbox — mutually exclusive with devices', () => {
-    it('resolves to sandbox regardless of bound / online devices', () => {
+  describe('sandbox — unavailable', () => {
+    it('resolves to none regardless of bound / online devices', () => {
       expect(
         resolveExecutionPlan({
           agencyConfig: cfg({ boundDeviceId: 'device-a', executionTarget: 'sandbox' }),
           isDesktop: true,
           onlineDeviceIds: ONLINE_A,
         }),
-      ).toEqual({ kind: 'sandbox', target: 'sandbox' });
+      ).toEqual({ kind: 'none', target: 'none' });
     });
 
-    it('survives canUseDevice=false — the sandbox never touches user machines', () => {
+    it('stays unavailable with canUseDevice=false', () => {
       expect(
         resolveExecutionPlan({
           agencyConfig: cfg({ executionTarget: 'sandbox' }),
@@ -159,7 +159,7 @@ describe('resolveExecutionPlan', () => {
           isDesktop: true,
           onlineDeviceIds: ONLINE_A,
         }),
-      ).toEqual({ kind: 'sandbox', target: 'sandbox' });
+      ).toEqual({ kind: 'none', target: 'none' });
     });
   });
 
@@ -258,8 +258,8 @@ describe('resolveExecutionPlan', () => {
     });
   });
 
-  describe('canUseDevice=false — hetero degrades to sandbox, never a machine', () => {
-    it('sends denied hetero device-capable targets to the sandbox', () => {
+  describe('canUseDevice=false — hetero does not fall back to sandbox while unavailable', () => {
+    it('sends denied hetero device-capable targets to none', () => {
       // regression: the hetero early-dispatch used to omit the policy, so an
       // external bot sender could run on the owner's bound machine via a
       // synced local/device binding
@@ -271,7 +271,7 @@ describe('resolveExecutionPlan', () => {
             isDesktop: false,
             isHetero: true,
           }),
-        ).toEqual({ kind: 'sandbox', target: 'sandbox' });
+        ).toEqual({ kind: 'none', target: 'none' });
       }
       // requestedDeviceId must not bypass the policy either
       expect(
@@ -282,7 +282,7 @@ describe('resolveExecutionPlan', () => {
           isHetero: true,
           requestedDeviceId: 'device-a',
         }),
-      ).toEqual({ kind: 'sandbox', target: 'sandbox' });
+      ).toEqual({ kind: 'none', target: 'none' });
     });
   });
 
@@ -314,16 +314,16 @@ describe('resolveExecutionPlan', () => {
       ).toEqual({ deviceId: 'device-a', kind: 'device', target: 'device' });
     });
 
-    it('sends hetero non-device targets to the sandbox on the server', () => {
-      // server resolves hetero with isDesktop=false: unbound local → sandbox,
-      // none → sandbox (hetero coercion), sandbox → sandbox
+    it('sends hetero non-device targets to none while cloud sandbox is unavailable', () => {
+      // server resolves hetero with isDesktop=false: unbound local → none,
+      // none → none (hetero coercion), sandbox → none
       for (const executionTarget of ['local', 'none', 'sandbox', undefined] as const) {
         const plan: ExecutionPlan = resolveExecutionPlan({
           agencyConfig: executionTarget ? cfg({ executionTarget }) : undefined,
           isDesktop: false,
           isHetero: true,
         });
-        expect(plan).toEqual({ kind: 'sandbox', target: 'sandbox' });
+        expect(plan).toEqual({ kind: 'none', target: 'none' });
       }
     });
   });

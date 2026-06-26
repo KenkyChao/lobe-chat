@@ -1,5 +1,6 @@
 'use client';
 
+import { DESKTOP_APP_DOWNLOAD_URL } from '@lobechat/const';
 import {
   REMOTE_HETEROGENEOUS_AGENT_CONFIGS,
   type RemoteHeterogeneousAgentType,
@@ -395,7 +396,7 @@ const CreatePlatformAgentModal = memo<CreatePlatformAgentModalProps>(
                   <Flexbox gap={12}>
                     <Flexbox gap={6}>
                       <span>{t('platformAgent.create.noDevicesDesktopHint')}</span>
-                      <a href="https://lobehub.com/downloads" rel="noreferrer" target="_blank">
+                      <a href={DESKTOP_APP_DOWNLOAD_URL} rel="noreferrer" target="_blank">
                         <Button
                           icon={<Icon icon={Download} size={13} />}
                           size="small"

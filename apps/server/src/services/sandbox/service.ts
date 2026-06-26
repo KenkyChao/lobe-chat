@@ -3,6 +3,7 @@ import {
   type SandboxExportFileResult,
   selectSandboxInitFiles,
 } from '@lobechat/builtin-tool-cloud-sandbox';
+import { CLOUD_SANDBOX_ENABLED, CLOUD_SANDBOX_UNAVAILABLE_MESSAGE } from '@lobechat/const';
 import debug from 'debug';
 import { sha256 } from 'js-sha256';
 
@@ -42,6 +43,14 @@ export class SandboxMiddlewareService implements SandboxService {
     toolName: string,
     params: Record<string, unknown>,
   ): Promise<SandboxCallToolResult> {
+    if (!CLOUD_SANDBOX_ENABLED) {
+      return {
+        error: { message: CLOUD_SANDBOX_UNAVAILABLE_MESSAGE, name: 'SandboxUnavailable' },
+        result: null,
+        success: false,
+      };
+    }
+
     await this.ensureFilesInitialized();
     return this.provider.callTool(toolName, params);
   }
@@ -103,6 +112,14 @@ export class SandboxMiddlewareService implements SandboxService {
   }
 
   async exportAndUploadFile(path: string, filename: string): Promise<SandboxExportFileResult> {
+    if (!CLOUD_SANDBOX_ENABLED) {
+      return {
+        error: { message: CLOUD_SANDBOX_UNAVAILABLE_MESSAGE, name: 'SandboxUnavailable' },
+        filename,
+        success: false,
+      };
+    }
+
     const { fileService, topicId } = this.options;
 
     if (!fileService) {

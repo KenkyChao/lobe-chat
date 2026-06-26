@@ -5,6 +5,13 @@ import type { MarketService } from '@/server/services/market';
 
 import type { SandboxProvider } from '../types';
 
+const mockCloudSandboxEnabled = (enabled: boolean) => {
+  vi.doMock('@lobechat/const', async () => ({
+    ...((await vi.importActual('@lobechat/const')) as object),
+    CLOUD_SANDBOX_ENABLED: enabled,
+  }));
+};
+
 describe('SandboxMiddlewareService', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -12,6 +19,8 @@ describe('SandboxMiddlewareService', () => {
   });
 
   it('uploads provider exports through the shared file record flow', async () => {
+    mockCloudSandboxEnabled(true);
+
     const { SandboxMiddlewareService: TestSandboxMiddlewareService } = await import('../service');
     const exportFileToUploadUrl = vi.fn(async () => ({
       result: { mime_type: 'text/plain' },
@@ -80,6 +89,8 @@ describe('SandboxMiddlewareService', () => {
   });
 
   it('normalizes provider export failures before storage metadata is read', async () => {
+    mockCloudSandboxEnabled(true);
+
     const provider = {
       capabilities: {
         backgroundCommands: true,
@@ -121,5 +132,44 @@ describe('SandboxMiddlewareService', () => {
     });
     expect(fileService.getFileMetadata).not.toHaveBeenCalled();
     expect(fileService.createFileRecord).not.toHaveBeenCalled();
+  });
+
+  it('returns unavailable without touching the provider when cloud sandbox is disabled', async () => {
+    mockCloudSandboxEnabled(false);
+
+    const { SandboxMiddlewareService } = await import('../service');
+    const provider = {
+      capabilities: {
+        backgroundCommands: true,
+        exportFile: true,
+        files: true,
+        languages: ['python'],
+        persistentSession: true,
+        shell: true,
+        skillScripts: true,
+      },
+      callTool: vi.fn(),
+      exportFileToUploadUrl: vi.fn(),
+      kind: 'onlyboxes',
+    } satisfies SandboxProvider;
+
+    const service = new SandboxMiddlewareService(provider, {
+      marketService: {} as MarketService,
+      topicId: 'topic-1',
+      userId: 'user-1',
+    });
+
+    await expect(service.callTool('runCommand', { command: 'ls' })).resolves.toMatchObject({
+      error: { message: '暂未开放', name: 'SandboxUnavailable' },
+      result: null,
+      success: false,
+    });
+    await expect(service.exportAndUploadFile('/workspace/result.csv', 'result.csv')).resolves.toMatchObject({
+      error: { message: '暂未开放', name: 'SandboxUnavailable' },
+      filename: 'result.csv',
+      success: false,
+    });
+    expect(provider.callTool).not.toHaveBeenCalled();
+    expect(provider.exportFileToUploadUrl).not.toHaveBeenCalled();
   });
 });
