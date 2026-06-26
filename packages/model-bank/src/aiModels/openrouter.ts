@@ -1,4 +1,4 @@
-import type { ModelParamsSchema } from '../standard-parameters';
+import type { ModelParamsSchema, VideoModelParamsSchema } from '../standard-parameters';
 import type {
   AIChatModelCard,
   AIImageModelCard,
@@ -18,8 +18,65 @@ const openrouterImageParameters: ModelParamsSchema = {
   },
 };
 
-const openrouterVideoParameters = {
+const openrouterGrokImagineVideoParameters: VideoModelParamsSchema = {
+  aspectRatio: {
+    default: '16:9',
+    enum: ['1:1', '16:9', '9:16', '4:3', '3:4', '3:2', '2:3'],
+  },
+  duration: { default: 8, max: 15, min: 1 },
+  imageUrl: {
+    default: null,
+  },
   prompt: { default: '' },
+  resolution: {
+    default: '480p',
+    enum: ['480p', '720p'],
+  },
+  size: {
+    default: '848x480',
+    enum: ['848x480', '1696x960', '1280x720', '1920x1080'],
+  },
+};
+
+const openrouterVeoVideoParameters: VideoModelParamsSchema = {
+  aspectRatio: {
+    default: '16:9',
+    enum: ['16:9', '9:16'],
+  },
+  duration: { default: 8, enum: [4, 6, 8] },
+  endImageUrl: {
+    default: null,
+  },
+  imageUrls: {
+    default: [],
+    maxCount: 3,
+  },
+  prompt: { default: '' },
+  resolution: {
+    default: '720p',
+    enum: ['720p', '1080p', '4k'],
+  },
+  seed: { default: null },
+};
+
+const openrouterKlingVideoParameters: VideoModelParamsSchema = {
+  aspectRatio: {
+    default: '16:9',
+    enum: ['16:9', '9:16', '1:1'],
+  },
+  duration: { default: 5, max: 12, min: 3 },
+  endImageUrl: {
+    default: null,
+  },
+  imageUrl: {
+    default: null,
+  },
+  prompt: { default: '' },
+  resolution: {
+    default: '1080p',
+    enum: ['720p', '1080p'],
+  },
+  seed: { default: null },
 };
 
 const withOpenRouterPrefix = <
@@ -38,63 +95,128 @@ const freeTokenPricing = {
 // https://openrouter.ai/docs/api-reference/list-available-models
 const openrouterImageModels: AIImageModelCard[] = withOpenRouterPrefix([
   {
-    description: 'OpenRouter image generation route for GPT Image 2-compatible generation.',
+    description:
+      'GPT 5.4 Image 2 through OpenRouter for text-to-image generation and image editing via an OpenAI-compatible image route.',
     displayName: 'GPT 5.4 Image 2',
     enabled: true,
+    family: 'gpt',
+    generation: 'gpt-5.4',
     id: 'openai/gpt-5.4-image-2',
+    organization: 'OpenAI',
     parameters: openrouterImageParameters,
     type: 'image',
   },
   {
+    contextWindowTokens: 65_536 + 65_536,
     description:
-      'Gemini 3.1 Flash Image Preview through OpenRouter for text-to-image generation and image editing.',
-    displayName: 'Gemini 3.1 Flash Image Preview',
+      'Gemini 3.1 Flash Image Preview, a.k.a. "Nano Banana 2," through OpenRouter. It delivers Pro-level visual quality at Flash speed for text-to-image generation, contextual understanding, and iterative image editing.',
+    displayName: 'Nano Banana 2',
     enabled: true,
+    family: 'gemini',
+    generation: 'gemini-3.1',
     id: 'google/gemini-3.1-flash-image-preview',
+    knowledgeCutoff: '2025-01',
+    maxOutput: 65_536,
+    organization: 'Google',
     parameters: openrouterImageParameters,
+    pricing: {
+      approximatePricePerImage: 0.067,
+      units: [
+        { name: 'imageOutput', rate: 60, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 0.25, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 1.5, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    releasedAt: '2026-02-26',
     type: 'image',
   },
   {
-    description: 'Gemini 2.5 Flash Image through OpenRouter for fast image generation.',
-    displayName: 'Gemini 2.5 Flash Image',
+    contextWindowTokens: 32_768 + 8192,
+    description:
+      'Gemini 2.5 Flash Image, a.k.a. "Nano Banana," through OpenRouter. It is a fast image generation and editing model with strong contextual understanding for generation, edits, and multi-turn creative workflows.',
+    displayName: 'Nano Banana',
     enabled: true,
+    family: 'gemini',
+    generation: 'gemini-2.5',
     id: 'google/gemini-2.5-flash-image',
+    knowledgeCutoff: '2025-06',
+    maxOutput: 8192,
+    organization: 'Google',
     parameters: openrouterImageParameters,
+    pricing: {
+      approximatePricePerImage: 0.039,
+      units: [
+        { name: 'imageOutput', rate: 30, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 0.3, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 2.5, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    releasedAt: '2025-10-07',
     type: 'image',
   },
   {
-    description: 'Gemini 3 Pro Image Preview through OpenRouter for higher-quality image generation.',
-    displayName: 'Gemini 3 Pro Image Preview',
+    contextWindowTokens: 131_072 + 32_768,
+    description:
+      'Gemini 3 Pro Image Preview, a.k.a. "Nano Banana Pro," through OpenRouter. It focuses on high-fidelity visual synthesis, multimodal reasoning, real-world grounding, and complex image generation such as infographics, diagrams, and cinematic composites.',
+    displayName: 'Nano Banana Pro',
     enabled: true,
+    family: 'gemini',
+    generation: 'gemini-3',
     id: 'google/gemini-3-pro-image-preview',
+    knowledgeCutoff: '2025-01',
+    maxOutput: 32_768,
+    organization: 'Google',
     parameters: openrouterImageParameters,
+    pricing: {
+      approximatePricePerImage: 0.134,
+      units: [
+        { name: 'imageOutput', rate: 120, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textInput', rate: 2, strategy: 'fixed', unit: 'millionTokens' },
+        { name: 'textOutput', rate: 12, strategy: 'fixed', unit: 'millionTokens' },
+      ],
+    },
+    releasedAt: '2025-11-20',
     type: 'image',
   },
 ]);
 
 const openrouterVideoModels: AIVideoModelCard[] = withOpenRouterPrefix([
   {
-    description: 'Grok Imagine Video through OpenRouter for text-to-video generation.',
+    description:
+      'Grok Imagine Video through OpenRouter for text-to-video and image-to-video generation, balancing quality, cost, and latency.',
     displayName: 'Grok Imagine Video',
     enabled: true,
     id: 'x-ai/grok-imagine-video',
-    parameters: openrouterVideoParameters,
+    organization: 'xAI',
+    parameters: openrouterGrokImagineVideoParameters,
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.05, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2026-01-28',
     type: 'video',
   },
   {
-    description: 'Veo 3.1 Fast through OpenRouter for text-to-video generation.',
+    description:
+      'Veo 3.1 Fast through OpenRouter for fast text-to-video generation with optional image references, aspect-ratio control, duration presets, and 720p/1080p/4k output options.',
     displayName: 'Veo 3.1 Fast',
     enabled: true,
     id: 'google/veo-3.1-fast',
-    parameters: openrouterVideoParameters,
+    organization: 'Google',
+    parameters: openrouterVeoVideoParameters,
+    pricing: {
+      units: [{ name: 'videoGeneration', rate: 0.35, strategy: 'fixed', unit: 'second' }],
+    },
+    releasedAt: '2026-01-13',
     type: 'video',
   },
   {
-    description: 'Kling v3.0 Pro through OpenRouter for text-to-video generation.',
+    description:
+      'Kling v3.0 Pro through OpenRouter for text-to-video and image-to-video generation with storyboard-oriented scene understanding, motion consistency, and 720p/1080p output.',
     displayName: 'Kling v3.0 Pro',
     enabled: true,
     id: 'kwaivgi/kling-v3.0-pro',
-    parameters: openrouterVideoParameters,
+    organization: 'Kuaishou',
+    parameters: openrouterKlingVideoParameters,
     type: 'video',
   },
 ]);
