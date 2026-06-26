@@ -16,13 +16,32 @@ services:
       - '${LOBE_PORT:-3010}:3210' # LobeChat Web
     command: tail -f /dev/null
     extra_hosts:
-      # 把 chat.naiyun.com 固定到公网网关 112.80.133.252，容器可直接到达。
-      # 不要依赖宿主机 DNS：宿主走 Clash/Surge fake-ip(198.18.x.x)，容器拿到后无法路由。
-      # 注：Agent 的 "Premature close" 与此 IP 无关，根因是 OpenAI SDK 默认用 node-fetch，
-      #     已在 packages/model-runtime 改为 undici 修复(见该文件构造函数注释)。
-      - 'chat.naiyun.com:112.80.133.252'
+      # 容器对 chat.naiyun.com 的解析目标，按环境区分（hosts 不认端口，一个域名只能指一个 IP）：
+      #   · dev(本机 Mac)：默认 112.80.133.252 —— 这是 chat.naiyun.com 的「入站」公网 A 记录
+      #     (dig chat.naiyun.com @1.1.1.1 可验证)，开发机走公网可达全部端口；同时借此绕过本机
+      #     Clash/Surge 的 fake-ip(198.18.x.x)，否则容器继承宿主 DNS 拿到 fake-ip 无法路由。
+      #   · prod(内网服务器)：setup.sh --env prod 自动设为 127.0.0.1，指向本栈的
+      #     gateway-proxy(nginx sidecar)，由它按端口分流到内网机器(见 gateway-proxy.conf)。
+      # ⚠ 切勿把默认值改成生产服务器 `curl ifconfig.me` 得到的「出站」IP(如 112.80.133.253)：
+      #   那只是本机出网的 NAT 源地址，不是服务地址。且 prod 用任何公网 IP 都会 NAT 回流(hairpin)
+      #   超时——这正是 sidecar 存在的原因；内网分流靠 sidecar，绝不靠这里填公网 IP。
+      - 'chat.naiyun.com:${NAIYUN_GATEWAY_IP:-112.80.133.252}'
     networks:
       - naiyunhub-network
+
+  # 仅 prod 启用(profile=gateway)：把容器对 chat.naiyun.com 各端口的访问按端口 TCP 透传到
+  # 正确内网机器。TLS 由后端(chat.naiyun.com 证书)端到端终结，本代理只转发 TCP，不需要证书。
+  gateway-proxy:
+    image: nginx:alpine
+    container_name: naiyun-gateway-proxy
+    restart: unless-stopped
+    logging: *default-logging
+    network_mode: 'service:network-service'
+    profiles: ['gateway']
+    depends_on:
+      - network-service
+    volumes:
+      - './gateway-proxy.conf:/etc/nginx/nginx.conf:ro'
 
   lobe:
     image: naiyunchat-db:${NAIYUNCHAT_DB_VERSION:-2.2.4}

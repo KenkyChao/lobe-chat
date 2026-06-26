@@ -246,8 +246,21 @@ check_env_file() {
 }
 
 compose() {
+  # prod 环境自动启用 gateway-proxy(nginx sidecar 反代),并把 chat.naiyun.com 指向
+  # 本机代理(127.0.0.1),由 sidecar 按端口分流到内网各机器。二者本质绑定(启用 sidecar
+  # ⟺ 域名指向 sidecar),故在此一起设置,运维零配置。如需自定义网关 IP,调用前
+  # export NAIYUN_GATEWAY_IP 即可覆盖。dev/test 不启用,域名走 compose 默认公网网关。
+  local compose_profiles=""
+  local gateway_ip="${NAIYUN_GATEWAY_IP:-}"
+  if [[ "${ENV_NAME}" == "prod" ]]; then
+    compose_profiles="gateway"
+    gateway_ip="${NAIYUN_GATEWAY_IP:-127.0.0.1}"
+  fi
+
   NAIYUN_ENV_FILE="${NAIYUN_ENV_FILE}" \
     NAIYUNCHAT_DB_VERSION="${APP_VERSION}" \
+    COMPOSE_PROFILES="${compose_profiles}" \
+    NAIYUN_GATEWAY_IP="${gateway_ip}" \
     docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" "$@"
 }
 
