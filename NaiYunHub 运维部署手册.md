@@ -1,6 +1,6 @@
 # NaiYunHub 运维部署手册
 
-本文用于 NaiYunHub 的 Docker Compose 环境、测试/生产服务器部署、Harbor 镜像发布和容器排障。当前部署方式以 `docker-compose/dev/docker-compose.yml` 为主：Mac 本地构建业务镜像，tag 后推送到公司内网 Harbor 的 `naiyun-chat` 项目；目标服务器从 Harbor 拉取镜像，再 tag 成 compose 需要的本地镜像名，最后通过 `--no-build` 启动。
+本文用于 NaiYunHub 的 Docker Compose 环境、测试/生产服务器部署、Harbor 镜像发布和容器排障。当前部署方式以 `docker-compose/dev/docker-compose.yml` 为主：开发主机从 Docker Hub 公网拉取公共基础镜像，手动推送到公司内网 Harbor；开发主机构建业务镜像并推送到 Harbor 的 `naiyun-chat` 项目；测试/生产服务器只从 Harbor 拉取镜像，不直连 Docker Hub，拉取后 tag 成 compose 需要的本地镜像名，最后通过 `--no-build` 启动。
 
 相关文档：
 
@@ -11,7 +11,7 @@
 本文只保留运维部署相关内容：
 
 - `docker-compose/` 目录职责、环境变量、端口和容器排查。
-- 本地构建业务镜像、推送 Harbor、目标服务器拉取并启动。
+- 开发主机拉取 Docker Hub 公共镜像、推送 Harbor，本地构建业务镜像并推送 Harbor，目标服务器只从 Harbor 拉取并启动。
 - 测试环境、生产环境的停止、重启、日志和常见问题。
 - 微信 / Bot Gateway、S3、登录回调、镜像缺失、端口冲突等排障。
 
@@ -274,6 +274,22 @@ docker pull 192.168.1.211:5001/naiyun-chat/naiyunchat-db:2.2.4
 docker tag 192.168.1.211:5001/naiyun-chat/naiyunchat-db:2.2.4 naiyunchat-db:2.2.4
 ```
 
+公共基础镜像也必须从 Harbor 拉取，不在目标服务器直连 Docker Hub：
+
+```bash
+docker pull 192.168.1.211:5001/naiyun-registry/library/alpine:latest
+docker tag 192.168.1.211:5001/naiyun-registry/library/alpine:latest alpine:latest
+
+docker pull 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+docker tag 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17 paradedb/paradedb:latest-pg17
+
+docker pull 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+docker tag 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine redis:7-alpine
+
+docker pull 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
+docker tag 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest searxng/searxng:latest
+```
+
 ## 需要上传到服务器的文件
 
 保持项目目录结构上传以下文件：
@@ -296,9 +312,11 @@ docker-compose/dev/searxng-settings.yml
 
 如果只部署测试环境，可以只上传 `.env.test`；如果只部署生产环境，可以只上传 `.env.prod`。
 
-## Mac 本地构建并推送到 Harbor
+## 开发主机构建并推送到 Harbor
 
-如果使用 Mac 作为构建机，并且目标 Linux 服务器是 x86 架构，建议显式构建 `linux/amd64` 镜像。
+开发主机需要能访问 Docker Hub 公网和公司内网 Harbor。公司测试/生产服务器不直连 Docker Hub，所有 Docker Hub 公共镜像都由开发主机拉取后手动推送到 Harbor。
+
+如果开发主机是 Mac，并且目标 Linux 服务器是 x86 架构，建议显式构建 `linux/amd64` 镜像。
 
 ### 准备 Dockerfile 基础镜像
 
@@ -309,21 +327,23 @@ node:24-slim
 busybox:latest
 ```
 
-如果 Mac 可以直接访问 Docker Hub：
+在开发主机上从 Docker Hub 公网拉取目标平台基础镜像：
 
 ```bash
 docker pull --platform linux/amd64 node:24-slim
 docker pull --platform linux/amd64 busybox:latest
 ```
 
-如果需要先从内网 Harbor 拉取，再转换为 Dockerfile 需要的官方镜像名：
+手动推送到 Harbor 的 `naiyun-registry` 项目，便于内网环境留档和复用：
 
 ```bash
-docker pull --platform linux/amd64 192.168.1.211:5001/naiyun-registry/library/node:24-slim
-docker tag 192.168.1.211:5001/naiyun-registry/library/node:24-slim node:24-slim
+docker login 192.168.1.211:5001
 
-docker pull --platform linux/amd64 192.168.1.211:5001/naiyun-registry/library/busybox:latest
-docker tag 192.168.1.211:5001/naiyun-registry/library/busybox:latest busybox:latest
+docker tag node:24-slim 192.168.1.211:5001/naiyun-registry/library/node:24-slim
+docker tag busybox:latest 192.168.1.211:5001/naiyun-registry/library/busybox:latest
+
+docker push 192.168.1.211:5001/naiyun-registry/library/node:24-slim
+docker push 192.168.1.211:5001/naiyun-registry/library/busybox:latest
 ```
 
 检查基础镜像架构：
@@ -396,7 +416,7 @@ redis:7-alpine
 searxng/searxng:latest
 ```
 
-在 Mac 上提前拉取目标平台镜像：
+在开发主机上提前从 Docker Hub 公网拉取目标平台镜像：
 
 ```bash
 docker pull --platform linux/amd64 alpine:latest
@@ -405,18 +425,20 @@ docker pull --platform linux/amd64 redis:7-alpine
 docker pull --platform linux/amd64 searxng/searxng:latest
 ```
 
-如果目标服务器无法直接访问 Docker Hub，也可以把基础服务镜像同步到 Harbor 的 `naiyun-chat` 项目：
+手动推送到 Harbor 的 `naiyun-registry` 项目。Docker Hub 官方镜像使用 `library/` 路径，第三方镜像保持原命名空间：
 
 ```bash
-docker tag alpine:latest 192.168.1.211:5001/naiyun-chat/alpine:latest
-docker tag paradedb/paradedb:latest-pg17 192.168.1.211:5001/naiyun-chat/paradedb/paradedb:latest-pg17
-docker tag redis:7-alpine 192.168.1.211:5001/naiyun-chat/redis:7-alpine
-docker tag searxng/searxng:latest 192.168.1.211:5001/naiyun-chat/searxng/searxng:latest
+docker login 192.168.1.211:5001
 
-docker push 192.168.1.211:5001/naiyun-chat/alpine:latest
-docker push 192.168.1.211:5001/naiyun-chat/paradedb/paradedb:latest-pg17
-docker push 192.168.1.211:5001/naiyun-chat/redis:7-alpine
-docker push 192.168.1.211:5001/naiyun-chat/searxng/searxng:latest
+docker tag alpine:latest 192.168.1.211:5001/naiyun-registry/library/alpine:latest
+docker tag paradedb/paradedb:latest-pg17 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+docker tag redis:7-alpine 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+docker tag searxng/searxng:latest 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
+
+docker push 192.168.1.211:5001/naiyun-registry/library/alpine:latest
+docker push 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+docker push 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+docker push 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
 ```
 
 ## 上传部署文件
@@ -446,20 +468,20 @@ docker pull 192.168.1.211:5001/naiyun-chat/naiyunchat-db:2.2.4
 docker tag 192.168.1.211:5001/naiyun-chat/naiyunchat-db:2.2.4 naiyunchat-db:2.2.4
 ```
 
-如果基础服务镜像也放在 Harbor 的 `naiyun-chat` 项目，需要一起拉取并 tag 回 compose 使用的官方镜像名：
+基础服务镜像必须从 Harbor 的 `naiyun-registry` 项目拉取，并 tag 回 compose 使用的官方镜像名：
 
 ```bash
-docker pull 192.168.1.211:5001/naiyun-chat/alpine:latest
-docker tag 192.168.1.211:5001/naiyun-chat/alpine:latest alpine:latest
+docker pull 192.168.1.211:5001/naiyun-registry/library/alpine:latest
+docker tag 192.168.1.211:5001/naiyun-registry/library/alpine:latest alpine:latest
 
-docker pull 192.168.1.211:5001/naiyun-chat/paradedb/paradedb:latest-pg17
-docker tag 192.168.1.211:5001/naiyun-chat/paradedb/paradedb:latest-pg17 paradedb/paradedb:latest-pg17
+docker pull 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+docker tag 192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17 paradedb/paradedb:latest-pg17
 
-docker pull 192.168.1.211:5001/naiyun-chat/redis:7-alpine
-docker tag 192.168.1.211:5001/naiyun-chat/redis:7-alpine redis:7-alpine
+docker pull 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+docker tag 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine redis:7-alpine
 
-docker pull 192.168.1.211:5001/naiyun-chat/searxng/searxng:latest
-docker tag 192.168.1.211:5001/naiyun-chat/searxng/searxng:latest searxng/searxng:latest
+docker pull 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
+docker tag 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest searxng/searxng:latest
 ```
 
 检查本地镜像是否齐全：
@@ -824,13 +846,13 @@ INTERNAL_APP_URL=http://127.0.0.1:3210
 
 ```text
 1. 确认 package.json 版本，并记录业务镜像名 naiyunchat-db:<version>
-2. Mac 本地准备 node:24-slim 和 busybox:latest 基础镜像
-3. Mac 本地执行 docker-compose/dev/setup.sh build --env test/prod --platform amd64
-4. 确认 naiyunchat-db:<version> 镜像架构符合目标服务器
-5. Mac 本地 tag 并 push 到 Harbor 的 naiyun-chat 项目
-6. 如目标服务器不能访问 Docker Hub，则将基础服务镜像也 push 到 Harbor
+2. 开发主机从 Docker Hub 公网拉取 node:24-slim、busybox:latest 和 compose 基础服务镜像
+3. 开发主机将 Docker Hub 公共镜像手动 tag 并 push 到 Harbor 的 naiyun-registry 项目
+4. 开发主机执行 docker-compose/dev/setup.sh build --env test/prod --platform amd64
+5. 确认 naiyunchat-db:<version> 镜像架构符合目标服务器
+6. 开发主机 tag 并 push 业务镜像到 Harbor 的 naiyun-chat 项目
 7. 上传 package.json、.env.test/.env.prod、docker-compose 目录到目标服务器
-8. 目标服务器从 Harbor pull 镜像，并 tag 成 compose 需要的本地镜像名
+8. 目标服务器只从 Harbor pull 镜像，并 tag 成 compose 需要的本地镜像名
 9. docker-compose/dev/setup.sh config --env test/prod
 10. docker-compose/dev/setup.sh up --env test/prod --no-build
 11. 检查容器状态、日志和页面访问

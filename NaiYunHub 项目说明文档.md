@@ -97,7 +97,7 @@ docker run -d \
   -e POSTGRES_DB=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -v "$PWD/docker-compose/dev/data:/var/lib/postgresql/data" \
-  192.168.1.211:5001/naiyun-registry/paradedb/paradedb:latest-pg17
+  paradedb/paradedb:latest-pg17
 ```
 
 ### 启动 Redis
@@ -107,7 +107,7 @@ docker run -d \
   --name naiyun-redis \
   -p 6379:6379 \
   -v naiyun_redis_data:/data \
-  192.168.1.211:5001/naiyun-registry/library/redis:7-alpine \
+  redis:7-alpine \
   redis-server --save 60 1000 --appendonly yes
 ```
 
@@ -700,22 +700,37 @@ bun run db:migrate
 
 ### Docker 镜像
 
-当前内网镜像源前缀为：
+公司内网服务器不直接访问 Docker Hub。标准流程是：开发主机自行从 Docker Hub 公网拉取所需镜像，手动 `tag` 后推送到 Harbor；测试/生产服务器只从 Harbor 拉取镜像。
+
+业务镜像推送到 Harbor 的 `naiyun-chat` 项目：
+
+```text
+192.168.1.211:5001/naiyun-chat/naiyunchat-db:<version>
+```
+
+Docker Hub 公共基础镜像推送到 Harbor 的 `naiyun-registry` 项目，当前前缀为：
 
 ```text
 192.168.1.211:5001/naiyun-registry/
 ```
 
-Docker Hub 官方镜像需要走 `library/` 路径，例如：
+Docker Hub 官方镜像推送到 Harbor 时需要走 `library/` 路径，例如：
 
 ```text
 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
 ```
 
-第三方镜像保持原命名空间，例如：
+第三方镜像推送到 Harbor 时保持原命名空间，例如：
 
 ```text
 192.168.1.211:5001/naiyun-registry/searxng/searxng:latest
+```
+
+目标服务器拉取 Harbor 镜像后，如 compose 仍使用 Docker Hub 原始镜像名，需要在目标服务器本地再 `tag` 回原名，例如：
+
+```bash
+docker pull 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine
+docker tag 192.168.1.211:5001/naiyun-registry/library/redis:7-alpine redis:7-alpine
 ```
 
 ## 推荐日常流程
