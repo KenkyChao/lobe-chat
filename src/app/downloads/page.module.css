@@ -104,7 +104,8 @@
 }
 
 .button,
-.buttonDisabled {
+.buttonDisabled,
+.buttonUnavailable {
   display: inline-flex;
   min-width: 112px;
   height: 40px;
@@ -121,10 +122,27 @@
   background: #111827;
 }
 
-.buttonDisabled {
-  cursor: not-allowed;
+.buttonDisabled,
+.buttonUnavailable {
+  border: 0;
+  cursor: pointer;
   color: #9ca3af;
   background: #eef0f3;
+}
+
+.toast {
+  position: fixed;
+  z-index: 1000;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #fff;
+  background: #111827;
+  box-shadow: 0 14px 40px rgb(15 23 42 / 18%);
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .empty {

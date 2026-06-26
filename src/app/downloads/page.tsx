@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import DownloadAction from './DownloadAction';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -30,9 +31,12 @@ export const metadata: Metadata = {
 
 type DownloadItem = {
   description: string;
+  disabled?: boolean;
   fileType: string;
   platform: string;
   title: string;
+  unavailableMessage?: string;
+  unavailableText?: string;
   url?: string;
 };
 
@@ -102,13 +106,12 @@ const downloads: DownloadItem[] = [
   },
   {
     description: '适用于 Windows ARM 设备',
+    disabled: true,
     fileType: 'EXE',
     platform: 'Windows',
     title: 'Windows ARM64',
-    url: desktopDownloadUrl(
-      'DESKTOP_DOWNLOAD_WINDOWS_ARM64_URL',
-      (version) => `NaiYunHub-${version}-arm64-setup.exe`,
-    ),
+    unavailableMessage: '暂未开放',
+    unavailableText: '暂未开放',
   },
 ];
 
@@ -129,7 +132,7 @@ const Page = () => {
 
         <div className={styles.grid}>
           {downloads.map((item) => {
-            const available = Boolean(item.url);
+            const available = Boolean(item.url) && !item.disabled;
 
             return (
               <article className={styles.item} key={item.title}>
@@ -141,14 +144,12 @@ const Page = () => {
 
                 <div className={styles.actionRow}>
                   <span className={styles.fileType}>{item.fileType}</span>
-                  <a
-                    aria-disabled={!available}
-                    className={available ? styles.button : styles.buttonDisabled}
+                  <DownloadAction
+                    available={available}
                     href={item.url}
-                    tabIndex={available ? undefined : -1}
-                  >
-                    {available ? '下载安装包' : '待配置'}
-                  </a>
+                    unavailableMessage={item.unavailableMessage}
+                    unavailableText={item.unavailableText}
+                  />
                 </div>
               </article>
             );
