@@ -4,8 +4,27 @@ import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
 
+const faviconVersion = 4;
+const naiyunhubIcon = `/icons/naiyunhub-logo.png?v=${faviconVersion}`;
+
 export const metadata: Metadata = {
   description: 'Download NaiYunHub desktop apps for macOS and Windows.',
+  icons: {
+    icon: [
+      {
+        sizes: '512x512',
+        type: 'image/png',
+        url: naiyunhubIcon,
+      },
+    ],
+    shortcut: [
+      {
+        sizes: '512x512',
+        type: 'image/png',
+        url: naiyunhubIcon,
+      },
+    ],
+  },
   title: '下载 NaiYunHub 桌面应用',
 };
 
