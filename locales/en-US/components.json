@@ -123,6 +123,7 @@
   "ModelSwitchPanel.detail.abilities.vision": "Vision",
   "ModelSwitchPanel.detail.config": "Model Config",
   "ModelSwitchPanel.detail.context": "Context Length",
+  "ModelSwitchPanel.detail.description": "Model Info",
   "ModelSwitchPanel.detail.pricing": "Pricing",
   "ModelSwitchPanel.detail.pricing.cachedInput": "Cached input ${{amount}}/M",
   "ModelSwitchPanel.detail.pricing.credits.cachedInput": "Cached input {{amount}} credits/M tokens",

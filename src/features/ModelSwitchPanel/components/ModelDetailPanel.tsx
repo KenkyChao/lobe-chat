@@ -50,6 +50,17 @@ const styles = createStaticStyles(({ css, cssVar }) => ({
   container: css`
     padding-block-end: 8px;
   `,
+  descriptionBlock: css`
+    padding-block: 6px;
+    padding-inline: 8px;
+  `,
+  descriptionText: css`
+    padding-inline-start: 11px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: ${cssVar.colorTextSecondary};
+    white-space: pre-wrap;
+  `,
   row: css`
     padding-block: 4px;
     padding-inline: 8px;
@@ -403,13 +414,37 @@ const ModelDetailPanel: FC<ModelDetailPanelProps> = memo(
     if (!model) return null;
 
     const hasContext = typeof model.contextWindowTokens === 'number';
+    const hasDescription = !!model.description?.trim();
+    const abilities = model.abilities ?? {};
     const enabledAbilities = ABILITY_CONFIG.filter(
-      (a) => model.abilities[a.key as keyof typeof model.abilities],
+      (a) => abilities[a.key as keyof typeof abilities],
     );
     const hasAbilities = enabledAbilities.length > 0;
+    const shouldShowDescription =
+      hasDescription && (!!pricingMode || (!hasPricing && !hasContext && !hasAbilities));
 
     return (
-      <Flexbox className={styles.container}>
+      <Flexbox className={styles.container} gap={8}>
+        {shouldShowDescription && (
+          <Flexbox className={styles.descriptionBlock} gap={6}>
+            <Flexbox horizontal align={'center'} gap={8}>
+              <div
+                style={{
+                  background: '#13c2c2',
+                  borderRadius: 2,
+                  flexShrink: 0,
+                  height: 14,
+                  width: 3,
+                }}
+              />
+              <span className={styles.titleText}>
+                {t('ModelSwitchPanel.detail.description')}
+              </span>
+            </Flexbox>
+            <div className={styles.descriptionText}>{model.description}</div>
+          </Flexbox>
+        )}
+
         {/* Sections */}
         {(hasPricing || hasContext || hasAbilities) && (
           <Accordion

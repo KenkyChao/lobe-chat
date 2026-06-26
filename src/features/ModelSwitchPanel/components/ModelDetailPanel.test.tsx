@@ -13,6 +13,8 @@ vi.mock('antd-style', () => ({
   createStaticStyles: () => ({
     actionText: 'actionText',
     container: 'container',
+    descriptionBlock: 'descriptionBlock',
+    descriptionText: 'descriptionText',
     originalPriceText: 'originalPriceText',
     priceValue: 'priceValue',
     row: 'row',
@@ -72,6 +74,7 @@ vi.mock('@/store/global/selectors', () => ({
 
 const translations: Record<string, string> = {
   'ModelSwitchPanel.detail.context': 'Context Length',
+  'ModelSwitchPanel.detail.description': 'Model Info',
   'ModelSwitchPanel.detail.pricing': 'Pricing',
   'ModelSwitchPanel.detail.pricing.credits.input': 'Input {{amount}} credits/M tokens',
   'ModelSwitchPanel.detail.pricing.credits.output': 'Output {{amount}} credits/M tokens',
@@ -137,6 +140,33 @@ const createEnabledList = (
 ];
 
 describe('ModelDetailPanel pricing', () => {
+  it('renders model description even when pricing, context, and abilities are unavailable', () => {
+    render(
+      <ModelDetailPanel
+        enabledList={[
+          {
+            children: [
+              {
+                description: 'Description-only image model.',
+                displayName: 'Description Model',
+                id: 'description-model',
+                type: 'image',
+              } as any,
+            ],
+            id: 'openrouter',
+            name: 'OpenRouter',
+            source: 'builtin',
+          },
+        ]}
+        model="description-model"
+        provider="openrouter"
+      />,
+    );
+
+    expect(screen.getByText('Model Info')).toBeInTheDocument();
+    expect(screen.getByText('Description-only image model.')).toBeInTheDocument();
+  });
+
   it('renders branding provider token pricing in credits', () => {
     const { container } = render(
       <ModelDetailPanel
