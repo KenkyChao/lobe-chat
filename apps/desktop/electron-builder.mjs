@@ -245,7 +245,7 @@ const config = {
     target: ['AppImage', 'snap', 'deb', 'rpm', 'tar.gz'],
   },
   mac: {
-    compression: 'maximum',
+    compression: 'normal',
     entitlementsInherit: 'build/entitlements.mac.plist',
     extendInfo: {
       CFBundleURLTypes: [

@@ -444,23 +444,50 @@ signing
 notarizing
 ```
 
-打包完成后验证 DMG：
+打包完成后先验证 DMG 文件完整性：
 
 ```bash
-spctl -a -vvv -t install apps/desktop/release/NaiYunHub-2.2.4-arm64.dmg
+hdiutil verify apps/desktop/release/NaiYunHub-2.2.4-arm64.dmg
+```
+
+期望结果：
+
+```text
+hdiutil: verify: checksum of "apps/desktop/release/NaiYunHub-2.2.4-arm64.dmg" is VALID
+```
+
+`desktop:build-channel` 会对 `.app` 执行签名和 notarization，但最终生成的 `.dmg` 可能还没有 stapled ticket。内部员工测试时，DMG 完整性验证通过即可先安装验证；正式发给真实用户前，建议对最终 DMG 再执行一次公证和票据贴附。
+
+正式分发 DMG 公证流程：
+
+```bash
+source .env.signing.local
+
+xcrun notarytool submit apps/desktop/release/NaiYunHub-2.2.4-arm64.dmg \
+  --key "$APPLE_API_KEY" \
+  --key-id "$APPLE_API_KEY_ID" \
+  --issuer "$APPLE_API_ISSUER" \
+  --wait
+
+xcrun stapler staple apps/desktop/release/NaiYunHub-2.2.4-arm64.dmg
+
 xcrun stapler validate apps/desktop/release/NaiYunHub-2.2.4-arm64.dmg
 ```
 
 期望结果：
 
 ```text
-spctl 显示 accepted
-stapler validate 显示可验证或 accepted
+notarytool 显示 status: Accepted
+stapler staple 显示 The staple and validate action worked!
+stapler validate 显示 The validate action worked!
 ```
+
+上面示例使用 Apple Silicon 产物 `NaiYunHub-2.2.4-arm64.dmg`。如果发布 Intel Mac 包，把文件名替换为对应的 `x64` DMG。
 
 常见问题：
 
 - `CSC_LINK` 不能指向 `.p8` 文件。`.p8` 只能用于 `APPLE_API_KEY`。
+- 如果 `xcrun stapler validate` 提示 `does not have a ticket stapled to it`，说明 DMG 文件本身还没有贴公证票据；按上面的 DMG 公证流程补一次即可。
 - 如果钥匙串里看不到 `Developer ID Application: 公司名 (TEAMID)`，说明当前 Mac 还没有安装签名证书，或证书缺少私钥。
 - 如果 `security find-identity -v -p codesigning` 显示 `0 valid identities found`，先确认 Apple Developer ID G2 中间证书已安装。
 - 如果验证 `.p12` 时出现 `Algorithm (RC2-40-CBC : 0) unsupported`，先用 `openssl pkcs12 -legacy` 验证；如果 `electron-builder` 仍无法导入，可重新导出为 macOS `security` 更兼容的 3DES/SHA1 格式。
